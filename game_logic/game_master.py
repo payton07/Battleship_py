@@ -1,6 +1,8 @@
+import random
+
 from game_logic.game import Game
+from players.cheat_bot import CheatBot
 from players.normal_player import NormalPlayer
-from players.smart_bot import SmartBot
 from classes.variable import Variable
 from classes.predefined_grids import PredefinedGrids
 from classes.grid import Grid
@@ -20,7 +22,7 @@ class GameMaster:
 
         # Création des joueurs
         self.players.append(NormalPlayer(Variable.DEFAULT_PLAYER_HUMAN))
-        self.players.append(SmartBot(Variable.DEFAULT_BOT_NAME))
+        self.players.append(CheatBot(Variable.CHEAT_BOT_NAME))
 
         for player in self.players:
             self.game.add_player(player)
@@ -33,7 +35,8 @@ class GameMaster:
         # Système de choix de grille pour l'humain
         choice = 0
         validating = False
-        
+
+        config = {}
         while not validating:
             temp_grid = Grid()
             config = PredefinedGrids.get_grid(choice)
@@ -69,22 +72,28 @@ class GameMaster:
         while self.game.is_game_over().get_success() == 0:
             for player in self.players:
                 print(f"\n--- C'est le tour de {player.get_name()} ({Variable.SHOTS_PER_TURN} tirs) ---")
-                
+
+                if isinstance(player, CheatBot):
+                    sq = random.randint(0, 4)
+                    player.set_success_quota(sq)
+                    print(f"\n--- Success quotas : {sq} ---")
+
                 for shot_num in range(1, Variable.SHOTS_PER_TURN + 1):
                     print(f"Tir n°{shot_num} :")
+                    print(player.my_grid)
                     result = self.game.play(player)
-                    
+
                     if result and not result.startswith(Variable.MESSAGE_TOUR_ERR[:5]):
                         print(Variable.MESSAGE_JOUEUR_ACTION.format(
-                            player_name=player.get_name(), 
+                            player_name=player.get_name(),
                             result=result
                         ))
-                    
+
                     # Vérification immédiate de fin de partie
                     if self.game.is_game_over().get_success() == 1:
                         print(Variable.MESSAGE_FIN_PARTIE)
                         print(self.game.is_game_over().get_message())
                         return
-                
+
                 # Après ses 4 tirs, on passe au tour du joueur suivant
                 self.game.next_turn()

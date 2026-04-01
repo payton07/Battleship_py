@@ -36,6 +36,43 @@ class Variable:
     DEFAULT_PLAYER_2_NAME = "Joueur 2"
     DEFAULT_PLAYER_HUMAN = "Joueur"
     DEFAULT_BOT_NAME = "Smart Bot"
+    CHEAT_BOT_NAME = "Cheat Bot"
+
+    @classmethod
+    def get_case_default(cls):
+        return cls.CASE_DEFAULT
+
+    @classmethod
+    def get_case_touche(cls):
+        return cls.CASE_TOUCHE
+
+    @classmethod
+    def get_case_rate(cls):
+        return cls.CASE_RATE
+
+    @classmethod
+    def get_case_bateau(cls):
+        return cls.CASE_BATEAU
+
+    @classmethod
+    def get_message_touche(cls):
+        return cls.MESSAGE_TOUCHE
+
+    @classmethod
+    def get_message_coule(cls):
+        return cls.MESSAGE_COULE
+
+    @classmethod
+    def get_message_rate(cls):
+        return cls.MESSAGE_RATE
+
+    @classmethod
+    def get_message_deja_joue(cls):
+        return cls.MESSAGE_DEJA_JOUE
+
+    @classmethod
+    def get_message_hors_grille(cls):
+        return cls.MESSAGE_HORS_GRILLE
 
     @classmethod
     def get_size_grid(cls):
