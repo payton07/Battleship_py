@@ -29,20 +29,11 @@ class SmartBot(Player):
                 return pos
 
     def add_adjacent_targets(self, pos):
-        x = pos.get_x()
-        y = pos.get_y()
-        self.potential_targets.append(Position(x, y - 1))
-        self.potential_targets.append(Position(x, y + 1))
-        self.potential_targets.append(Position(x - 1, y))
-        self.potential_targets.append(Position(x + 1, y))
+        """Ajoute les voisins valides aux cibles potentielles."""
+        for neighbor in self.get_valid_neighbors(pos.get_x(), pos.get_y()):
+            if neighbor not in self.history:
+                self.potential_targets.append(neighbor)
 
     def is_valid_and_not_played(self, pos):
-        x = pos.get_x()
-        y = pos.get_y()
-        size = Variable.get_size_grid()
-        
-        # Vérification des bords dynamique
-        if x < 0 or x >= size or y < 0 or y >= size:
-            return False
-        
-        return pos not in self.history
+        """Vérifie si la position est valide et n'a pas encore été jouée."""
+        return self.is_inside(pos.get_x(), pos.get_y()) and pos not in self.history

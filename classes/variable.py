@@ -100,3 +100,8 @@ class Variable:
         if 0 <= number < cls.SIZE_GRID:
             return chr(ord('A') + number)
         return " "
+
+    @classmethod
+    def is_inside(cls, x, y):
+        """Vérifie si une coordonnée (x, y) est dans les limites de la grille."""
+        return 0 <= x < cls.SIZE_GRID and 0 <= y < cls.SIZE_GRID

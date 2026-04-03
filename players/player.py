@@ -58,3 +58,15 @@ class Player:
 
     def get_name(self):
         return self.name
+
+    def is_inside(self, x, y):
+        """Vérifie si une coordonnée est dans la grille."""
+        return Variable.is_inside(x, y)
+
+    def get_valid_neighbors(self, x, y):
+        """Retourne les positions adjacentes valides (dans la grille)."""
+        valid_neighbors = []
+        for neighbor in Position(x, y).get_neighbors():
+            if self.is_inside(neighbor.get_x(), neighbor.get_y()):
+                valid_neighbors.append(neighbor)
+        return valid_neighbors

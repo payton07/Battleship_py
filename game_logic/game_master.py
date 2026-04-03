@@ -12,31 +12,36 @@ from classes.orientation import Orientation
 
 class GameMaster:
     def __init__(self):
-        self.game = None
-        self.players = []
-
-    def init_game(self):
-        """Initialise la partie en mode Humain vs Smart Bot."""
-        self.players = []
         self.game = Game()
+        self.players = []
+        self.human_player = None
+        self.bot_player = None
 
-        # Création des joueurs
-        self.players.append(NormalPlayer(Variable.DEFAULT_PLAYER_HUMAN))
-        self.players.append(CheatBot(Variable.CHEAT_BOT_NAME))
+    def setup_players(self):
+        """Initialise les joueurs et lie leurs grilles."""
+        self.players = []
+        self.human_player = NormalPlayer(Variable.DEFAULT_PLAYER_HUMAN)
+        self.bot_player = CheatBot(Variable.CHEAT_BOT_NAME)
+
+        self.players.append(self.human_player)
+        self.players.append(self.bot_player)
 
         for player in self.players:
             self.game.add_player(player)
 
         # Liaison des grilles pour l'adversité
-        if len(self.players) >= 2:
-            self.players[0].set_enemy_grid(self.players[1].get_my_grid())
-            self.players[1].set_enemy_grid(self.players[0].get_my_grid())
+        self.human_player.set_enemy_grid(self.bot_player.get_my_grid())
+        self.bot_player.set_enemy_grid(self.human_player.get_my_grid())
 
-        # Système de choix de grille pour l'humain
+    def apply_grid_choice(self, player, index):
+        """Applique une grille prédéfinie à un joueur."""
+        config = PredefinedGrids.get_grid(index)
+        self.game.place_predefined_ships(player, config)
+
+    def select_human_grid_console(self):
+        """Gère la boucle de sélection de grille en mode console."""
         choice = 0
         validating = False
-
-        config = {}
         while not validating:
             temp_grid = Grid()
             config = PredefinedGrids.get_grid(choice)
@@ -50,7 +55,7 @@ class GameMaster:
             
             if user_input == 'V':
                 validating = True
-                print(Variable.MESSAGE_GRILLE_VALIDEE.format(index=choice))
+                self.apply_grid_choice(self.human_player, choice)
             elif user_input == 'N':
                 choice = (choice + 1) % 10
             else:
@@ -60,40 +65,84 @@ class GameMaster:
                         choice = new_choice
                 except ValueError:
                     pass
+
+    def play_shot(self, player, x=None, y=None):
+        """
+        Exécute un tir pour un joueur. 
+        Si x et y sont fournis, force la position (utile pour l'UI).
+        """
+        if x is not None and y is not None:
+            player.set_next_shot(x, y)
         
-        self.game.place_predefined_ships(self.players[0], config)
-        self.game.place_all_ships(self.players[1])
+        result = self.game.play(player)
+        return result
+
+    def execute_human_turn(self):
+        """Exécute le tour complet de l'humain (4 tirs). Utile pour le mode console."""
+        results = []
+        for _ in range(Variable.SHOTS_PER_TURN):
+            res = self.play_shot(self.human_player)
+            results.append(res)
+            if self.is_game_over():
+                break
+        
+        self.game.next_turn()
+        return results
+
+    def execute_bot_turn(self):
+        """Exécute le tour complet du Bot (4 tirs)."""
+        if not isinstance(self.bot_player, CheatBot):
+            return []
+
+        results = []
+        sq = random.randint(0, 4)
+        self.bot_player.set_success_quota(sq)
+        
+        for _ in range(Variable.SHOTS_PER_TURN):
+            res = self.play_shot(self.bot_player)
+            results.append(res)
+            if self.is_game_over():
+                break
+        
+        self.game.next_turn()
+        return results
+
+    def is_game_over(self):
+        """Vérifie si la partie est terminée."""
+        return self.game.is_game_over().get_success() == 1
+
+    def get_winner_message(self):
+        """Retourne le message du gagnant."""
+        return self.game.is_game_over().get_message()
+
+    def display_and_check_results(self, player, results):
+        """Affiche les résultats d'un tour et vérifie si la partie est finie."""
+        for res in results:
+            print(Variable.MESSAGE_JOUEUR_ACTION.format(
+                player_name=player.get_name(), 
+                result=res
+            ))
+            if self.is_game_over():
+                print(Variable.MESSAGE_FIN_PARTIE)
+                print(self.get_winner_message())
+                return True
+        return False
 
     def run(self):
-        """Lance la boucle de jeu avec 4 tirs par tour."""
-        self.init_game()
+        """Boucle de jeu console (rétro-compatibilité)."""
+        self.setup_players()
+        self.select_human_grid_console()
+        
+        self.game.place_all_ships(self.bot_player)
         print(Variable.MESSAGE_DEBUT_PARTIE)
         
-        while self.game.is_game_over().get_success() == 0:
-            for player in self.players:
-                print(f"\n--- C'est le tour de {player.get_name()} ({Variable.SHOTS_PER_TURN} tirs) ---")
+        while not self.is_game_over():
+            # Tour Humain
+            print(f"\n--- C'est votre tour ({Variable.SHOTS_PER_TURN} tirs) ---")
+            if self.display_and_check_results(self.human_player, self.execute_human_turn()):
+                return
 
-                if isinstance(player, CheatBot):
-                    sq = random.randint(0, 4)
-                    player.set_success_quota(sq)
-                    print(f"\n--- Success quotas : {sq} ---")
-
-                for shot_num in range(1, Variable.SHOTS_PER_TURN + 1):
-                    print(f"Tir n°{shot_num} :")
-                    print(player.my_grid)
-                    result = self.game.play(player)
-
-                    if result and not result.startswith(Variable.MESSAGE_TOUR_ERR[:5]):
-                        print(Variable.MESSAGE_JOUEUR_ACTION.format(
-                            player_name=player.get_name(),
-                            result=result
-                        ))
-
-                    # Vérification immédiate de fin de partie
-                    if self.game.is_game_over().get_success() == 1:
-                        print(Variable.MESSAGE_FIN_PARTIE)
-                        print(self.game.is_game_over().get_message())
-                        return
-
-                # Après ses 4 tirs, on passe au tour du joueur suivant
-                self.game.next_turn()
+            # Tour Bot
+            print(f"\n--- C'est le tour du Bot ---")
+            if self.display_and_check_results(self.bot_player, self.execute_bot_turn()):
+                return

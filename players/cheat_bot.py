@@ -206,10 +206,5 @@ class CheatBot(Player):
         return shots
 
     def _get_adjacent_positions(self, x, y):
-        """Retourne les positions adjacentes valides (haut, bas, gauche, droite)."""
-        adjacent = []
-        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-            new_x, new_y = x + dx, y + dy
-            if 0 <= new_x < Variable.get_size_grid() and 0 <= new_y < Variable.get_size_grid():
-                adjacent.append((new_x, new_y))
-        return adjacent
+        """Retourne les positions adjacentes valides (x, y) pour la logique interne."""
+        return [(p.get_x(), p.get_y()) for p in self.get_valid_neighbors(x, y)]

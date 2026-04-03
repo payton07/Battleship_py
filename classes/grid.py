@@ -10,8 +10,8 @@ class Grid:
         self.ships = []
 
     def is_inside(self, x, y):
-        """Vérification des limites de la grille (CONDITION 1)."""
-        return 0 <= x < self.size and 0 <= y < self.size
+        """Vérification des limites de la grille."""
+        return Variable.is_inside(x, y)
 
     def can_place_ship(self, ship):
         """Vérifie si un bateau peut être placé (CONDITIONS 2 et 3)."""
