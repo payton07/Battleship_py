@@ -4,6 +4,8 @@ from classes.position import Position
 from classes.orientation import Orientation
 from classes.ship import Ship
 from classes.response import Response
+from players.cheat_bot import CheatBot
+
 
 class Game:
     def __init__(self):
