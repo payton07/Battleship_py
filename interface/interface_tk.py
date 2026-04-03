@@ -1,41 +1,48 @@
 from tkinter import *
 
-fenetre = Tk()
-
 # https://python.doctor/page-tkinter-interface-graphique-python-tutoriel
 
-def recuperer_case(event):
-    # Calculer l'index de la case cliquée (de 0 à 9)
-    colonne = event.x // taille_case
-    ligne = event.y // taille_case
+class Interface:
+    def __init__(self):
+        # Paramètres de la grille
+        self.nb_cases = 10
+        self.taille_case = 50
+        self.canvas = None
+        self.fenetre = Tk()
+        self.create_fenetre()
+        self.fenetre.mainloop()
 
-    print(f"Clic sur la case : [Ligne {ligne}, Colonne {colonne}]")
+    def create_canvas(self):
+        cote = self.nb_cases * self.taille_case  # 500 pixels
 
-    # Colorier la case cliquée pour confirmation
-    x1, y1 = colonne * taille_case, ligne * taille_case
-    x2, y2 = x1 + taille_case, y1 + taille_case
-    Canvas1.create_rectangle(x1, y1, x2, y2, fill="lightblue", outline="gray")
+        self.canvas = Canvas(self.fenetre, width=cote, height=cote, bg="white", highlightthickness=0)
+        self.canvas.pack(padx=10, pady=10)
 
-# Paramètres de la grille
-nb_cases = 10
-taille_case = 50
-cote = nb_cases * taille_case # 500 pixels
+        self.canvas.bind("<Button-1>", self.recuperer_case)
 
-Canvas1 = Canvas(fenetre, width=cote, height=cote, bg="white", highlightthickness=0)
-Canvas1.pack(padx=10, pady=10)
+        # Tracé de la grille
+        for i in range(self.nb_cases + 1):
+            pos = i * self.taille_case
+            # Lignes horizontales
+            self.canvas.create_line(0, pos, cote, pos, fill="lightgray")
+            # Lignes verticales
+            self.canvas.create_line(pos, 0, pos, cote, fill="lightgray")
 
-Canvas1.bind("<Button-1>", recuperer_case)
+    def recuperer_case(self, event):
+        # Calculer l'index de la case cliquée (de 0 à 9)
+        colonne = event.x // self.taille_case
+        ligne = event.y // self.taille_case
 
-# Tracé de la grille
-for i in range(nb_cases + 1):
-    pos = i * taille_case
-    # Lignes horizontales
-    Canvas1.create_line(0, pos, cote, pos, fill="lightgray")
-    # Lignes verticales
-    Canvas1.create_line(pos, 0, pos, cote, fill="lightgray")
+        print(f"Clic sur la case : [Ligne {ligne}, Colonne {colonne}]")
 
-# bouton de sortie
-bouton=Button(fenetre, text="Fermer", command=fenetre.quit)
-bouton.pack()
+        # Colorier la case cliquée pour confirmation
+        x1, y1 = colonne * self.taille_case, ligne * self.taille_case
+        x2, y2 = x1 + self.taille_case, y1 + self.taille_case
+        self.canvas.create_rectangle(x1, y1, x2, y2, fill="lightblue", outline="gray")
+    
+    def create_fenetre(self):
+        # bouton de sortie
+        bouton = Button(self.fenetre, text="Fermer", command=self.fenetre.quit)
+        bouton.pack()
 
-fenetre.mainloop()
+        self.create_canvas()
