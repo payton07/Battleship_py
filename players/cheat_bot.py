@@ -79,7 +79,7 @@ class CheatBot(Player):
 
         # Vérifier si le quota est réalisable
         if self.success_quota > len(untouched_ship_cells):
-            self.success_quota = untouched_ship_cells
+            self.success_quota = len(untouched_ship_cells)
 
         shots = []
 

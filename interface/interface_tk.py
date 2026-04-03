@@ -1,267 +1,195 @@
+# -*- coding: utf-8 -*-
 from tkinter import *
-import threading
-import queue
-import traceback
+from tkinter import messagebox
+import random
+from game_logic.game_master import GameMaster
+from classes.variable import Variable
+from classes.position import Position
+from players.cheat_bot import CheatBot
 
-# https://python.doctor/page-tkinter-interface-graphique-python-tutoriel
+class BattleshipGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Pepper Battleship - Digital vs Physical")
+        self.root.resizable(False, False)
 
-class Interface:
-    def __init__(self):
-        # Paramètres de la grille
-        self.nb_cases = 10
-        self.taille_case = 50
-        self.marge = 30  # Marge pour les labels
-        self.canvas = None
-        self.fenetre = None
+        # Initialisation du moteur de jeu
+        self.gm = GameMaster()
+        self.gm.setup_players()
         
-        # File d'attente pour la communication thread-safe
-        self.command_queue = queue.Queue()
-        self.result_queue = queue.Queue()
+        # État de l'interface
+        self.current_grid_index = 0
+        self.is_playing = False
+        self.can_shoot = False
+        self.shots_left = Variable.SHOTS_PER_TURN
         
-        # File d'attente pour les clics de l'utilisateur
-        self.click_queue = queue.Queue()
-        
-        # Thread pour l'interface
-        self.thread = threading.Thread(target=self._run_tk, daemon=True)
-        self.running = False
-        self.error = None  # Stocke les erreurs du thread
-        self.waiting_for_click = False  # Indique si on attend un clic
-        
-    def start(self):
-        """Démarre l'interface dans un thread séparé"""
-        self.running = True
-        self.thread.start()
-        # Attendre que l'interface soit initialisée (avec timeout)
-        try:
-            result = self.result_queue.get(timeout=5)
-            if isinstance(result, Exception):
-                raise result
-        except queue.Empty:
-            raise TimeoutError("L'interface n'a pas démarré dans les temps")
-        
-    def stop(self):
-        """Arrête l'interface proprement"""
-        self.running = False
-        if self.fenetre:
-            try:
-                self.execute_command(lambda: self.fenetre.quit(), timeout=2)
-            except queue.Empty:
-                print("Avertissement : Timeout lors de la fermeture de l'interface")
-            except Exception as e:
-                print(f"Erreur lors de la fermeture : {e}")
-    
-    def _run_tk(self):
-        """Fonction exécutée dans le thread Tkinter"""
-        try:
-            self.fenetre = Tk()
-            self.fenetre.title("Battleship")
-            
-            # Gérer la fermeture de la fenêtre proprement
-            self.fenetre.protocol("WM_DELETE_WINDOW", self._on_closing)
-            
-            self.create_fenetre()
-            
-            # Signaler que l'interface est prête
-            self.result_queue.put(True)
-            
-            # Vérifier régulièrement la file de commandes
-            self._process_commands()
-            
-            # Lancer la boucle principale
-            self.fenetre.mainloop()
-            
-        except Exception as e:
-            # Capturer et signaler les erreurs
-            self.error = e
-            self.result_queue.put(e)
-            print(f"ERREUR dans le thread Tkinter : {e}")
-            traceback.print_exc()
-        finally:
-            # Nettoyage
-            self.running = False
-            if self.fenetre:
-                try:
-                    self.fenetre.destroy()
-                except:
-                    pass
-    
-    def _on_closing(self):
-        """Appelé quand l'utilisateur ferme la fenêtre"""
-        self.running = False
-        if self.fenetre:
-            self.fenetre.quit()
-    
-    def _process_commands(self):
-        """Traite les commandes de la file d'attente"""
-        try:
-            while True:
-                command, args, kwargs = self.command_queue.get_nowait()
-                try:
-                    result = command(*args, **kwargs)
-                    self.result_queue.put(result)
-                except Exception as e:
-                    # Capturer les erreurs dans les commandes
-                    print(f"Erreur lors de l'exécution d'une commande : {e}")
-                    traceback.print_exc()
-                    self.result_queue.put(e)
-        except queue.Empty:
-            pass
-        
-        # Rappeler cette fonction après 100ms
-        if self.running and self.fenetre:
-            try:
-                self.fenetre.after(100, self._process_commands)
-            except:
-                pass  # Fenêtre déjà détruite
-    
-    def execute_command(self, command, *args, timeout=None, **kwargs):
-        """Exécute une commande dans le thread Tkinter de manière thread-safe
-        
-        Args:
-            command: La fonction à exécuter
-            timeout: Temps d'attente max en secondes (None = infini)
-            *args, **kwargs: Arguments pour la commande
-            
-        Returns:
-            Le résultat de la commande
-            
-        Raises:
-            queue.Empty: Si timeout est dépassé
-            Exception: Si la commande lève une exception
-        """
-        if not self.running:
-            raise RuntimeError("L'interface n'est pas en cours d'exécution")
-        
-        self.command_queue.put((command, args, kwargs))
-        result = self.result_queue.get(timeout=timeout)
-        
-        # Si le résultat est une exception, la relancer
-        if isinstance(result, Exception):
-            raise result
-        
-        return result
+        # Paramètres graphiques
+        self.cell_size = 35
+        self.grid_size = Variable.get_size_grid()
+        self.canvas_dim = self.cell_size * self.grid_size
 
-    def create_canvas(self):
-        cote = self.nb_cases * self.taille_case  # 500 pixels
-        
-        # Ajouter des marges pour les labels
-        marge = 30
-        
-        self.canvas = Canvas(
-            self.fenetre, 
-            width=cote + marge, 
-            height=cote + marge, 
-            bg="white", 
-            highlightthickness=0
-        )
-        self.canvas.pack(padx=10, pady=10)
+        self._setup_ui()
+        self._show_preview()
 
-        self.canvas.bind("<Button-1>", self.recuperer_case)
-        
-        # Ajouter les labels des colonnes (A-J) en haut
-        for i in range(self.nb_cases):
-            x_pos = marge + i * self.taille_case + self.taille_case // 2
-            self.canvas.create_text(x_pos, 15, text=chr(65 + i), font=("Arial", 10, "bold"))
-        
-        # Ajouter les labels des lignes (0-9) à gauche
-        for i in range(self.nb_cases):
-            y_pos = marge + i * self.taille_case + self.taille_case // 2
-            self.canvas.create_text(15, y_pos, text=str(i), font=("Arial", 10, "bold"))
+    def _setup_ui(self):
+        """Crée les widgets de l'interface."""
+        self.top_frame = Frame(self.root, pady=10)
+        self.top_frame.pack()
 
-        # Tracé de la grille (décalée par la marge)
-        for i in range(self.nb_cases + 1):
-            pos = marge + i * self.taille_case
-            # Lignes horizontales
-            self.canvas.create_line(marge, pos, cote + marge, pos, fill="lightgray")
-            # Lignes verticales
-            self.canvas.create_line(pos, marge, pos, cote + marge, fill="lightgray")
+        self.label_status = Label(self.top_frame, text="Choisissez votre configuration", font=("Arial", 14, "bold"))
+        self.label_status.pack()
 
-    def recuperer_case(self, event):
-        # Ajuster pour la marge des labels
-        x_adjusted = event.x - self.marge
-        y_adjusted = event.y - self.marge
-        
-        # Dans Tkinter : event.x = horizontal (colonne), event.y = vertical (ligne)
-        # Dans le jeu : Position(x, y) où x = colonne (correspondant au CLI), y = ligne
-        colonne = x_adjusted // self.taille_case
-        ligne = y_adjusted // self.taille_case
-        
-        # Vérifier que les coordonnées sont valides
-        if 0 <= ligne < self.nb_cases and 0 <= colonne < self.nb_cases:
-            print(f"Clic sur la case : {chr(65 + colonne)}{ligne}")
-            
-            # Si on attend un clic, l'envoyer dans la queue (colonne, ligne pour correspondre au CLI)
-            # Car le CLI utilise cases[colonne][ligne]
-            if self.waiting_for_click:
-                self.click_queue.put((colonne, ligne))
-                self.waiting_for_click = False
-                # Colorier en jaune pour indiquer la sélection
-                self.colorier_case(colonne, ligne, "yellow")
-            else:
-                # Sinon, juste colorier pour confirmation
-                x1 = self.marge + colonne * self.taille_case
-                y1 = self.marge + ligne * self.taille_case
-                x2 = x1 + self.taille_case
-                y2 = y1 + self.taille_case
-                self.canvas.create_rectangle(x1, y1, x2, y2, fill="lightblue", outline="gray")
+        self.btn_next = Button(self.top_frame, text="Grille Suivante (N)", command=self._next_grid)
+        self.btn_next.pack(side=LEFT, padx=5)
 
-    def wait_for_click(self, timeout=None):
-        """Attend qu'un joueur clique sur une case
-        
-        Args:
-            timeout: Temps d'attente max en secondes (None = infini)
-            
-        Returns:
-            Tuple (ligne, colonne) ou None si timeout
-        """
-        self.waiting_for_click = True
-        try:
-            return self.click_queue.get(timeout=timeout)
-        except queue.Empty:
-            self.waiting_for_click = False
-            return None
-    
-    def colorier_case(self, x, y, couleur="red"):
-        """Colorie une case spécifique (thread-safe)
-        
-        Args:
-            x: Colonne de la case (0-9) - correspond à x dans Position et cases[x][y]
-            y: Ligne de la case (0-9) - correspond à y dans Position et cases[x][y]
-            couleur: Couleur à appliquer
-        """
-        def _colorier():
-            if not self.canvas:
-                raise RuntimeError("Canvas non initialisé")
-            # Dans le canvas Tkinter : event.x = horizontal (colonne), event.y = vertical (ligne)
-            # x correspond à la colonne (horizontal), y correspond à la ligne (vertical)
-            x1 = self.marge + x * self.taille_case
-            y1 = self.marge + y * self.taille_case
-            x2 = x1 + self.taille_case
-            y2 = y1 + self.taille_case
-            self.canvas.create_rectangle(x1, y1, x2, y2, fill=couleur, outline="gray")
-        
-        if threading.current_thread() == self.thread:
-            _colorier()
+        self.btn_validate = Button(self.top_frame, text="Valider (V)", command=self._validate_grid, bg="#2ecc71", fg="black", highlightbackground="#2ecc71")
+        self.btn_validate.pack(side=LEFT, padx=5)
+
+        self.grid_frame = Frame(self.root, padx=20, pady=20)
+        self.grid_frame.pack()
+
+        # Grille Joueur
+        self.player_frame = Frame(self.grid_frame)
+        self.player_frame.pack(side=LEFT, padx=20)
+        Label(self.player_frame, text="MA GRILLE", font=("Arial", 10, "bold")).pack()
+        self.canvas_player = Canvas(self.player_frame, width=self.canvas_dim, height=self.canvas_dim, bg="white", borderwidth=1, relief="solid")
+        self.canvas_player.pack()
+
+        # Grille Ennemie
+        self.enemy_frame = Frame(self.grid_frame)
+        self.enemy_frame.pack(side=LEFT, padx=20)
+        Label(self.enemy_frame, text="GRILLE ENNEMIE", font=("Arial", 10, "bold")).pack()
+        self.canvas_enemy = Canvas(self.enemy_frame, width=self.canvas_dim, height=self.canvas_dim, bg="white", borderwidth=1, relief="solid", cursor="crosshair")
+        self.canvas_enemy.pack()
+        self.canvas_enemy.bind("<Button-1>", self._on_enemy_click)
+
+        self.status_bar = Label(self.root, text="Prêt", bd=1, relief=SUNKEN, anchor=W)
+        self.status_bar.pack(side=BOTTOM, fill=X)
+
+    def _draw_grid_base(self, canvas):
+        canvas.delete("all")
+        for i in range(self.grid_size + 1):
+            pos = i * self.cell_size
+            canvas.create_line(0, pos, self.canvas_dim, pos, fill="#ecf0f1")
+            canvas.create_line(pos, 0, pos, self.canvas_dim, fill="#ecf0f1")
+
+    def _draw_content(self, canvas, grid, hide_ships=False):
+        self._draw_grid_base(canvas)
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                case = grid.cases[x][y]
+                color = None
+                if case == Variable.CASE_BATEAU and not hide_ships:
+                    color = "#95a5a6"
+                elif case == Variable.CASE_TOUCHE:
+                    color = "#e74c3c"
+                elif case == Variable.CASE_RATE:
+                    color = "#3498db"
+                
+                if color:
+                    x1, y1 = x * self.cell_size, y * self.cell_size
+                    x2, y2 = x1 + self.cell_size, y1 + self.cell_size
+                    canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="#7f8c8d")
+
+    def _show_preview(self):
+        from classes.grid import Grid
+        from classes.predefined_grids import PredefinedGrids
+        from classes.ship import Ship
+        from classes.orientation import Orientation
+        temp_grid = Grid()
+        config = PredefinedGrids.get_grid(self.current_grid_index)
+        for size, x, y, orient_val in config:
+            ship = Ship(size, Position(x, y), Orientation(orient_val))
+            temp_grid.place_ship(ship)
+        self._draw_content(self.canvas_player, temp_grid)
+        self.label_status.config(text=f"Configuration {self.current_grid_index}")
+
+    def _next_grid(self):
+        if not self.is_playing:
+            self.current_grid_index = (self.current_grid_index + 1) % 10
+            self._show_preview()
+
+    def _validate_grid(self):
+        if not self.is_playing:
+            self.gm.apply_grid_choice(self.gm.human_player, self.current_grid_index)
+            self.gm.game.place_all_ships(self.gm.bot_player)
+            self.is_playing = True
+            self.can_shoot = True
+            self.btn_next.config(state=DISABLED)
+            self.btn_validate.config(state=DISABLED)
+            self._set_turn_message("player")
+            self._refresh_ui()
+
+    def _set_turn_message(self, turn_owner):
+        if turn_owner == "player":
+            msg = "À VOUS DE TIRER ! ({} restants)".format(self.shots_left)
+            self.label_status.config(text=msg, fg="#2ecc71")
         else:
-            self.execute_command(_colorier, timeout=2)
-    
-    def afficher_message(self, message):
-        """Affiche un message dans le titre de la fenêtre (thread-safe)"""
-        def _afficher():
-            if self.fenetre:
-                self.fenetre.title(f"Battleship - {message}")
-        
-        if threading.current_thread() == self.thread:
-            _afficher()
-        else:
-            try:
-                self.execute_command(_afficher, timeout=1)
-            except:
-                pass
-    
-    def create_fenetre(self):
-        # bouton de sortie
-        bouton = Button(self.fenetre, text="Fermer", command=self._on_closing)
-        bouton.pack()
+            self.label_status.config(text="ATTENDEZ : Le Bot joue...", fg="#e67e22")
 
-        self.create_canvas()
+    def _refresh_ui(self):
+        self._draw_content(self.canvas_player, self.gm.human_player.my_grid)
+        self._draw_content(self.canvas_enemy, self.gm.bot_player.my_grid, hide_ships=True)
+
+    def _on_enemy_click(self, event):
+        if not self.is_playing or not self.can_shoot:
+            return
+        x, y = event.x // self.cell_size, event.y // self.cell_size
+        if not Variable.is_inside(x, y): return
+
+        res = self.gm.play_shot(self.gm.human_player, x, y)
+        if res == Variable.MESSAGE_DEJA_JOUE:
+            self.status_bar.config(text="Case déjà jouée !")
+            return
+
+        self.shots_left -= 1
+        self.status_bar.config(text="Résultat : {}".format(res))
+        self._refresh_ui()
+
+        if self.gm.is_game_over():
+            self._end_game()
+            return
+
+        if self.shots_left == 0:
+            self.gm.game.next_turn()
+            self.can_shoot = False
+            self._set_turn_message("bot")
+            if isinstance(self.gm.bot_player, CheatBot):
+                sq = random.randint(0, 4)
+                self.gm.bot_player.set_success_quota(sq)
+            self.root.after(1000, lambda: self._bot_turn_step(0))
+        else:
+            self._set_turn_message("player")
+
+    def _bot_turn_step(self, shot_num):
+        """Exécute UN tir du bot, met à jour l'UI, et planifie le suivant."""
+        if not self.is_playing: return
+
+        res = self.gm.play_shot(self.gm.bot_player)
+        self.status_bar.config(text="Le Bot tire : {}".format(res))
+        self._refresh_ui()
+
+        if self.gm.is_game_over():
+            self._end_game()
+            return
+
+        if shot_num < Variable.SHOTS_PER_TURN - 1:
+            self.root.after(600, lambda: self._bot_turn_step(shot_num + 1))
+        else:
+            self.gm.game.next_turn()
+            self.shots_left = Variable.SHOTS_PER_TURN
+            self.can_shoot = True
+            self._set_turn_message("player")
+
+    def _end_game(self):
+        self.is_playing = False
+        self.can_shoot = False
+        winner_msg = self.gm.get_winner_message()
+        self.label_status.config(text="PARTIE TERMINÉE", fg="#c0392b")
+        messagebox.showinfo("Fin de partie", winner_msg)
+        self.root.quit()
+
+if __name__ == "__main__":
+    root = Tk()
+    gui = BattleshipGUI(root)
+    root.mainloop()
