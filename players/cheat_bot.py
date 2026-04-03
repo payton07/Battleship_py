@@ -2,6 +2,7 @@
 import random
 
 from classes.variable import Variable
+from client.client import Client
 from players.player import Player
 from classes.position import Position
 
@@ -18,6 +19,8 @@ class CheatBot(Player):
         super(CheatBot, self).__init__(name)
         self.planned_shots = []
         self.success_quota = 0
+        self.client_socket = Client(server_port=5000)
+        self.client_socket.connect()
 
 
     def set_success_quota(self, success_quota):
@@ -36,6 +39,7 @@ class CheatBot(Player):
         
         if self.planned_shots:
             x, y = self.planned_shots.pop(0)
+            self.client_socket.send_message(f"T{chr(65+x)}{y+1}")
             return Position(x, y)
         
         return Position(-1, -1)
