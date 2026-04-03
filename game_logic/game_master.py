@@ -3,7 +3,7 @@ from __future__ import print_function
 import random
 
 from game_logic.game import Game
-from players.smart_bot import SmartBot
+from players.cheat_bot import CheatBot
 from players.player import Player
 from players.physical_player import PhysicalPlayer
 from classes.variable import Variable
@@ -19,7 +19,7 @@ class GameMaster(object):
         self.players = []
         self.human_player = None
         self.bot_player = None
-        self.is_hybrid = False # Mode hybride (Humain papier vs Bot digital)
+        self.is_hybrid = False
 
     def setup_players(self, hybrid=False):
         """Initialise les joueurs."""
@@ -31,13 +31,19 @@ class GameMaster(object):
         else:
             self.human_player = Player(Variable.DEFAULT_PLAYER_HUMAN)
             
-        self.bot_player = SmartBot(Variable.DEFAULT_BOT_NAME)
+        # Par défaut, on joue contre le CheatBot
+        self.bot_player = CheatBot(Variable.CHEAT_BOT_NAME)
 
         self.players.append(self.human_player)
         self.players.append(self.bot_player)
 
         for player in self.players:
             self.game.add_player(player)
+
+        # SI LE BOT EST UN CHEATBOT ET QUE L'HUMAIN EST DIGITAL :
+        # On lui donne accès à la grille pour qu'il puisse tricher
+        if isinstance(self.bot_player, CheatBot) and not self.is_hybrid:
+            self.bot_player.set_target_grid(self.human_player.get_my_grid())
 
     def apply_grid_choice(self, player, index):
         """Applique une grille prédéfinie à un joueur."""
@@ -93,6 +99,11 @@ class GameMaster(object):
 
     def execute_turn(self, player):
         """Exécute le tour complet d'un joueur."""
+        # Si c'est le Bot qui triche, on définit son quota de succès pour ce tour
+        if player == self.bot_player and isinstance(player, CheatBot):
+            # Quota aléatoire entre 0 et 3 succès sur 4 tirs pour paraître naturel
+            player.set_success_quota(random.randint(0, 3))
+
         results = []
         for _ in range(Variable.SHOTS_PER_TURN):
             res = self.play_shot(player)
@@ -127,7 +138,7 @@ class GameMaster(object):
     def run(self):
         """Boucle de jeu console."""
         print("\n--- Configuration ---")
-        print("1. Mode Digital (Humain sur PC vs Bot)")
+        print("1. Mode Digital (Humain sur PC vs CheatBot)")
         print("2. Mode Hybride (Humain sur Papier vs Bot)")
         
         try:
@@ -146,12 +157,12 @@ class GameMaster(object):
             
             while not self.is_game_over():
                 # Tour Humain
-                print(f"\n--- C'est votre tour ({Variable.SHOTS_PER_TURN} tirs) ---")
+                print("\n--- C'est votre tour ({} tirs) ---".format(Variable.SHOTS_PER_TURN))
                 if self.display_and_check_results(self.human_player, self.execute_turn(self.human_player)):
                     return
 
                 # Tour Bot
-                print(f"\n--- C'est le tour du Bot ---")
+                print("\n--- C'est le tour du Bot ---")
                 if self.display_and_check_results(self.bot_player, self.execute_turn(self.bot_player)):
                     return
         except KeyboardInterrupt:
