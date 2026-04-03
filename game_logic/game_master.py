@@ -80,7 +80,6 @@ class GameMaster:
 
                 for shot_num in range(1, Variable.SHOTS_PER_TURN + 1):
                     print(f"Tir n°{shot_num} :")
-                    print(player.my_grid)
                     result = self.game.play(player)
 
                     if result and not result.startswith(Variable.MESSAGE_TOUR_ERR[:5]):
