@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function
 import random
 
 from game_logic.game import Game
-from players.cheat_bot import CheatBot
-from players.normal_player import NormalPlayer
+from players.smart_bot import SmartBot
+from players.player import Player
+from players.physical_player import PhysicalPlayer
 from classes.variable import Variable
 from classes.predefined_grids import PredefinedGrids
 from classes.grid import Grid
@@ -10,28 +13,31 @@ from classes.ship import Ship
 from classes.position import Position
 from classes.orientation import Orientation
 
-class GameMaster:
+class GameMaster(object):
     def __init__(self):
         self.game = Game()
         self.players = []
         self.human_player = None
         self.bot_player = None
+        self.is_hybrid = False # Mode hybride (Humain papier vs Bot digital)
 
-    def setup_players(self):
-        """Initialise les joueurs et lie leurs grilles."""
+    def setup_players(self, hybrid=False):
+        """Initialise les joueurs."""
         self.players = []
-        self.human_player = NormalPlayer(Variable.DEFAULT_PLAYER_HUMAN)
-        self.bot_player = CheatBot(Variable.CHEAT_BOT_NAME)
+        self.is_hybrid = hybrid
+        
+        if self.is_hybrid:
+            self.human_player = PhysicalPlayer(Variable.DEFAULT_PLAYER_HUMAN)
+        else:
+            self.human_player = Player(Variable.DEFAULT_PLAYER_HUMAN)
+            
+        self.bot_player = SmartBot(Variable.DEFAULT_BOT_NAME)
 
         self.players.append(self.human_player)
         self.players.append(self.bot_player)
 
         for player in self.players:
             self.game.add_player(player)
-
-        # Liaison des grilles pour l'adversité
-        self.human_player.set_enemy_grid(self.bot_player.get_my_grid())
-        self.bot_player.set_enemy_grid(self.human_player.get_my_grid())
 
     def apply_grid_choice(self, player, index):
         """Applique une grille prédéfinie à un joueur."""
@@ -40,6 +46,10 @@ class GameMaster:
 
     def select_human_grid_console(self):
         """Gère la boucle de sélection de grille en mode console."""
+        if self.is_hybrid:
+            print("\nMode Hybride : Préparez votre grille sur papier.")
+            return
+
         choice = 0
         validating = False
         while not validating:
@@ -51,7 +61,14 @@ class GameMaster:
             
             print(Variable.MESSAGE_APERÇU_TITRE.format(index=choice))
             print(temp_grid)
-            user_input = input(Variable.PROMPT_CHOIX_GRILLE).strip().upper()
+            
+            try:
+                try:
+                    user_input = raw_input(Variable.PROMPT_CHOIX_GRILLE).strip().upper()
+                except NameError:
+                    user_input = input(Variable.PROMPT_CHOIX_GRILLE).strip().upper()
+            except EOFError:
+                break
             
             if user_input == 'V':
                 validating = True
@@ -67,39 +84,18 @@ class GameMaster:
                     pass
 
     def play_shot(self, player, x=None, y=None):
-        """
-        Exécute un tir pour un joueur. 
-        Si x et y sont fournis, force la position (utile pour l'UI).
-        """
+        """Exécute un tir pour un joueur."""
         if x is not None and y is not None:
             player.set_next_shot(x, y)
         
         result = self.game.play(player)
         return result
 
-    def execute_human_turn(self):
-        """Exécute le tour complet de l'humain (4 tirs). Utile pour le mode console."""
+    def execute_turn(self, player):
+        """Exécute le tour complet d'un joueur."""
         results = []
         for _ in range(Variable.SHOTS_PER_TURN):
-            res = self.play_shot(self.human_player)
-            results.append(res)
-            if self.is_game_over():
-                break
-        
-        self.game.next_turn()
-        return results
-
-    def execute_bot_turn(self):
-        """Exécute le tour complet du Bot (4 tirs)."""
-        if not isinstance(self.bot_player, CheatBot):
-            return []
-
-        results = []
-        sq = random.randint(0, 4)
-        self.bot_player.set_success_quota(sq)
-        
-        for _ in range(Variable.SHOTS_PER_TURN):
-            res = self.play_shot(self.bot_player)
+            res = self.play_shot(player)
             results.append(res)
             if self.is_game_over():
                 break
@@ -116,7 +112,7 @@ class GameMaster:
         return self.game.is_game_over().get_message()
 
     def display_and_check_results(self, player, results):
-        """Affiche les résultats d'un tour et vérifie si la partie est finie."""
+        """Affiche les résultats d'un tour."""
         for res in results:
             print(Variable.MESSAGE_JOUEUR_ACTION.format(
                 player_name=player.get_name(), 
@@ -129,20 +125,34 @@ class GameMaster:
         return False
 
     def run(self):
-        """Boucle de jeu console (rétro-compatibilité)."""
-        self.setup_players()
-        self.select_human_grid_console()
+        """Boucle de jeu console."""
+        print("\n--- Configuration ---")
+        print("1. Mode Digital (Humain sur PC vs Bot)")
+        print("2. Mode Hybride (Humain sur Papier vs Bot)")
         
-        self.game.place_all_ships(self.bot_player)
-        print(Variable.MESSAGE_DEBUT_PARTIE)
-        
-        while not self.is_game_over():
-            # Tour Humain
-            print(f"\n--- C'est votre tour ({Variable.SHOTS_PER_TURN} tirs) ---")
-            if self.display_and_check_results(self.human_player, self.execute_human_turn()):
-                return
+        try:
+            try:
+                mode = raw_input("Votre choix : ").strip()
+            except NameError:
+                mode = input("Votre choix : ").strip()
+            
+            self.setup_players(hybrid=(mode == "2"))
+            self.select_human_grid_console()
+            
+            # Placement des bateaux du bot
+            self.game.place_all_ships(self.bot_player)
+            
+            print(Variable.MESSAGE_DEBUT_PARTIE)
+            
+            while not self.is_game_over():
+                # Tour Humain
+                print(f"\n--- C'est votre tour ({Variable.SHOTS_PER_TURN} tirs) ---")
+                if self.display_and_check_results(self.human_player, self.execute_turn(self.human_player)):
+                    return
 
-            # Tour Bot
-            print(f"\n--- C'est le tour du Bot ---")
-            if self.display_and_check_results(self.bot_player, self.execute_bot_turn()):
-                return
+                # Tour Bot
+                print(f"\n--- C'est le tour du Bot ---")
+                if self.display_and_check_results(self.bot_player, self.execute_turn(self.bot_player)):
+                    return
+        except KeyboardInterrupt:
+            print("\nPartie interrompue.")

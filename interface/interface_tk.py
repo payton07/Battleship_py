@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
-from tkinter import *
-from tkinter import messagebox
+try:
+    from tkinter import *
+    from tkinter import messagebox
+except ImportError:
+    from Tkinter import *
+    import tkMessageBox as messagebox
 import random
 from game_logic.game_master import GameMaster
 from classes.variable import Variable
 from classes.position import Position
-from players.cheat_bot import CheatBot
 
-class BattleshipGUI:
+class BattleshipGUI(object):
     def __init__(self, root):
         self.root = root
         self.root.title("Pepper Battleship - Digital vs Physical")
@@ -15,7 +18,8 @@ class BattleshipGUI:
 
         # Initialisation du moteur de jeu
         self.gm = GameMaster()
-        self.gm.setup_players()
+        # Par défaut en mode Digital pour l'UI
+        self.gm.setup_players(hybrid=False)
         
         # État de l'interface
         self.current_grid_index = 0
@@ -75,6 +79,8 @@ class BattleshipGUI:
 
     def _draw_content(self, canvas, grid, hide_ships=False):
         self._draw_grid_base(canvas)
+        if not grid: return
+        
         for x in range(self.grid_size):
             for y in range(self.grid_size):
                 case = grid.cases[x][y]
@@ -102,7 +108,7 @@ class BattleshipGUI:
             ship = Ship(size, Position(x, y), Orientation(orient_val))
             temp_grid.place_ship(ship)
         self._draw_content(self.canvas_player, temp_grid)
-        self.label_status.config(text=f"Configuration {self.current_grid_index}")
+        self.label_status.config(text=u"Configuration {}".format(self.current_grid_index))
 
     def _next_grid(self):
         if not self.is_playing:
@@ -122,10 +128,10 @@ class BattleshipGUI:
 
     def _set_turn_message(self, turn_owner):
         if turn_owner == "player":
-            msg = "À VOUS DE TIRER ! ({} restants)".format(self.shots_left)
+            msg = u"À VOUS DE TIRER ! ({} restants)".format(self.shots_left)
             self.label_status.config(text=msg, fg="#2ecc71")
         else:
-            self.label_status.config(text="ATTENDEZ : Le Bot joue...", fg="#e67e22")
+            self.label_status.config(text=u"ATTENDEZ : Le Bot joue...", fg="#e67e22")
 
     def _refresh_ui(self):
         self._draw_content(self.canvas_player, self.gm.human_player.my_grid)
@@ -143,7 +149,7 @@ class BattleshipGUI:
             return
 
         self.shots_left -= 1
-        self.status_bar.config(text="Résultat : {}".format(res))
+        self.status_bar.config(text=u"Résultat : {}".format(res))
         self._refresh_ui()
 
         if self.gm.is_game_over():
@@ -154,9 +160,6 @@ class BattleshipGUI:
             self.gm.game.next_turn()
             self.can_shoot = False
             self._set_turn_message("bot")
-            if isinstance(self.gm.bot_player, CheatBot):
-                sq = random.randint(0, 4)
-                self.gm.bot_player.set_success_quota(sq)
             self.root.after(1000, lambda: self._bot_turn_step(0))
         else:
             self._set_turn_message("player")
@@ -166,7 +169,7 @@ class BattleshipGUI:
         if not self.is_playing: return
 
         res = self.gm.play_shot(self.gm.bot_player)
-        self.status_bar.config(text="Le Bot tire : {}".format(res))
+        self.status_bar.config(text=u"Le Bot tire : {}".format(res))
         self._refresh_ui()
 
         if self.gm.is_game_over():
@@ -185,7 +188,7 @@ class BattleshipGUI:
         self.is_playing = False
         self.can_shoot = False
         winner_msg = self.gm.get_winner_message()
-        self.label_status.config(text="PARTIE TERMINÉE", fg="#c0392b")
+        self.label_status.config(text=u"PARTIE TERMINÉE", fg="#c0392b")
         messagebox.showinfo("Fin de partie", winner_msg)
         self.root.quit()
 

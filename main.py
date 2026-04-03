@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import sys
 import os
-from tkinter import Tk
+try:
+    from tkinter import Tk
+except ImportError:
+    from Tkinter import Tk
 
 # Garantir que les modules locaux sont trouvables
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -19,7 +23,10 @@ def main():
     print("2. Mode Graphique (Tkinter)")
     
     try:
-        choice = input("\nVotre choix (1 ou 2) : ").strip()
+        try:
+            choice = raw_input("\nVotre choix (1 ou 2) : ").strip()
+        except NameError:
+            choice = input("\nVotre choix (1 ou 2) : ").strip()
         
         if choice == "1":
             print("\nLancement du mode Console...\n")
@@ -36,7 +43,9 @@ def main():
     except KeyboardInterrupt:
         print("\nPartie interrompue. À bientôt !")
     except Exception as e:
-        print(f"Une erreur inattendue est survenue : {e}")
+        import traceback
+        traceback.print_exc()
+        print("Une erreur inattendue est survenue : {}".format(e))
 
 if __name__ == "__main__":
     main()
