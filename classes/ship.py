@@ -12,9 +12,9 @@ class Ship:
         positions = []
         for i in range(self.size):
             if self.orientation == Orientation.HORIZONTAL:
-                positions.append(Position(self.start.get_x(), self.start.get_y() + i))
-            else:
                 positions.append(Position(self.start.get_x() + i, self.start.get_y()))
+            else:
+                positions.append(Position(self.start.get_x(), self.start.get_y() + i))
         return positions
 
     def get_size(self):
