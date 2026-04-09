@@ -7,6 +7,7 @@ class Variable:
     # --- Symboles d'Affichage ---
     CASE_DEFAULT = "~"
     CASE_TOUCHE = "X"
+    CASE_COULE = "C"
     CASE_RATE = "*"
     CASE_BATEAU = "O"
 

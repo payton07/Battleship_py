@@ -91,6 +91,8 @@ class BattleshipGUI(object):
                     color = "#e74c3c"
                 elif case == Variable.CASE_RATE:
                     color = "#3498db"
+                elif case == Variable.CASE_COULE:
+                    color = "#FFFF00"
                 
                 if color:
                     x1, y1 = x * self.cell_size, y * self.cell_size

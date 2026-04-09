@@ -47,6 +47,7 @@ class Grid:
             if ship:
                 ship.hit(x, y)
                 if ship.is_sunk():
+                    self.cases[x][y] = Variable.CASE_COULE
                     return Response(2, Variable.MESSAGE_COULE)
             return Response(1, Variable.MESSAGE_TOUCHE)
 

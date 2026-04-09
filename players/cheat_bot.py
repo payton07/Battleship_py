@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 from classes.variable import Variable
+from client.client import Client
 from players.player import Player
 from classes.position import Position
 
@@ -16,6 +17,8 @@ class CheatBot(Player):
         self.planned_shots = []
         self.success_quota = 2
         self.target_grid = None # La grille qu'on va "espionner"
+        self.client_socket = Client("10.161.177.181", server_port=5000)
+        self.client_socket.connect()
 
     def set_target_grid(self, grid):
         """Permet au GameMaster de donner l'accès à la grille adverse."""
@@ -36,6 +39,7 @@ class CheatBot(Player):
         # 2. Si on a des coups planifiés (via triche ou autre)
         if self.planned_shots:
             x, y = self.planned_shots.pop(0)
+            self.client_socket.send_message(f"P{chr(65+x)}{y}")
             return Position(x, y)
         
         # 3. Comportement de secours (ou mode Physique) : Aléatoire pur
@@ -98,3 +102,8 @@ class CheatBot(Player):
 
         random.shuffle(shots)
         return shots
+
+    def receive_shot(self, x, y):
+        msg = super().receive_shot(x, y)
+        self.client_socket.send_message(msg.get_message()[0])
+        return msg
