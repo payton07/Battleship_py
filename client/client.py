@@ -1,17 +1,19 @@
 import socket
 
 class Client:
-    def __init__(self, server_ip="127.0.0.1", server_port=5000, buffer_size=1024):
+    def __init__(self, server_ip="127.0.0.1", server_port=5000, buffer_size=1024, timeout=2):
         """Initialise le client
         
         Args:
             server_ip: Adresse IP du serveur
             server_port: Port du serveur
-            buffer_size: Taille du buffer de réception (défaut: 4096)
+            buffer_size: Taille du buffer de réception (défaut: 1024)
+            timeout: Temps d'attente max pour la connexion (secondes)
         """
         self.server_ip = server_ip
         self.server_port = server_port
         self.buffer_size = buffer_size
+        self.timeout = timeout
         self.socket = None
         self.connected = False
     
@@ -19,12 +21,13 @@ class Client:
         """Se connecte au serveur"""
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.settimeout(self.timeout)
             self.socket.connect((self.server_ip, self.server_port))
             self.connected = True
             print(f"Connecté au serveur {self.server_ip}:{self.server_port}")
             return True
         except Exception as e:
-            print(f"Erreur de connexion : {e}")
+            print(f"Erreur de connexion ({self.server_ip}): {e}")
             self.connected = False
             return False
     

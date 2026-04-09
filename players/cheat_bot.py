@@ -18,7 +18,7 @@ class CheatBot(Player):
         self.success_quota = 2
         self.target_grid = None # La grille qu'on va "espionner"
         self.client_socket = Client("10.161.177.181", server_port=5000)
-        self.client_socket.connect()
+        # On ne connecte pas ici pour éviter de bloquer l'interface au démarrage
 
     def set_target_grid(self, grid):
         """Permet au GameMaster de donner l'accès à la grille adverse."""
@@ -26,6 +26,15 @@ class CheatBot(Player):
 
     def set_success_quota(self, quota):
         self.success_quota = quota
+
+    def _send_safe_message(self, message):
+        """Tente d'envoyer un message, en se connectant si nécessaire."""
+        if not self.client_socket.connected:
+            self.client_socket.connect()
+        
+        if self.client_socket.connected:
+            return self.client_socket.send_message(message)
+        return False
 
     def get_case_played(self):
         """
@@ -39,8 +48,9 @@ class CheatBot(Player):
         # 2. Si on a des coups planifiés (via triche ou autre)
         if self.planned_shots:
             x, y = self.planned_shots.pop(0)
-            self.client_socket.send_message(f"P{chr(65+x)}{y}")
-            return Position(x, y)
+            self.last_played_pos = Position(x, y)
+            self._send_safe_message(f"P{chr(65+x)}{y}")
+            return self.last_played_pos
         
         # 3. Comportement de secours (ou mode Physique) : Aléatoire pur
         size = Variable.get_size_grid()
@@ -49,7 +59,16 @@ class CheatBot(Player):
             y = random.randint(0, size - 1)
             pos = Position(x, y)
             if pos not in self.history:
+                self.last_played_pos = pos
+                self._send_safe_message(f"P{chr(65+x)}{y}")
                 return pos
+
+    def repeat_last_shot(self):
+        """Renvoie le message socket du dernier tir effectué."""
+        if self.last_played_pos:
+            x, y = self.last_played_pos.get_x(), self.last_played_pos.get_y()
+            return self._send_safe_message(f"P{chr(65+x)}{y}")
+        return False
     
     def _plan_next_shots(self):
         """Planifie les 4 prochains coups en analysant la grille cible."""

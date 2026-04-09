@@ -114,6 +114,12 @@ class GameMaster(object):
         self.game.next_turn()
         return results
 
+    def repeat_bot_shot(self):
+        """Demande au bot de répéter son dernier tir."""
+        if hasattr(self.bot_player, 'repeat_last_shot'):
+            return self.bot_player.repeat_last_shot()
+        return False
+
     def is_game_over(self):
         """Vérifie si la partie est terminée."""
         return self.game.is_game_over().get_success() == 1

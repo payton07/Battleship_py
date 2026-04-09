@@ -43,11 +43,17 @@ class BattleshipGUI(object):
         self.label_status = Label(self.top_frame, text="Choisissez votre configuration", font=("Arial", 14, "bold"))
         self.label_status.pack()
 
-        self.btn_next = Button(self.top_frame, text="Grille Suivante (N)", command=self._next_grid)
+        self.btn_next = Button(self.top_frame, text="Grille Suivante (N)", command=self._next_grid, fg="black", bg="white", highlightbackground="white", activeforeground="black")
         self.btn_next.pack(side=LEFT, padx=5)
 
-        self.btn_validate = Button(self.top_frame, text="Valider (V)", command=self._validate_grid, bg="#2ecc71", fg="black", highlightbackground="#2ecc71")
+        self.btn_validate = Button(self.top_frame, text="Valider (V)", command=self._validate_grid, fg="black", bg="white", highlightbackground="white", activeforeground="black")
         self.btn_validate.pack(side=LEFT, padx=5)
+
+        self.btn_next_bot = Button(self.top_frame, text="Suivant (Bot)", command=self._next_bot_shot, state=DISABLED, fg="black", bg="white", highlightbackground="white", activeforeground="black")
+        self.btn_next_bot.pack(side=LEFT, padx=5)
+
+        self.btn_repeat_bot = Button(self.top_frame, text="Répéter", command=self._repeat_bot_shot, state=DISABLED, fg="black", bg="white", highlightbackground="white", activeforeground="black")
+        self.btn_repeat_bot.pack(side=LEFT, padx=5)
 
         self.grid_frame = Frame(self.root, padx=20, pady=20)
         self.grid_frame.pack()
@@ -161,14 +167,17 @@ class BattleshipGUI(object):
         if self.shots_left == 0:
             self.gm.game.next_turn()
             self.can_shoot = False
+            self.btn_next_bot.config(state=NORMAL)
+            self.btn_repeat_bot.config(state=NORMAL)
             self._set_turn_message("bot")
-            self.root.after(1000, lambda: self._bot_turn_step(0))
+            self.shots_left = Variable.SHOTS_PER_TURN
         else:
             self._set_turn_message("player")
 
-    def _bot_turn_step(self, shot_num):
-        """Exécute UN tir du bot, met à jour l'UI, et planifie le suivant."""
-        if not self.is_playing: return
+    def _next_bot_shot(self):
+        """Exécute un tir du bot manuellement."""
+        if not self.is_playing or self.can_shoot:
+            return
 
         res = self.gm.play_shot(self.gm.bot_player)
         self.status_bar.config(text=u"Le Bot tire : {}".format(res))
@@ -178,13 +187,23 @@ class BattleshipGUI(object):
             self._end_game()
             return
 
-        if shot_num < Variable.SHOTS_PER_TURN - 1:
-            self.root.after(600, lambda: self._bot_turn_step(shot_num + 1))
-        else:
+        self.shots_left -= 1
+        if self.shots_left == 0:
             self.gm.game.next_turn()
             self.shots_left = Variable.SHOTS_PER_TURN
             self.can_shoot = True
+            self.btn_next_bot.config(state=DISABLED)
+            self.btn_repeat_bot.config(state=DISABLED)
             self._set_turn_message("player")
+        else:
+            self.label_status.config(text=u"BOT : Encore {} tirs".format(self.shots_left))
+
+    def _repeat_bot_shot(self):
+        """Demande au bot de répéter son dernier tir."""
+        if self.gm.repeat_bot_shot():
+            self.status_bar.config(text=u"Bot : Dernier tir répété.")
+        else:
+            self.status_bar.config(text=u"Erreur : Impossible de répéter.")
 
     def _end_game(self):
         self.is_playing = False
