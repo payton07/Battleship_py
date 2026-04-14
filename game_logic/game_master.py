@@ -12,6 +12,7 @@ from classes.grid import Grid
 from classes.ship import Ship
 from classes.position import Position
 from classes.orientation import Orientation
+from database.db_manager import DatabaseManager
 
 class GameMaster(object):
     def __init__(self):
@@ -20,6 +21,9 @@ class GameMaster(object):
         self.human_player = None
         self.bot_player = None
         self.is_hybrid = False
+        self.db = DatabaseManager()
+        self.current_game_id = None
+        self.current_turn_number = 1
 
     def setup_players(self, hybrid=False):
         """Initialise les joueurs."""
@@ -28,8 +32,10 @@ class GameMaster(object):
         
         if self.is_hybrid:
             self.human_player = PhysicalPlayer(Variable.DEFAULT_PLAYER_HUMAN)
+            player_type = "Papier"
         else:
             self.human_player = Player(Variable.DEFAULT_PLAYER_HUMAN)
+            player_type = "Digital"
             
         # Par défaut, on joue contre le CheatBot
         self.bot_player = CheatBot(Variable.CHEAT_BOT_NAME)
@@ -39,6 +45,12 @@ class GameMaster(object):
 
         for player in self.players:
             self.game.add_player(player)
+
+        # Enregistrement initial en base
+        self.current_game_id = self.db.create_game(
+            self.human_player.get_name(), 
+            player_type # "Digital" ou "Papier" pour le type_joueur
+        )
 
         # SI LE BOT EST UN CHEATBOT ET QUE L'HUMAIN EST DIGITAL :
         # On lui donne accès à la grille pour qu'il puisse tricher
@@ -119,6 +131,42 @@ class GameMaster(object):
         if hasattr(self.bot_player, 'repeat_last_shot'):
             return self.bot_player.repeat_last_shot()
         return False
+
+    def save_bot_turn(self, trust_score, bot_shots):
+        """
+        Enregistre les données du tour du bot en base.
+        bot_shots: list de [{'x', 'y', 'result'}]
+        """
+        if not self.current_game_id: return
+        
+        quota = 0
+        if isinstance(self.bot_player, CheatBot):
+            quota = self.bot_player.success_quota
+            
+        self.db.save_full_turn(
+            self.current_game_id,
+            self.current_turn_number,
+            quota,
+            trust_score,
+            bot_shots
+        )
+        self.current_turn_number += 1
+
+    def finalize_game(self):
+        """Enregistre le gagnant final."""
+        if not self.current_game_id: return
+        
+        winner = "Inconnu"
+        res = self.game.is_game_over()
+        if res.get_success() == 1:
+            winner = res.get_message().split(" ")[0] # Récupère le nom du gagnant
+            
+        self.db.update_game_winner(self.current_game_id, winner)
+
+    def record_final_trust(self, score):
+        """Enregistre le score de confiance global en fin de partie."""
+        if not self.current_game_id: return
+        self.db.update_game_trust(self.current_game_id, score)
 
     def is_game_over(self):
         """Vérifie si la partie est terminée."""

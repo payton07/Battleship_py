@@ -18,6 +18,7 @@ class CheatBot(Player):
         self.success_quota = 2
         self.target_grid = None # La grille qu'on va "espionner"
         self.client_socket = Client("10.161.177.181", server_port=5000)
+        self.client_socket.connect()
         # On ne connecte pas ici pour éviter de bloquer l'interface au démarrage
 
     def set_target_grid(self, grid):

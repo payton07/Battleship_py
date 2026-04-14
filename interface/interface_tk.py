@@ -2,9 +2,11 @@
 try:
     from tkinter import *
     from tkinter import messagebox
+    from tkinter import simpledialog
 except ImportError:
     from Tkinter import *
     import tkMessageBox as messagebox
+    import tkSimpleDialog as simpledialog
 import random
 from game_logic.game_master import GameMaster
 from classes.variable import Variable
@@ -26,11 +28,13 @@ class BattleshipGUI(object):
         self.is_playing = False
         self.can_shoot = False
         self.shots_left = Variable.SHOTS_PER_TURN
+        self.bot_shots_history = [] # Historique des tirs du bot pour le tour actuel
         
         # Paramètres graphiques
         self.cell_size = 35
+        self.offset = 25 # Marge pour les numéros de ligne/colonne
         self.grid_size = Variable.get_size_grid()
-        self.canvas_dim = self.cell_size * self.grid_size
+        self.canvas_dim = (self.cell_size * self.grid_size) + self.offset
 
         self._setup_ui()
         self._show_preview()
@@ -78,10 +82,24 @@ class BattleshipGUI(object):
 
     def _draw_grid_base(self, canvas):
         canvas.delete("all")
+        # Dessiner les lettres (Colonnes)
+        for i in range(self.grid_size):
+            char = chr(ord('A') + i)
+            x = self.offset + (i * self.cell_size) + (self.cell_size // 2)
+            canvas.create_text(x, self.offset // 2, text=char, font=("Arial", 10, "bold"), fill="black")
+        
+        # Dessiner les chiffres (Lignes)
+        for i in range(self.grid_size):
+            y = self.offset + (i * self.cell_size) + (self.cell_size // 2)
+            canvas.create_text(self.offset // 2, y, text=str(i), font=("Arial", 10, "bold"), fill="black")
+
+        # Dessiner les lignes de la grille (décalées par l'offset)
         for i in range(self.grid_size + 1):
-            pos = i * self.cell_size
-            canvas.create_line(0, pos, self.canvas_dim, pos, fill="#ecf0f1")
-            canvas.create_line(pos, 0, pos, self.canvas_dim, fill="#ecf0f1")
+            pos = self.offset + (i * self.cell_size)
+            # Lignes horizontales
+            canvas.create_line(self.offset, pos, self.canvas_dim, pos, fill="#ecf0f1")
+            # Lignes verticales
+            canvas.create_line(pos, self.offset, pos, self.canvas_dim, fill="#ecf0f1")
 
     def _draw_content(self, canvas, grid, hide_ships=False):
         self._draw_grid_base(canvas)
@@ -101,7 +119,8 @@ class BattleshipGUI(object):
                     color = "#FFFF00"
                 
                 if color:
-                    x1, y1 = x * self.cell_size, y * self.cell_size
+                    x1 = self.offset + (x * self.cell_size)
+                    y1 = self.offset + (y * self.cell_size)
                     x2, y2 = x1 + self.cell_size, y1 + self.cell_size
                     canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="#7f8c8d")
 
@@ -148,7 +167,11 @@ class BattleshipGUI(object):
     def _on_enemy_click(self, event):
         if not self.is_playing or not self.can_shoot:
             return
-        x, y = event.x // self.cell_size, event.y // self.cell_size
+        
+        # Soustraire l'offset avant de diviser par cell_size
+        x = (event.x - self.offset) // self.cell_size
+        y = (event.y - self.offset) // self.cell_size
+        
         if not Variable.is_inside(x, y): return
 
         res = self.gm.play_shot(self.gm.human_player, x, y)
@@ -171,6 +194,7 @@ class BattleshipGUI(object):
             self.btn_repeat_bot.config(state=NORMAL)
             self._set_turn_message("bot")
             self.shots_left = Variable.SHOTS_PER_TURN
+            self.bot_shots_history = [] # On réinitialise l'historique du bot
         else:
             self._set_turn_message("player")
 
@@ -180,6 +204,15 @@ class BattleshipGUI(object):
             return
 
         res = self.gm.play_shot(self.gm.bot_player)
+        
+        # Enregistrement du tir du bot
+        pos = self.gm.bot_player.last_played_pos
+        self.bot_shots_history.append({
+            'x': pos.get_x(),
+            'y': pos.get_y(),
+            'result': res
+        })
+
         self.status_bar.config(text=u"Le Bot tire : {}".format(res))
         self._refresh_ui()
 
@@ -191,12 +224,26 @@ class BattleshipGUI(object):
         if self.shots_left == 0:
             self.gm.game.next_turn()
             self.shots_left = Variable.SHOTS_PER_TURN
+            
+            # Enregistre le tour sans demander le score (on le fera à la fin)
+            self.gm.save_bot_turn(None, self.bot_shots_history)
+            
             self.can_shoot = True
             self.btn_next_bot.config(state=DISABLED)
             self.btn_repeat_bot.config(state=DISABLED)
             self._set_turn_message("player")
         else:
             self.label_status.config(text=u"BOT : Encore {} tirs".format(self.shots_left))
+
+    def _ask_trust_score(self):
+        """Affiche une popup pour demander la confiance du joueur (0-5)."""
+        score = simpledialog.askinteger(
+            "Évaluation de la triche", 
+            "À quel point pensez-vous que le robot triche ?\n(0 = Pas du tout, 5 = Flagrant)",
+            minvalue=0, maxvalue=5, initialvalue=3,
+            parent=self.root
+        )
+        return score if score is not None else 3
 
     def _repeat_bot_shot(self):
         """Demande au bot de répéter son dernier tir."""
@@ -206,6 +253,12 @@ class BattleshipGUI(object):
             self.status_bar.config(text=u"Erreur : Impossible de répéter.")
 
     def _end_game(self):
+        self.gm.finalize_game() # Enregistre le gagnant en BDD
+        
+        # Demander le score de confiance global à la fin
+        trust = self._ask_trust_score()
+        self.gm.record_final_trust(trust)
+        
         self.is_playing = False
         self.can_shoot = False
         winner_msg = self.gm.get_winner_message()
