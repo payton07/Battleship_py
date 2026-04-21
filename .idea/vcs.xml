@@ -2,6 +2,9 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$/../../../.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../Cours_L3/Semestre1/ALGO4/TPS /algo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../Cours_L3/Semestre1/Atelier Genie Logiciel/TDS/That/aglter24" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../../../Cours_L3/Semestre1/Atelier Genie Logiciel/TDS/That/tp4" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
   </component>
 </project>
