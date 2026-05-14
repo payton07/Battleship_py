@@ -50,8 +50,9 @@ const API = {
   preview: (gid, i)  => API.get(`/api/game/${gid}/preview/${i}`),
   select:  (gid, i)  => API.post(`/api/game/${gid}/select-grid`, { index: i }),
   shoot:   (gid,x,y) => API.post(`/api/game/${gid}/shoot`, { x, y }),
-  botTurn:   gid        => API.post(`/api/game/${gid}/bot-turn`),
-  turnTrust: (gid, s)  => API.post(`/api/game/${gid}/turn-trust`, { score: s }),
+  botTurn:    gid           => API.post(`/api/game/${gid}/bot-turn`),
+  turnTrust:  (gid, s)     => API.post(`/api/game/${gid}/turn-trust`, { score: s }),
+  finalTrust: (gid, det)   => API.post(`/api/game/${gid}/final-trust`, { detected: det }),
 };
 
 // ─── Grid rendering ──────────────────────────────────────────────────────────
@@ -460,8 +461,23 @@ async function onTurnRatingClick(score) {
 function endGame(winner, message) {
   S.phase  = 'gameover';
   S.locked = true;
+  S._endWinner = winner;
 
-  const isWin = winner === 'player';
+  setBoardActive('none');
+  setStatus('Partie terminée — rendez votre verdict !', 'info');
+
+  // Montre d'abord le modal de verdict binaire
+  setTimeout(() => $('modal-final-trust').classList.add('active'), 600);
+}
+
+async function onFinalTrustAnswer(detected) {
+  $('modal-final-trust').classList.remove('active');
+
+  // Enregistrement fire-and-forget
+  API.finalTrust(S.gameId, detected).catch(() => {});
+
+  // Affiche le résultat de la partie
+  const isWin = S._endWinner === 'player';
   $('result-emoji').textContent    = isWin ? '🏆' : '💀';
   $('result-title').textContent    = isWin ? 'VICTOIRE !' : 'DÉFAITE';
   $('result-title').className      = `result-title ${isWin ? 'win' : 'lose'}`;
@@ -469,9 +485,8 @@ function endGame(winner, message) {
     ? 'Bravo Commandant ! Vous avez coulé toute la flotte de Pepper Bot.'
     : 'Pepper Bot a coulé toute votre flotte. Meilleure chance la prochaine fois !';
 
-  setBoardActive('none');
   setStatus(isWin ? '🏆 Victoire !' : '💀 Défaite.', isWin ? 'info' : 'warn');
-  setTimeout(() => $('modal-gameover').classList.add('active'), 600);
+  setTimeout(() => $('modal-gameover').classList.add('active'), 400);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -507,6 +522,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Bouton dans le panneau gauche → rouvre aussi le modal
   $('btn-side-evaluate').addEventListener('click', openTurnRatingModal);
+
+  // Verdict final binaire
+  $('btn-final-yes').addEventListener('click', () => onFinalTrustAnswer(true));
+  $('btn-final-no').addEventListener('click',  () => onFinalTrustAnswer(false));
 
   // Bouton vitesse
   $('btn-speed').addEventListener('click', () => {

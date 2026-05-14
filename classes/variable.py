@@ -32,6 +32,12 @@ class Variable:
     MESSAGE_PAS_DE_JOUEUR = "Pas de joueurs configurés"
     MESSAGE_JOUEUR_NON_TROUVE = "Joueur non trouvé dans la partie"
 
+    # --- Séquence de quota statique pour le CheatBot (Option B) ---
+    # Générée une fois via random.choices([0,1,2,3,4], weights=[1,4,6,4,1], k=20).
+    # Distribution cible : 0→6%, 1→25%, 2→38%, 3→25%, 4→6% (cloche centrée sur 2).
+    # Chaque partie suit cette même séquence. Modifier manuellement si besoin.
+    QUOTA_SEQUENCE = [1, 2, 2, 2, 2, 1, 0, 3, 1, 1, 4, 2, 3, 2, 2, 1, 2, 3, 2, 3]
+
     # --- Noms par défaut ---
     DEFAULT_PLAYER_1_NAME = "Joueur 1"
     DEFAULT_PLAYER_2_NAME = "Joueur 2"

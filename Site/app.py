@@ -1,5 +1,10 @@
-from flask import Flask, request, jsonify, render_template
-import sys, os, uuid, random, sqlite3
+from flask import Flask, request, jsonify, render_template, Response
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from dotenv import load_dotenv
+import sys, os, uuid, functools, time, logging
+
+load_dotenv()
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -12,37 +17,137 @@ from classes.predefined_grids import PredefinedGrids
 from players.player import Player
 from players.cheat_bot import CheatBot
 from game_logic.game import Game
-from database.db_manager import DatabaseManager
+from database.connection import Database
+from database.repositories.game_repository import GameRepository
+from database.repositories.turn_repository import TurnRepository
 
+# ── Config depuis variables d'environnement ───────────────────────────────────
+SECRET_KEY     = os.environ.get('SECRET_KEY')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+DATABASE_URL   = os.environ.get('DATABASE_URL')
+
+if not SECRET_KEY:
+    raise RuntimeError("Variable d'environnement SECRET_KEY manquante. Créer un fichier .env.")
+if not ADMIN_PASSWORD:
+    raise RuntimeError("Variable d'environnement ADMIN_PASSWORD manquante. Créer un fichier .env.")
+if not DATABASE_URL:
+    raise RuntimeError("Variable d'environnement DATABASE_URL manquante. Créer un fichier .env.")
+
+# ── App ───────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
-games = {}
+app.secret_key = SECRET_KEY
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'battleship_stats.db')
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["500 per day", "100 per hour"],
+    storage_uri="memory://",
+)
+
+# ── Repositories (partagés par toute l'app) ───────────────────────────────────
+_db        = Database(DATABASE_URL)
+_db.init()
+game_repo  = GameRepository(_db)
+turn_repo  = TurnRepository(_db)
+
+# ── Sessions de jeu ───────────────────────────────────────────────────────────
+games    = {}
+GAME_TTL = 7200  # 2 heures
+
+def cleanup_old_games():
+    cutoff = time.time() - GAME_TTL
+    stale = [gid for gid, wg in list(games.items()) if wg.created_at < cutoff]
+    for gid in stale:
+        del games[gid]
+
+# ── Headers de sécurité ───────────────────────────────────────────────────────
+@app.after_request
+def add_security_headers(resp):
+    resp.headers['X-Content-Type-Options']  = 'nosniff'
+    resp.headers['X-Frame-Options']         = 'DENY'
+    resp.headers['X-XSS-Protection']        = '1; mode=block'
+    resp.headers['Referrer-Policy']         = 'strict-origin-when-cross-origin'
+    resp.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data:; "
+        "connect-src 'self';"
+    )
+    return resp
+
+# ── Validation des entrées ────────────────────────────────────────────────────
+def validate_int(value, min_val, max_val):
+    try:
+        v = int(value)
+        if min_val <= v <= max_val:
+            return v
+    except (TypeError, ValueError):
+        pass
+    return None
+
+def validate_uuid(value):
+    try:
+        return str(uuid.UUID(str(value)))
+    except (ValueError, AttributeError):
+        return None
+
+def sanitize_name(value):
+    if not value:
+        return 'Joueur'
+    name = str(value).strip()[:24]
+    return name or 'Joueur'
+
+# ── Authentification admin ────────────────────────────────────────────────────
+def require_admin(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or auth.password != ADMIN_PASSWORD:
+            return Response(
+                'Accès refusé.',
+                401,
+                {'WWW-Authenticate': 'Basic realm="Admin PBattleship"'}
+            )
+        return f(*args, **kwargs)
+    return decorated
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  WebGame
+# ══════════════════════════════════════════════════════════════════════════════
 
 class WebGame:
     def __init__(self, player_name):
-        self.player_name = player_name
-        self.phase = 'setup'
-        self.current_turn = 'player'
+        self.player_name    = player_name
+        self.phase          = 'setup'
+        self.current_turn   = 'player'
         self.player_shots_left = Variable.SHOTS_PER_TURN
-        self.turn_number = 1
+        self.turn_number    = 1
         self.bot_shots_this_turn = []
-        self.action_log = []
-        self.last_turn_id = None
+        self.action_log     = []
+        self.last_turn_id   = None
+        self.created_at     = time.time()
 
         self.player = Player(player_name)
-        self.bot = CheatBot('Pepper Bot')
+        self.bot    = CheatBot('Pepper Bot')
 
         self.game = Game()
         self.game.add_player(self.player)
         self.game.add_player(self.bot)
 
+        self.quota_sequence = Variable.QUOTA_SEQUENCE
+        self.quota_index    = 0
+
         try:
-            self.db = DatabaseManager(DB_PATH)
-            self.game_id = self.db.create_game(player_name, 'Digital-Web')
-        except Exception:
-            self.db = None
+            self.game_id = game_repo.create(player_name, 'Digital-Web')
+        except Exception as e:
+            logger.error("create_game error: %s", e)
             self.game_id = None
 
     def get_grid_preview(self, index):
@@ -64,7 +169,8 @@ class WebGame:
         size = Variable.get_size_grid()
         return [
             [
-                Variable.CASE_DEFAULT if (hide_ships and grid.cases[x][y] == Variable.CASE_BATEAU) else grid.cases[x][y]
+                Variable.CASE_DEFAULT if (hide_ships and grid.cases[x][y] == Variable.CASE_BATEAU)
+                else grid.cases[x][y]
                 for x in range(size)
             ]
             for y in range(size)
@@ -74,7 +180,7 @@ class WebGame:
         r = self.game.is_game_over()
         if r.get_success() == 1:
             self.phase = 'game_over'
-            msg = r.get_message()
+            msg    = r.get_message()
             winner = 'player' if self.player_name in msg else 'bot'
             return True, winner, msg
         return False, None, None
@@ -82,7 +188,7 @@ class WebGame:
     def _grids(self, reveal_bot=False):
         return {
             'player_grid': self._serialize(self.player.get_my_grid()),
-            'enemy_grid': self._serialize(self.bot.get_my_grid(), hide_ships=not reveal_bot),
+            'enemy_grid':  self._serialize(self.bot.get_my_grid(), hide_ships=not reveal_bot),
         }
 
     def player_shoot(self, x, y):
@@ -112,17 +218,15 @@ class WebGame:
         turn_ended = False
         if self.player_shots_left <= 0:
             self.game.next_turn()
-            self.current_turn = 'bot'
+            self.current_turn        = 'bot'
             self.bot_shots_this_turn = []
-            if isinstance(self.bot, CheatBot):
-                self.bot.set_success_quota(random.randint(0, 3))
-            turn_ended = True
+            turn_ended               = True
 
         return {
             **self._grids(),
-            'result': result,
+            'result':     result,
             'shots_left': self.player_shots_left,
-            'game_over': False,
+            'game_over':  False,
             'turn_ended': turn_ended,
             'x': x, 'y': y,
         }
@@ -131,13 +235,18 @@ class WebGame:
         if self.current_turn != 'bot' or self.phase != 'playing':
             return {'error': 'Not bot turn'}
 
+        quota = self.quota_sequence[self.quota_index % len(self.quota_sequence)]
+        self.quota_index += 1
+        if isinstance(self.bot, CheatBot):
+            self.bot.set_success_quota(quota)
+
         shots = []
         for _ in range(Variable.SHOTS_PER_TURN):
             result = self.game.play(self.bot)
-            pos = self.bot.last_played_pos
-            sx = pos.get_x() if pos else -1
-            sy = pos.get_y() if pos else -1
-            col = chr(65 + sx) if sx >= 0 else '?'
+            pos    = self.bot.last_played_pos
+            sx     = pos.get_x() if pos else -1
+            sy     = pos.get_y() if pos else -1
+            col    = chr(65 + sx) if sx >= 0 else '?'
 
             shot = {'x': sx, 'y': sy, 'coord': f"{col}{sy}", 'result': result}
             shots.append(shot)
@@ -151,60 +260,69 @@ class WebGame:
                         'shots': shots, 'game_over': True, 'winner': winner, 'message': msg}
 
         self.game.next_turn()
-        self.current_turn = 'player'
+        self.current_turn      = 'player'
         self.player_shots_left = Variable.SHOTS_PER_TURN
-        self.turn_number += 1
+        self.turn_number      += 1
 
-        if self.db and self.game_id:
+        if self.game_id:
             try:
-                quota = self.bot.success_quota if isinstance(self.bot, CheatBot) else 0
-                self.last_turn_id = self.db.save_full_turn(
+                self.last_turn_id = turn_repo.save(
                     self.game_id, self.turn_number, quota, None, self.bot_shots_this_turn
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error("save_turn error: %s", e)
 
         return {
             **self._grids(),
-            'shots': shots,
-            'game_over': False,
-            'shots_left': self.player_shots_left,
+            'shots':       shots,
+            'game_over':   False,
+            'shots_left':  self.player_shots_left,
             'turn_number': self.turn_number,
         }
 
     def _save_winner(self, winner_key):
-        if self.db and self.game_id:
+        if self.game_id:
             name = self.player_name if winner_key == 'player' else 'Pepper Bot'
             try:
-                self.db.update_game_winner(self.game_id, name)
-            except Exception:
-                pass
+                game_repo.update_winner(self.game_id, name)
+            except Exception as e:
+                logger.error("update_winner error: %s", e)
 
     def submit_turn_trust(self, score):
-        """Enregistre le score de confiance du dernier tour du bot."""
-        if self.db and self.last_turn_id:
+        if self.last_turn_id:
             try:
-                self.db.update_turn_trust(self.last_turn_id, score)
-            except Exception:
-                pass
+                turn_repo.update_trust(self.last_turn_id, score)
+            except Exception as e:
+                logger.error("update_turn_trust error: %s", e)
+
+    def submit_final_trust(self, detected):
+        if self.game_id:
+            try:
+                game_repo.update_trust_final(self.game_id, detected)
+            except Exception as e:
+                logger.error("update_trust_final error: %s", e)
 
     def submit_trust(self, score):
-        if self.db and self.game_id:
+        if self.game_id:
             try:
-                self.db.update_game_trust(self.game_id, score)
-            except Exception:
-                pass
+                game_repo.update_trust(self.game_id, score)
+            except Exception as e:
+                logger.error("update_trust error: %s", e)
 
     def get_state(self):
         return {
-            'phase': self.phase,
+            'phase':        self.phase,
             'current_turn': self.current_turn,
-            'shots_left': self.player_shots_left,
-            'turn_number': self.turn_number,
+            'shots_left':   self.player_shots_left,
+            'turn_number':  self.turn_number,
             **self._grids(),
-            'action_log': self.action_log[:10],
+            'action_log':   self.action_log[:10],
         }
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  Routes publiques
+# ══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/')
 def index():
@@ -215,15 +333,22 @@ def game_page():
     return render_template('game.html')
 
 @app.route('/api/game/new', methods=['POST'])
+@limiter.limit("10 per hour")
 def new_game():
+    cleanup_old_games()
     data = request.json or {}
-    name = (data.get('player_name') or 'Joueur').strip() or 'Joueur'
-    gid = str(uuid.uuid4())
+    name = sanitize_name(data.get('player_name'))
+    gid  = str(uuid.uuid4())
     games[gid] = WebGame(name)
     return jsonify({'game_id': gid})
 
 @app.route('/api/game/<gid>/preview/<int:idx>')
+@limiter.limit("60 per minute")
 def preview(gid, idx):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
+    if validate_int(idx, 0, 9) is None:
+        return jsonify({'error': 'invalid index'}), 400
     wg = games.get(gid)
     if not wg:
         return jsonify({'error': 'not found'}), 404
@@ -231,150 +356,147 @@ def preview(gid, idx):
 
 @app.route('/api/game/<gid>/select-grid', methods=['POST'])
 def select_grid(gid):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
     wg = games.get(gid)
     if not wg:
         return jsonify({'error': 'not found'}), 404
-    idx = (request.json or {}).get('index', 0)
+    idx = validate_int((request.json or {}).get('index'), 0, 9)
+    if idx is None:
+        return jsonify({'error': 'invalid index'}), 400
     wg.select_grid(idx)
     return jsonify(wg.get_state())
 
 @app.route('/api/game/<gid>/shoot', methods=['POST'])
 def shoot(gid):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
     wg = games.get(gid)
     if not wg:
         return jsonify({'error': 'not found'}), 404
     data = request.json or {}
-    return jsonify(wg.player_shoot(data.get('x', 0), data.get('y', 0)))
+    x = validate_int(data.get('x'), 0, 9)
+    y = validate_int(data.get('y'), 0, 9)
+    if x is None or y is None:
+        return jsonify({'error': 'invalid coordinates'}), 400
+    return jsonify(wg.player_shoot(x, y))
 
 @app.route('/api/game/<gid>/bot-turn', methods=['POST'])
 def bot_turn(gid):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
     wg = games.get(gid)
     if not wg:
         return jsonify({'error': 'not found'}), 404
     return jsonify(wg.execute_bot_turn())
 
-@app.route('/api/game/<gid>/turn-trust', methods=['POST'])
-def turn_trust(gid):
+@app.route('/api/game/<gid>/final-trust', methods=['POST'])
+def final_trust(gid):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
     wg = games.get(gid)
     if not wg:
         return jsonify({'error': 'not found'}), 404
-    score = (request.json or {}).get('score', 0)
+    detected = (request.json or {}).get('detected')
+    if not isinstance(detected, bool):
+        return jsonify({'error': 'invalid value'}), 400
+    wg.submit_final_trust(detected)
+    return jsonify({'ok': True})
+
+@app.route('/api/game/<gid>/turn-trust', methods=['POST'])
+def turn_trust(gid):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
+    wg = games.get(gid)
+    if not wg:
+        return jsonify({'error': 'not found'}), 404
+    score = validate_int((request.json or {}).get('score'), 0, 5)
+    if score is None:
+        return jsonify({'error': 'invalid score'}), 400
     wg.submit_turn_trust(score)
     return jsonify({'ok': True})
 
 @app.route('/api/game/<gid>/trust', methods=['POST'])
 def trust(gid):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
     wg = games.get(gid)
     if not wg:
         return jsonify({'error': 'not found'}), 404
-    score = (request.json or {}).get('score', 3)
+    score = validate_int((request.json or {}).get('score'), 0, 5)
+    if score is None:
+        return jsonify({'error': 'invalid score'}), 400
     wg.submit_trust(score)
     return jsonify({'ok': True})
 
 @app.route('/api/stats')
+@limiter.limit("30 per minute")
 def api_stats():
     try:
-        with sqlite3.connect(DB_PATH) as conn:
-            total = conn.execute("SELECT COUNT(*) FROM Game").fetchone()[0]
-            avg = conn.execute(
-                "SELECT AVG(trust_score) FROM Game WHERE trust_score IS NOT NULL"
-            ).fetchone()[0]
-        return jsonify({'total_games': total, 'avg_trust': round(float(avg), 1) if avg else None})
-    except Exception:
+        stats = game_repo.get_overview_stats()
+        return jsonify({'total_games': stats['total_games'], 'avg_trust': None})
+    except Exception as e:
+        logger.error("api_stats error: %s", e)
         return jsonify({'total_games': 0, 'avg_trust': None})
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  Routes admin (protégées)
+# ══════════════════════════════════════════════════════════════════════════════
+
 @app.route('/admin')
+@require_admin
 def admin_page():
     return render_template('admin.html')
 
 @app.route('/api/admin/overview')
+@require_admin
 def admin_overview():
     try:
-        with sqlite3.connect(DB_PATH) as conn:
-            c = conn.cursor()
-            total_games    = c.execute("SELECT COUNT(*) FROM Game").fetchone()[0]
-            unique_players = c.execute("SELECT COUNT(DISTINCT player_name) FROM Game").fetchone()[0]
-            avg_trust      = c.execute("SELECT AVG(trust_score) FROM Turn WHERE trust_score IS NOT NULL").fetchone()[0]
-            bot_wins       = c.execute("SELECT COUNT(*) FROM Game WHERE winner = 'Pepper Bot'").fetchone()[0]
-            player_wins    = c.execute("SELECT COUNT(*) FROM Game WHERE winner IS NOT NULL AND winner != 'Pepper Bot'").fetchone()[0]
-            total_turns    = c.execute("SELECT COUNT(*) FROM Turn").fetchone()[0]
-
-            dist_rows = c.execute("""
-                SELECT trust_score, COUNT(*) FROM Turn
-                WHERE trust_score IS NOT NULL
-                GROUP BY trust_score ORDER BY trust_score
-            """).fetchall()
-
-            quota_rows = c.execute("""
-                SELECT bot_quota, ROUND(AVG(trust_score), 2), COUNT(*)
-                FROM Turn WHERE trust_score IS NOT NULL AND bot_quota IS NOT NULL
-                GROUP BY bot_quota ORDER BY bot_quota
-            """).fetchall()
-
-            avg_hits = c.execute("""
-                SELECT AVG(h) FROM (
-                    SELECT SUM(CASE WHEN result IN ('Touché','Coulé') THEN 1 ELSE 0 END) as h
-                    FROM BotShot GROUP BY turn_id
-                )
-            """).fetchone()[0]
-
+        g_stats = game_repo.get_overview_stats()
+        t_stats = turn_repo.get_overview_stats()
+        detection_rate = (
+            round(100 * g_stats['detected_count'] / g_stats['answered_count'], 1)
+            if g_stats['answered_count'] else None
+        )
         return jsonify({
-            'total_games':       total_games,
-            'unique_players':    unique_players,
-            'avg_trust':         round(float(avg_trust), 2) if avg_trust else 0,
-            'bot_wins':          bot_wins,
-            'player_wins':       player_wins,
-            'total_turns':       total_turns,
-            'avg_hits_per_turn': round(float(avg_hits), 1) if avg_hits else 0,
-            'trust_distribution': {str(r[0]): r[1] for r in dist_rows},
-            'quota_trust':        [{'quota': r[0], 'avg_trust': r[1], 'count': r[2]} for r in quota_rows],
+            **g_stats,
+            **t_stats,
+            'avg_trust':      t_stats['avg_trust'],
+            'detection_rate': detection_rate,
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error("admin_overview error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/admin/games')
+@require_admin
 def admin_games_list():
     try:
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            rows = conn.execute("""
-                SELECT g.id, g.player_name, g.player_type, g.date_played, g.winner,
-                       COUNT(DISTINCT t.id) as turn_count,
-                       ROUND(AVG(t.trust_score), 1) as avg_trust
-                FROM Game g
-                LEFT JOIN Turn t ON t.game_id = g.id
-                GROUP BY g.id
-                ORDER BY g.date_played DESC
-                LIMIT 200
-            """).fetchall()
-        return jsonify([dict(r) for r in rows])
+        return jsonify(game_repo.find_all())
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error("admin_games_list error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/admin/game/<int:gid>')
+@require_admin
 def admin_game_detail(gid):
     try:
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            game  = dict(conn.execute("SELECT * FROM Game WHERE id = ?", (gid,)).fetchone() or {})
-            turns = [dict(r) for r in conn.execute(
-                "SELECT * FROM Turn WHERE game_id = ? ORDER BY turn_number", (gid,)
-            ).fetchall()]
-            shots = [dict(r) for r in conn.execute("""
-                SELECT bs.turn_id, bs.pos_x, bs.pos_y, bs.result
-                FROM BotShot bs JOIN Turn t ON bs.turn_id = t.id
-                WHERE t.game_id = ? ORDER BY t.turn_number, bs.shot_number
-            """, (gid,)).fetchall()]
-
-        shots_by_turn = {}
-        for s in shots:
-            shots_by_turn.setdefault(s['turn_id'], []).append(s)
-        for t in turns:
-            t['shots'] = shots_by_turn.get(t['id'], [])
-
+        game = game_repo.find_by_id(gid)
+        if not game:
+            return jsonify({'error': 'not found'}), 404
+        turns = turn_repo.find_by_game(gid)
         return jsonify({'game': game, 'turns': turns})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error("admin_game_detail error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  Lancement
+# ══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    host = os.environ.get('FLASK_HOST', '127.0.0.1')
+    port = int(os.environ.get('FLASK_PORT', 5001))
+    app.run(debug=False, host=host, port=port)

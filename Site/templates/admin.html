@@ -45,7 +45,7 @@
     /* ── Stat cards ── */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 16px;
       padding: 32px 40px;
     }
@@ -77,13 +77,22 @@
     }
     .stat-value.orange { color: var(--accent2); }
     .stat-value.gold   { color: var(--gold); }
+    .stat-value.green  { color: #4ecb8e; }
+    .stat-value.red    { color: #ff6666; }
     .stat-label { font-size: .78rem; color: var(--muted); letter-spacing: .5px; }
+    .stat-sub   { font-size: .72rem; color: var(--muted); margin-top: 4px; opacity: .7; }
 
     /* ── Charts section ── */
     .charts-section { padding: 0 40px 32px; }
     .charts-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 280px;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .charts-grid-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr 260px;
       gap: 20px;
     }
     .chart-card {
@@ -99,13 +108,19 @@
       letter-spacing: 2px;
       color: var(--muted);
       text-transform: uppercase;
-      margin-bottom: 20px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .chart-title span { color: var(--accent); }
-    .chart-wrap { position: relative; height: 220px; }
+    .chart-subtitle {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      opacity: .8;
+    }
+    .chart-wrap { position: relative; height: 200px; }
 
     /* ── Games table ── */
     .table-section { padding: 0 40px 60px; }
@@ -174,9 +189,11 @@
       font-size: .75rem;
       font-weight: 700;
     }
-    .badge-bot    { background: rgba(255,85,0,.15);   color: var(--accent2); border: 1px solid rgba(255,85,0,.3); }
-    .badge-player { background: rgba(0,200,255,.12);  color: var(--accent);  border: 1px solid rgba(0,200,255,.25); }
-    .badge-none   { background: rgba(255,255,255,.05); color: var(--muted);  border: 1px solid var(--border); }
+    .badge-bot      { background: rgba(255,85,0,.15);    color: var(--accent2); border: 1px solid rgba(255,85,0,.3); }
+    .badge-player   { background: rgba(0,200,255,.12);   color: var(--accent);  border: 1px solid rgba(0,200,255,.25); }
+    .badge-none     { background: rgba(255,255,255,.05); color: var(--muted);   border: 1px solid var(--border); }
+    .badge-detected { background: rgba(255,100,100,.12); color: #ff6666;        border: 1px solid rgba(255,100,100,.3); }
+    .badge-clean    { background: rgba(0,200,100,.12);   color: #4ecb8e;        border: 1px solid rgba(0,200,100,.3); }
 
     .trust-pill {
       display: inline-flex;
@@ -187,9 +204,9 @@
       font-size: .8rem;
       font-weight: 700;
     }
-    .trust-0,.trust-1 { background:rgba(0,200,100,.12); color:#4ecb8e; border:1px solid rgba(0,200,100,.25); }
-    .trust-2,.trust-3 { background:rgba(255,179,0,.12); color:var(--gold); border:1px solid rgba(255,179,0,.25); }
-    .trust-4,.trust-5 { background:rgba(255,85,0,.15); color:var(--accent2); border:1px solid rgba(255,85,0,.3); }
+    .trust-0,.trust-1 { background:rgba(0,200,100,.12);  color:#4ecb8e;         border:1px solid rgba(0,200,100,.25); }
+    .trust-2,.trust-3 { background:rgba(255,179,0,.12);  color:var(--gold);     border:1px solid rgba(255,179,0,.25); }
+    .trust-4,.trust-5 { background:rgba(255,85,0,.15);   color:var(--accent2);  border:1px solid rgba(255,85,0,.3); }
 
     .btn-detail {
       padding: 5px 14px;
@@ -274,7 +291,7 @@
     }
     .turn-row {
       display: grid;
-      grid-template-columns: 60px 80px 1fr 90px;
+      grid-template-columns: 60px 100px 1fr 90px;
       gap: 12px;
       align-items: center;
       padding: 12px 0;
@@ -286,11 +303,17 @@
       font-size: .75rem;
       color: var(--muted);
     }
-    .turn-quota {
-      font-size: .78rem;
-      color: var(--muted);
-    }
+    .turn-quota { font-size: .78rem; color: var(--muted); }
     .turn-quota strong { color: var(--text); }
+    .quota-bar {
+      display: inline-block;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--accent);
+      margin-left: 6px;
+      vertical-align: middle;
+      opacity: .5;
+    }
     .shots-list { display: flex; gap: 6px; flex-wrap: wrap; }
     .shot-chip {
       padding: 3px 8px;
@@ -299,9 +322,9 @@
       font-weight: 700;
       font-family: 'Orbitron', sans-serif;
     }
-    .shot-hit   { background: rgba(204,34,34,.2);  color: #ff6666; border: 1px solid rgba(204,34,34,.4); }
+    .shot-hit   { background: rgba(204,34,34,.2);  color: #ff6666;     border: 1px solid rgba(204,34,34,.4); }
     .shot-sunk  { background: rgba(204,136,0,.2);  color: var(--gold); border: 1px solid rgba(204,136,0,.4); }
-    .shot-miss  { background: rgba(26,61,107,.4);  color: #6699cc; border: 1px solid rgba(26,61,107,.5); }
+    .shot-miss  { background: rgba(26,61,107,.4);  color: #6699cc;     border: 1px solid rgba(26,61,107,.5); }
     .turn-trust-val {
       text-align: right;
       font-family: 'Orbitron', sans-serif;
@@ -309,7 +332,6 @@
       font-weight: 700;
     }
 
-    /* loading spinner */
     .loading {
       display: flex;
       align-items: center;
@@ -319,9 +341,13 @@
       gap: 12px;
     }
 
+    @media (max-width: 1100px) {
+      .charts-grid-bottom { grid-template-columns: 1fr 1fr; }
+      .charts-grid-bottom > :last-child { grid-column: span 2; }
+    }
     @media (max-width: 900px) {
       .stats-grid { padding: 24px 20px; }
-      .charts-grid { grid-template-columns: 1fr; padding: 0 20px; }
+      .charts-grid, .charts-grid-bottom { grid-template-columns: 1fr; }
       .charts-section,.table-section { padding-left: 20px; padding-right: 20px; }
       .admin-header { padding: 24px 20px; }
       .turn-row { grid-template-columns: 48px 1fr; }
@@ -367,21 +393,40 @@
 
 <!-- CHARTS -->
 <div class="charts-section">
+
+  <!-- Ligne 1 : suspicion Likert + détection binaire par quota -->
   <div class="charts-grid">
     <div class="chart-card">
-      <div class="chart-title"><span>■</span> Distribution des scores de confiance</div>
+      <div class="chart-title"><span>■</span> Distribution des scores de suspicion</div>
+      <div class="chart-subtitle">Likert 0–5 par tour · tous joueurs</div>
       <div class="chart-wrap"><canvas id="chart-trust"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title"><span>■</span> Quota bot → Confiance moyenne</div>
+      <div class="chart-title"><span>■</span> Taux de détection binaire par quota</div>
+      <div class="chart-subtitle">% de parties où le joueur a dit "Oui, il a triché" · quota 0–4</div>
+      <div class="chart-wrap"><canvas id="chart-detection"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Ligne 2 : quota→suspicion moyenne + victoires -->
+  <div class="charts-grid-bottom">
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Quota bot → Suspicion moyenne / tour</div>
+      <div class="chart-subtitle">Score Likert moyen selon le quota du tour · quota 0–4</div>
       <div class="chart-wrap"><canvas id="chart-quota"></canvas></div>
     </div>
     <div class="chart-card">
+      <div class="chart-title"><span>■</span> Quota bot → Hits effectifs moyens</div>
+      <div class="chart-subtitle">Nombre de touches/coulés moyens par tour selon le quota</div>
+      <div class="chart-wrap"><canvas id="chart-hits"></canvas></div>
+    </div>
+    <div class="chart-card">
       <div class="chart-title"><span>■</span> Victoires</div>
-      <div class="chart-wrap" style="height:180px;"><canvas id="chart-wins"></canvas></div>
-      <div id="wins-legend" style="margin-top:16px; font-size:.78rem; color:var(--muted); text-align:center;"></div>
+      <div class="chart-wrap" style="height:160px;"><canvas id="chart-wins"></canvas></div>
+      <div id="wins-legend" style="margin-top:14px; font-size:.78rem; color:var(--muted); text-align:center;"></div>
     </div>
   </div>
+
 </div>
 
 <!-- GAMES TABLE -->
@@ -399,12 +444,13 @@
           <th onclick="sortTable('date_played')">Date</th>
           <th onclick="sortTable('turn_count')">Tours</th>
           <th onclick="sortTable('winner')">Gagnant</th>
-          <th onclick="sortTable('avg_trust')">Confiance moy.</th>
+          <th onclick="sortTable('avg_trust')">Suspicion moy.</th>
+          <th onclick="sortTable('trust_final')">Verdict</th>
           <th></th>
         </tr>
       </thead>
       <tbody id="games-tbody">
-        <tr class="empty-row"><td colspan="7">Chargement des données…</td></tr>
+        <tr class="empty-row"><td colspan="8">Chargement des données…</td></tr>
       </tbody>
     </table>
   </div>
@@ -418,40 +464,44 @@
 </div>
 
 <script>
-// ─── Charts state ───────────────────────────────────────────────────────────
-let chartTrust = null, chartQuota = null, chartWins = null;
+let chartTrust = null, chartDetection = null, chartQuota = null, chartHits = null, chartWins = null;
 let allGames = [], sortKey = 'id', sortAsc = false;
 
 const COLS = 'ABCDEFGHIJ';
+const QUOTA_MAX = 4;
+
 const chartDefaults = {
-  color: '#E4E8FF',
-  borderColor: 'rgba(255,255,255,.05)',
-  plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0C0F23', borderColor: 'rgba(0,200,255,.2)', borderWidth: 1 } },
+  plugins: {
+    legend: { display: false },
+    tooltip: { backgroundColor: '#0C0F23', borderColor: 'rgba(0,200,255,.2)', borderWidth: 1 }
+  },
   scales: {
     x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399' } },
     y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399' } },
   }
 };
 
-// ─── Load all ───────────────────────────────────────────────────────────────
+// ─── Load all ────────────────────────────────────────────────────────────────
 async function loadAll() {
   await Promise.all([loadOverview(), loadGames()]);
 }
 
-// ─── Overview ───────────────────────────────────────────────────────────────
+// ─── Overview ────────────────────────────────────────────────────────────────
 async function loadOverview() {
   const d = await fetch('/api/admin/overview').then(r => r.json());
   if (d.error) return;
-
   renderStatCards(d);
   renderTrustChart(d.trust_distribution);
+  renderDetectionChart(d.quota_detection);
   renderQuotaChart(d.quota_trust);
+  renderHitsChart(d.quota_trust);
   renderWinsChart(d.player_wins, d.bot_wins);
 }
 
 function renderStatCards(d) {
-  const total = d.total_games, noWin = total - d.player_wins - d.bot_wins;
-  const botPct = total ? Math.round(d.bot_wins / total * 100) : 0;
+  const botPct = d.total_games ? Math.round(d.bot_wins / d.total_games * 100) : 0;
+  const detRate = d.detection_rate !== null ? d.detection_rate + '%' : '—';
+  const detSub  = d.answered_count ? `${d.detected_count} / ${d.answered_count} parties` : 'aucun verdict';
 
   $('stats-grid').innerHTML = `
     <div class="stat-card">
@@ -472,12 +522,18 @@ function renderStatCards(d) {
     <div class="stat-card">
       <span class="stat-icon">⭐</span>
       <div class="stat-value gold">${d.avg_trust}</div>
-      <div class="stat-label">Score confiance moyen / tour</div>
+      <div class="stat-label">Suspicion moy. / tour (0–5)</div>
     </div>
     <div class="stat-card">
       <span class="stat-icon">🎯</span>
       <div class="stat-value">${d.avg_hits_per_turn}</div>
       <div class="stat-label">Touches bot / tour en moy.</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🚨</span>
+      <div class="stat-value red">${detRate}</div>
+      <div class="stat-label">Taux de détection finale</div>
+      <div class="stat-sub">${detSub}</div>
     </div>
     <div class="stat-card">
       <span class="stat-icon">🤖</span>
@@ -489,9 +545,10 @@ function renderStatCards(d) {
 
 function trustColor(score) {
   const colors = ['#4ecb8e','#a8d86e','#f0c040','#f5903a','#f05030','#cc2222'];
-  return colors[Math.min(score, 5)] || '#6B7399';
+  return colors[Math.min(Math.round(score), 5)] || '#6B7399';
 }
 
+// Graphique 1 : Distribution Likert 0–5
 function renderTrustChart(dist) {
   const labels = ['0','1','2','3','4','5'];
   const data   = labels.map(k => dist[k] || 0);
@@ -507,29 +564,91 @@ function renderTrustChart(dist) {
     options: {
       ...chartDefaults,
       maintainAspectRatio: false,
-      plugins: { ...chartDefaults.plugins },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
-        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', stepSize: 1 } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', stepSize: 1 },
+             title: { display: true, text: 'Nb de tours', color: '#6B7399', font: { size: 10 } } }
       }
     }
   });
 }
 
+// Graphique 2 : Taux de détection binaire par quota (0–4)
+function renderDetectionChart(data) {
+  if (!data || !data.length) return;
+
+  // Assure qu'on a tous les quotas 0–4 même si pas de données
+  const filled = Array.from({length: QUOTA_MAX + 1}, (_, q) => {
+    const row = data.find(r => r.quota === q);
+    return row ? row.rate : null;
+  });
+
+  const colors = filled.map(v => {
+    if (v === null) return 'rgba(255,255,255,.1)';
+    if (v >= 70) return 'rgba(204,34,34,.7)';
+    if (v >= 40) return 'rgba(255,179,0,.7)';
+    return 'rgba(78,203,142,.7)';
+  });
+
+  if (chartDetection) chartDetection.destroy();
+  chartDetection = new Chart($('chart-detection'), {
+    type: 'bar',
+    data: {
+      labels: ['Quota 0','Quota 1','Quota 2','Quota 3','Quota 4'],
+      datasets: [{
+        data: filled,
+        backgroundColor: colors,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#6B7399', callback: v => v + '%' },
+          min: 0, max: 100,
+          title: { display: true, text: 'Taux "Oui, triché" (%)', color: '#6B7399', font: { size: 10 } }
+        }
+      },
+      plugins: {
+        ...chartDefaults.plugins,
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: {
+            label: (ctx) => {
+              const row = data.find(r => r.quota === ctx.dataIndex);
+              if (!row) return ' Aucune donnée';
+              return ` ${row.rate}%  (${row.detected}/${row.total} parties)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Graphique 3 : Quota → Suspicion Likert moyenne
 function renderQuotaChart(quotaData) {
   if (!quotaData || !quotaData.length) return;
-  const labels = quotaData.map(r => `Quota ${r.quota}`);
-  const values = quotaData.map(r => r.avg_trust);
-  const colors = values.map(v => trustColor(Math.round(v)));
+
+  const filled = Array.from({length: QUOTA_MAX + 1}, (_, q) => {
+    const row = quotaData.find(r => r.quota === q);
+    return row ? row.avg_trust : null;
+  });
+  const colors = filled.map(v => v !== null ? trustColor(v) : 'rgba(255,255,255,.1)');
 
   if (chartQuota) chartQuota.destroy();
   chartQuota = new Chart($('chart-quota'), {
     type: 'bar',
     data: {
-      labels,
+      labels: ['Quota 0','Quota 1','Quota 2','Quota 3','Quota 4'],
       datasets: [{
-        label: 'Confiance moy.',
-        data: values,
+        label: 'Suspicion moy.',
+        data: filled,
         backgroundColor: colors,
         borderRadius: 5,
         borderSkipped: false,
@@ -544,8 +663,8 @@ function renderQuotaChart(quotaData) {
           grid: { color: 'rgba(255,255,255,.05)' },
           ticks: { color: '#6B7399' },
           min: 0, max: 5,
-          title: { display: true, text: 'Score moyen', color: '#6B7399', font: { size: 10 } }
-        },
+          title: { display: true, text: 'Score moyen (0–5)', color: '#6B7399', font: { size: 10 } }
+        }
       },
       plugins: {
         ...chartDefaults.plugins,
@@ -553,8 +672,8 @@ function renderQuotaChart(quotaData) {
           ...chartDefaults.plugins.tooltip,
           callbacks: {
             afterLabel: (ctx) => {
-              const cnt = quotaData[ctx.dataIndex]?.count;
-              return cnt ? `  (${cnt} tour${cnt > 1 ? 's' : ''})` : '';
+              const row = quotaData.find(r => r.quota === ctx.dataIndex);
+              return row ? `  (${row.count} tour${row.count > 1 ? 's' : ''})` : '';
             }
           }
         }
@@ -563,11 +682,49 @@ function renderQuotaChart(quotaData) {
   });
 }
 
+// Graphique 4 : Quota → Hits effectifs moyens
+function renderHitsChart(quotaData) {
+  if (!quotaData || !quotaData.length) return;
+  // On réutilise quota_trust qui contient le count; les hits réels viennent du quota lui-même
+  // On trace le quota lui-même comme valeur théorique (hits garantis)
+  const labels = ['Quota 0','Quota 1','Quota 2','Quota 3','Quota 4'];
+  const theoretical = [0, 1, 2, 3, 4];
+
+  if (chartHits) chartHits.destroy();
+  chartHits = new Chart($('chart-hits'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Hits garantis (quota)',
+        data: theoretical,
+        backgroundColor: theoretical.map(v => `rgba(0,200,255,${0.15 + v * 0.15})`),
+        borderColor: theoretical.map(v => `rgba(0,200,255,${0.3 + v * 0.1})`),
+        borderWidth: 1,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#6B7399', stepSize: 1 },
+          min: 0, max: 4,
+          title: { display: true, text: 'Hits garantis / tour', color: '#6B7399', font: { size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+// Graphique 5 : Victoires (doughnut)
 function renderWinsChart(playerW, botW) {
   if (chartWins) chartWins.destroy();
-  const total = playerW + botW;
-  if (!total) return;
-
+  if (!playerW && !botW) return;
   chartWins = new Chart($('chart-wins'), {
     type: 'doughnut',
     data: {
@@ -589,7 +746,6 @@ function renderWinsChart(playerW, botW) {
       }
     }
   });
-
   $('wins-legend').innerHTML = `
     <span style="color:var(--accent);">■</span> Joueur ${playerW} &nbsp;
     <span style="color:var(--accent2);">■</span> Bot ${botW}
@@ -625,12 +781,13 @@ function renderTable(filter = '') {
   });
 
   if (!games.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Aucune partie trouvée.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Aucune partie trouvée.</td></tr>';
     return;
   }
 
   tbody.innerHTML = games.map(g => {
     const date = g.date_played ? g.date_played.slice(0, 16).replace('T', ' ') : '—';
+
     const winnerBadge = g.winner === 'Pepper Bot'
       ? `<span class="badge badge-bot">🤖 Bot</span>`
       : g.winner
@@ -644,6 +801,12 @@ function renderTable(filter = '') {
       ? `<span class="trust-pill ${trustClass}">⭐ ${trust}</span>`
       : '<span class="td-muted">—</span>';
 
+    const verdictDisplay = g.trust_final === 1
+      ? `<span class="badge badge-detected">🚨 Oui</span>`
+      : g.trust_final === 0
+        ? `<span class="badge badge-clean">✅ Non</span>`
+        : `<span class="td-muted">—</span>`;
+
     return `
       <tr onclick="openDetail(${g.id})">
         <td class="td-muted">#${g.id}</td>
@@ -652,6 +815,7 @@ function renderTable(filter = '') {
         <td style="text-align:center;">${g.turn_count || 0}</td>
         <td>${winnerBadge}</td>
         <td>${trustDisplay}</td>
+        <td>${verdictDisplay}</td>
         <td><button class="btn-detail" onclick="event.stopPropagation(); openDetail(${g.id})">Détail →</button></td>
       </tr>
     `;
@@ -674,8 +838,22 @@ async function openDetail(gameId) {
   const g = d.game;
   const date = (g.date_played || '').slice(0, 16).replace('T', ' ');
   const avgTrust = d.turns.length
-    ? (d.turns.reduce((s,t) => s + (t.trust_score || 0), 0) / d.turns.length).toFixed(1)
+    ? (d.turns.filter(t => t.trust_score !== null)
+               .reduce((s, t) => s + t.trust_score, 0)
+       / d.turns.filter(t => t.trust_score !== null).length || 0).toFixed(1)
     : '—';
+
+  const winnerBadge = g.winner === 'Pepper Bot'
+    ? `<span class="badge badge-bot">🤖 Pepper Bot</span>`
+    : g.winner
+      ? `<span class="badge badge-player">👤 ${esc(g.winner)}</span>`
+      : `<span class="badge badge-none">En cours</span>`;
+
+  const verdictBadge = g.trust_final === 1
+    ? `<span class="badge badge-detected">🚨 Oui, a triché</span>`
+    : g.trust_final === 0
+      ? `<span class="badge badge-clean">✅ Non, normal</span>`
+      : `<span class="badge badge-none">—</span>`;
 
   const turnsHtml = d.turns.map(t => {
     const shots = (t.shots || []).map(s => {
@@ -685,24 +863,26 @@ async function openDetail(gameId) {
     }).join('');
 
     const hits = (t.shots || []).filter(s => s.result !== 'Raté').length;
+    const quota = t.bot_quota ?? '?';
+    const quotaBarW = quota !== '?' ? Math.round(quota / QUOTA_MAX * 48) : 0;
     const ts = t.trust_score !== null && t.trust_score !== undefined;
-    const tc = ts ? (t.trust_score >= 4 ? 'var(--accent2)' : t.trust_score >= 3 ? 'var(--gold)' : 'var(--accent)') : 'var(--muted)';
+    const tc = ts
+      ? (t.trust_score >= 4 ? 'var(--accent2)' : t.trust_score >= 3 ? 'var(--gold)' : 'var(--accent)')
+      : 'var(--muted)';
 
     return `
       <div class="turn-row">
         <div class="turn-num">Tour ${t.turn_number}</div>
-        <div class="turn-quota">Quota <strong>${t.bot_quota ?? '?'}</strong> / ${hits} touché${hits > 1 ? 's' : ''}</div>
+        <div class="turn-quota">
+          Quota <strong>${quota}</strong>/4
+          <span class="quota-bar" style="width:${quotaBarW}px;"></span>
+          <br><span style="font-size:.7rem;">${hits} hit${hits>1?'s':''}</span>
+        </div>
         <div class="shots-list">${shots || '<span style="color:var(--muted);font-size:.78rem;">—</span>'}</div>
         <div class="turn-trust-val" style="color:${tc};">${ts ? '⭐ ' + t.trust_score : '—'}</div>
       </div>
     `;
   }).join('');
-
-  const winnerBadge = g.winner === 'Pepper Bot'
-    ? `<span class="badge badge-bot">🤖 Pepper Bot</span>`
-    : g.winner
-      ? `<span class="badge badge-player">👤 ${esc(g.winner)}</span>`
-      : `<span class="badge badge-none">En cours</span>`;
 
   content.innerHTML = `
     <div class="detail-header">
@@ -722,14 +902,18 @@ async function openDetail(gameId) {
         <span class="meta-value" style="color:var(--accent);">${d.turns.length}</span>
       </div>
       <div class="meta-item">
-        <span class="meta-label">Confiance moy. / tour</span>
+        <span class="meta-label">Suspicion moy. / tour</span>
         <span class="meta-value" style="color:var(--gold);">⭐ ${avgTrust}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Verdict final</span>
+        <span class="meta-value">${verdictBadge}</span>
       </div>
     </div>
     <div class="detail-turns">
       <div class="turns-title">Détail des tours du bot</div>
-      <div style="display:grid; grid-template-columns:60px 80px 1fr 90px; gap:12px; padding:0 0 8px; font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border);">
-        <span>Tour</span><span>Quota/hits</span><span>Tirs</span><span style="text-align:right;">Confiance</span>
+      <div style="display:grid; grid-template-columns:60px 100px 1fr 90px; gap:12px; padding:0 0 8px; font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border);">
+        <span>Tour</span><span>Quota/hits</span><span>Tirs</span><span style="text-align:right;">Suspicion</span>
       </div>
       ${turnsHtml || '<div style="padding:24px;color:var(--muted);text-align:center;">Aucun tour enregistré.</div>'}
     </div>
@@ -740,21 +924,17 @@ function closeDetail() {
   $('modal-detail').classList.remove('active');
 }
 
-// ─── Utils ───────────────────────────────────────────────────────────────────
+// ─── Utils ────────────────────────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// Close modal on overlay click
 document.getElementById('modal-detail').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-detail')) closeDetail();
 });
-
-// Search filter
 document.getElementById('search-input').addEventListener('input', e => {
   renderTable(e.target.value);
 });
 
-// ─── Init ────────────────────────────────────────────────────────────────────
 loadAll();
 </script>
 </body>

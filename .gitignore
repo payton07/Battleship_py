@@ -1,8 +1,37 @@
+# Python
 */__pycache__/*
-*.md
-!README.md
-*__init__.py
-*.pyc
 */__pycache__/
-classes/__pycache__/
-players/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*__init__.py
+
+# Secrets — ne jamais committer
+.env
+*.env
+
+# Base de données
+*.db
+*.sqlite
+*.sqlite3
+
+# Environnements virtuels
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+*.md
+*.env.*

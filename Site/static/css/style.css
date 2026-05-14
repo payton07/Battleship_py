@@ -1152,6 +1152,42 @@ footer .logo-foot {
   box-shadow: 0 6px 20px rgba(255,179,0,.2);
 }
 
+/* ─── Final trust buttons ────────────────────────────────────────────────── */
+.final-trust-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: 2px solid;
+  transition: all .2s;
+}
+.final-trust-btn.yes {
+  background: rgba(204,34,34,.08);
+  border-color: var(--hit-col);
+  color: #ff6666;
+}
+.final-trust-btn.yes:hover {
+  background: rgba(204,34,34,.18);
+  box-shadow: 0 6px 20px rgba(204,34,34,.3);
+  transform: translateY(-2px);
+}
+.final-trust-btn.no {
+  background: rgba(0,200,100,.08);
+  border-color: #00c864;
+  color: #00c864;
+}
+.final-trust-btn.no:hover {
+  background: rgba(0,200,100,.18);
+  box-shadow: 0 6px 20px rgba(0,200,100,.3);
+  transform: translateY(-2px);
+}
+
 /* ─── Utility ────────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
 .text-accent  { color: var(--accent); }
