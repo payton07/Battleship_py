@@ -239,6 +239,7 @@ async function onStart() {
 
 // ─── GRID SELECTION ────────────────────────────────────────────────────────
 function showGridPreview(index) {
+  if (!S.grids) return;
   S.gridIndex = ((index % 10) + 10) % 10;
   buildGrid('grid-preview', S.grids[S.gridIndex], false);
   $('grid-index-badge').textContent = `Config ${S.gridIndex + 1} / 10`;
@@ -296,7 +297,11 @@ async function onEnemyCellClick(x, y) {
 
   S.locked = true;
 
+  const clickedCell = document.querySelector(`#enemy-grid [data-x="${x}"][data-y="${y}"]`);
+  if (clickedCell) clickedCell.dataset.pending = 'true';
+
   const data = await API.shoot(S.gameId, x, y);
+  if (clickedCell) delete clickedCell.dataset.pending;
 
   if (data.error || data.invalid) {
     if (data.result === 'Déjà joué') setStatus('⚠ Case déjà jouée !', 'warn');

@@ -742,6 +742,16 @@ footer .logo-foot {
   0% { filter: brightness(3); transform: scale(1.15); }
   100% { filter: brightness(1); transform: scale(1); }
 }
+.grid-cell.enemy-cell[data-pending="true"] {
+  background: rgba(255,200,0,.25);
+  border-color: rgba(255,200,0,.7);
+  animation: pending-pulse .5s ease-in-out infinite;
+  cursor: wait;
+}
+@keyframes pending-pulse {
+  0%,100% { opacity: .5; }
+  50%      { opacity: 1; }
+}
 
 /* ─── Screen: Game ───────────────────────────────────────────────────────── */
 #screen-game {
