@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pepper Battleship — Détectez la Triche</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⚓ PEPPER<span> BATTLESHIP</span></div>
+  <div class="nav-links">
+    <a href="#features">Fonctionnalités</a>
+    <a href="#how">Comment jouer</a>
+    <a href="#about">Recherche</a>
+  </div>
+  <a href="/game" class="nav-cta">⚔ Jouer</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Expérience de Recherche · Université</div>
+  <h1>
+    POUVEZ-VOUS<br>
+    <span class="accent">DÉTECTER</span><br>
+    LA <span class="accent2">TRICHE ?</span>
+  </h1>
+  <p>
+    Affrontez notre robot Pepper dans une partie de Bataille Navale.
+    Il maîtrise l'art de tricher discrètement. Saurez-vous le démasquer ?
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-number" id="stat-games">—</span>
+      <span class="hero-stat-label">Parties jouées</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-number">4</span>
+      <span class="hero-stat-label">Tirs par tour</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-number">10</span>
+      <span class="hero-stat-label">Configurations</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-number">5</span>
+      <span class="hero-stat-label">Bateaux en jeu</span>
+    </div>
+  </div>
+  <a href="/game" class="btn-hero">
+    ⚔ &nbsp; COMMENCER LA PARTIE
+  </a>
+  <div class="scroll-hint">
+    <span>Découvrir</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <span class="section-label">Fonctionnalités</span>
+    <h2 class="section-title">Une expérience unique</h2>
+    <p class="section-sub">
+      Un jeu de bataille navale où chaque partie contribue à notre recherche
+      sur la détection de comportements suspects dans un contexte humain-robot.
+    </p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🤖</span>
+        <h3>Affrontez Pepper Bot</h3>
+        <p>Mesurez-vous à notre adversaire artificiel. Il joue 4 tirs par tour, tout comme vous. Mais quelque chose dans son comportement vous semblera peut-être étrange…</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔍</span>
+        <h3>Évaluation par Tour</h3>
+        <p>À la fin de chaque tour du bot, notez votre niveau de suspicion de 0 à 5. Vos ressentis tour par tour alimentent notre base de données de recherche.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🗺️</span>
+        <h3>10 Configurations</h3>
+        <p>Choisissez parmi 10 dispositions tactiques prédéfinies pour votre flotte. Chaque configuration offre des opportunités défensives différentes.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💣</span>
+        <h3>4 Tirs par Tour</h3>
+        <p>Vous et le bot tirez alternativement, 4 coups chacun. Analysez chaque tir adverse pour vous forger une opinion sur son comportement.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <h3>Données Anonymes</h3>
+        <p>Chaque partie est enregistrée de façon anonyme : vos tirs, ceux du bot, et vos évaluations. Contribuez à la science !</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🧠</span>
+        <h3>Faites confiance à votre instinct</h3>
+        <p>Pas besoin d'être expert. Ce projet mesure les ressentis naturels des joueurs face à un adversaire artificiel. Votre intuition est la donnée la plus précieuse.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO PLAY -->
+<section class="how-it-works" id="how">
+  <div class="container">
+    <span class="section-label">Règles du Jeu</span>
+    <h2 class="section-title">Comment jouer</h2>
+    <p class="section-sub">
+      Simple à prendre en main, captivant à maîtriser.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Choisissez votre flotte</h3>
+          <p>Parcourez les 10 configurations prédéfinies et sélectionnez la disposition qui vous semble la plus difficile à cibler. Votre flotte inclut 5 bateaux : un porte-avions (5), un croiseur (4), deux frégates (3) et une vedette (2).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Attaquez à tour de rôle</h3>
+          <p>Cliquez sur la grille ennemie pour tirer. Vous disposez de <strong>4 tirs par tour</strong>. Ensuite, le robot Pepper joue ses 4 tirs. Touché, Coulé ou Raté — chaque résultat est affiché en temps réel.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Observez le bot</h3>
+          <p>Le bot Pepper triche peut-être. Analysez la précision de ses tirs, repérez des patterns suspects. Trop de touches ? Des coups trop "chanceux" ? Prenez des notes mentales.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Évaluez après chaque tour</h3>
+          <p>Après chaque tour du bot, notez votre niveau de suspicion sur une échelle de 0 (comportement normal) à 5 (très suspect). Ces réponses tour par tour sont précieuses pour la recherche !</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT / RESEARCH -->
+<section id="about" style="background: #090C1F; padding: 100px 40px;">
+  <div class="container" style="max-width:700px;">
+    <span class="section-label">Recherche</span>
+    <h2 class="section-title">Un projet académique</h2>
+    <p style="color:var(--muted); line-height:1.8; margin-bottom:24px;">
+      Ce jeu est développé dans le cadre d'un <strong style="color:var(--text)">TER (Travail d'Étude et de Recherche)</strong> en Master 1 Génie Logiciel.
+      Il explore la capacité humaine à détecter des comportements non-conformes dans un contexte de jeu compétitif avec un robot social (Pepper).
+    </p>
+    <p style="color:var(--muted); line-height:1.8; margin-bottom:40px;">
+      Toutes les données collectées sont anonymes et utilisées uniquement à des fins de recherche académique.
+      En jouant, vous contribuez à mieux comprendre comment les humains perçoivent la tromperie artificielle.
+    </p>
+    <a href="/game" class="btn-hero" style="display:inline-flex;">
+      ⚔ &nbsp; Participer maintenant
+    </a>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<div class="cta-banner">
+  <h2>Prêt à démasquer le robot ?</h2>
+  <p>Rejoignez les joueurs qui ont déjà participé à l'expérience.</p>
+  <a href="/game" class="btn-hero">⚔ &nbsp; JOUER MAINTENANT</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo-foot">⚓ PEPPER BATTLESHIP</div>
+  <span>TER M1 Génie Logiciel · 2025–2026</span>
+  <span>Données anonymes · Projet de recherche</span>
+</footer>
+
+<script>
+// ── Particle System ─────────────────────────────────────────────────────────
+(function () {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function Particle() {
+    this.reset();
+  }
+  Particle.prototype.reset = function () {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.r = Math.random() * 1.8 + .3;
+    this.vx = (Math.random() - .5) * .4;
+    this.vy = (Math.random() - .5) * .4;
+    this.alpha = Math.random() * .5 + .1;
+    this.color = Math.random() > .7
+      ? `rgba(255,85,0,${this.alpha})`
+      : `rgba(0,200,255,${this.alpha})`;
+  };
+  Particle.prototype.update = function () {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+  };
+  Particle.prototype.draw = function () {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  };
+
+  function init() {
+    resize();
+    particles = Array.from({length: 120}, () => new Particle());
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    // Draw subtle connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < 100) {
+          ctx.strokeStyle = `rgba(0,200,255,${.08 * (1 - d/100)})`;
+          ctx.lineWidth = .5;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', resize);
+  init();
+  loop();
+})();
+
+// ── Animated number counter ──────────────────────────────────────────────────
+function animateCount(el, target, duration = 1200) {
+  let start = 0;
+  const step = target / (duration / 16);
+  function tick() {
+    start = Math.min(start + step, target);
+    el.textContent = Math.floor(start).toLocaleString('fr');
+    if (start < target) requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── Fetch stats ──────────────────────────────────────────────────────────────
+fetch('/api/stats')
+  .then(r => r.json())
+  .then(d => {
+    const el = document.getElementById('stat-games');
+    if (d.total_games > 0) animateCount(el, d.total_games);
+    else el.textContent = '0';
+  })
+  .catch(() => {
+    document.getElementById('stat-games').textContent = '0';
+  });
+</script>
+</body>
+</html>

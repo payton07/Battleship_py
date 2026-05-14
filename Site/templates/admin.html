@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Pepper Battleship</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body { padding-top: 65px; }
+
+    .admin-header {
+      padding: 40px 40px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .admin-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .admin-sub { color: var(--muted); font-size: .88rem; }
+    .refresh-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Stat cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+      padding: 32px 40px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .stat-card:hover { border-color: rgba(0,200,255,.3); }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(0,200,255,.05), transparent 60%);
+      pointer-events: none;
+    }
+    .stat-icon { font-size: 1.6rem; margin-bottom: 12px; display: block; }
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-value.orange { color: var(--accent2); }
+    .stat-value.gold   { color: var(--gold); }
+    .stat-label { font-size: .78rem; color: var(--muted); letter-spacing: .5px; }
+
+    /* ── Charts section ── */
+    .charts-section { padding: 0 40px 32px; }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 280px;
+      gap: 20px;
+    }
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .chart-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-title span { color: var(--accent); }
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* ── Games table ── */
+    .table-section { padding: 0 40px 60px; }
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .table-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .search-input {
+      padding: 9px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
+      outline: none;
+      width: 220px;
+      transition: border-color .2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--muted); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+      cursor: pointer;
+      user-select: none;
+    }
+    thead th:hover { color: var(--accent); }
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    tbody tr:hover { background: rgba(0,200,255,.04); }
+    tbody td { padding: 13px 16px; color: var(--text); vertical-align: middle; }
+    .td-muted { color: var(--muted); font-size: .8rem; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .badge-bot    { background: rgba(255,85,0,.15);   color: var(--accent2); border: 1px solid rgba(255,85,0,.3); }
+    .badge-player { background: rgba(0,200,255,.12);  color: var(--accent);  border: 1px solid rgba(0,200,255,.25); }
+    .badge-none   { background: rgba(255,255,255,.05); color: var(--muted);  border: 1px solid var(--border); }
+
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+    .trust-0,.trust-1 { background:rgba(0,200,100,.12); color:#4ecb8e; border:1px solid rgba(0,200,100,.25); }
+    .trust-2,.trust-3 { background:rgba(255,179,0,.12); color:var(--gold); border:1px solid rgba(255,179,0,.25); }
+    .trust-4,.trust-5 { background:rgba(255,85,0,.15); color:var(--accent2); border:1px solid rgba(255,85,0,.3); }
+
+    .btn-detail {
+      padding: 5px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-detail:hover { border-color: var(--accent); color: var(--accent); }
+
+    .empty-row td {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    /* ── Detail modal ── */
+    .modal-overlay { align-items: flex-start; padding: 60px 20px; overflow-y: auto; }
+    .detail-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      overflow: hidden;
+      animation: modal-up .35s cubic-bezier(.22,1,.36,1);
+    }
+    .detail-header {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .detail-header-left h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .detail-header-left p { font-size: .82rem; color: var(--muted); }
+    .detail-close {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+    .detail-close:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    .detail-meta {
+      padding: 20px 32px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .meta-label { font-size: .68rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+    .meta-value { font-size: .95rem; font-weight: 700; }
+
+    .detail-turns { padding: 24px 32px; }
+    .turns-title {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .turn-row {
+      display: grid;
+      grid-template-columns: 60px 80px 1fr 90px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .turn-row:last-child { border-bottom: none; }
+    .turn-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+    .turn-quota {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .turn-quota strong { color: var(--text); }
+    .shots-list { display: flex; gap: 6px; flex-wrap: wrap; }
+    .shot-chip {
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: .72rem;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .shot-hit   { background: rgba(204,34,34,.2);  color: #ff6666; border: 1px solid rgba(204,34,34,.4); }
+    .shot-sunk  { background: rgba(204,136,0,.2);  color: var(--gold); border: 1px solid rgba(204,136,0,.4); }
+    .shot-miss  { background: rgba(26,61,107,.4);  color: #6699cc; border: 1px solid rgba(26,61,107,.5); }
+    .turn-trust-val {
+      text-align: right;
+      font-family: 'Orbitron', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    /* loading spinner */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px;
+      color: var(--muted);
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .stats-grid { padding: 24px 20px; }
+      .charts-grid { grid-template-columns: 1fr; padding: 0 20px; }
+      .charts-section,.table-section { padding-left: 20px; padding-right: 20px; }
+      .admin-header { padding: 24px 20px; }
+      .turn-row { grid-template-columns: 48px 1fr; }
+      .turn-row > :nth-child(3), .turn-row > :nth-child(4) { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">⚓ PEPPER<span> BATTLESHIP</span></a>
+  <div class="nav-links">
+    <a href="/">Accueil</a>
+    <a href="/game">Jouer</a>
+    <a href="/admin" style="color:var(--accent);">Admin</a>
+  </div>
+  <span style="font-family:'Orbitron',sans-serif; font-size:.7rem; letter-spacing:2px; color:var(--muted); padding:6px 14px; border:1px solid var(--border); border-radius:6px;">
+    RESEARCH DASHBOARD
+  </span>
+</nav>
+
+<!-- HEADER -->
+<div class="admin-header">
+  <div class="admin-header-top">
+    <div>
+      <div class="admin-title">Tableau de bord</div>
+      <div class="admin-sub">Données collectées — Pepper Battleship · TER M1 GL</div>
+    </div>
+    <button class="refresh-btn" onclick="loadAll()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 12a9 9 0 0 1 15-6.7L21 8M3 16l3 3a9 9 0 0 0 15-7"/>
+      </svg>
+      Actualiser
+    </button>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="stats-grid" id="stats-grid">
+  <div class="stat-card"><span class="stat-icon">⏳</span><div class="stat-value">—</div><div class="stat-label">Chargement…</div></div>
+</div>
+
+<!-- CHARTS -->
+<div class="charts-section">
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Distribution des scores de confiance</div>
+      <div class="chart-wrap"><canvas id="chart-trust"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Quota bot → Confiance moyenne</div>
+      <div class="chart-wrap"><canvas id="chart-quota"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Victoires</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chart-wins"></canvas></div>
+      <div id="wins-legend" style="margin-top:16px; font-size:.78rem; color:var(--muted); text-align:center;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GAMES TABLE -->
+<div class="table-section">
+  <div class="table-header">
+    <span class="table-title">📋 Parties enregistrées</span>
+    <input type="text" class="search-input" id="search-input" placeholder="🔍 Rechercher un joueur…">
+  </div>
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortTable('id')">#</th>
+          <th onclick="sortTable('player_name')">Joueur</th>
+          <th onclick="sortTable('date_played')">Date</th>
+          <th onclick="sortTable('turn_count')">Tours</th>
+          <th onclick="sortTable('winner')">Gagnant</th>
+          <th onclick="sortTable('avg_trust')">Confiance moy.</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="games-tbody">
+        <tr class="empty-row"><td colspan="7">Chargement des données…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="detail-modal" id="detail-modal-content">
+    <div class="loading"><div class="spinner"></div> Chargement…</div>
+  </div>
+</div>
+
+<script>
+// ─── Charts state ───────────────────────────────────────────────────────────
+let chartTrust = null, chartQuota = null, chartWins = null;
+let allGames = [], sortKey = 'id', sortAsc = false;
+
+const COLS = 'ABCDEFGHIJ';
+const chartDefaults = {
+  color: '#E4E8FF',
+  borderColor: 'rgba(255,255,255,.05)',
+  plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0C0F23', borderColor: 'rgba(0,200,255,.2)', borderWidth: 1 } },
+  scales: {
+    x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399' } },
+    y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399' } },
+  }
+};
+
+// ─── Load all ───────────────────────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadOverview(), loadGames()]);
+}
+
+// ─── Overview ───────────────────────────────────────────────────────────────
+async function loadOverview() {
+  const d = await fetch('/api/admin/overview').then(r => r.json());
+  if (d.error) return;
+
+  renderStatCards(d);
+  renderTrustChart(d.trust_distribution);
+  renderQuotaChart(d.quota_trust);
+  renderWinsChart(d.player_wins, d.bot_wins);
+}
+
+function renderStatCards(d) {
+  const total = d.total_games, noWin = total - d.player_wins - d.bot_wins;
+  const botPct = total ? Math.round(d.bot_wins / total * 100) : 0;
+
+  $('stats-grid').innerHTML = `
+    <div class="stat-card">
+      <span class="stat-icon">🎮</span>
+      <div class="stat-value">${d.total_games}</div>
+      <div class="stat-label">Parties jouées</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <div class="stat-value">${d.unique_players}</div>
+      <div class="stat-label">Joueurs uniques</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📊</span>
+      <div class="stat-value">${d.total_turns}</div>
+      <div class="stat-label">Tours analysés</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">⭐</span>
+      <div class="stat-value gold">${d.avg_trust}</div>
+      <div class="stat-label">Score confiance moyen / tour</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🎯</span>
+      <div class="stat-value">${d.avg_hits_per_turn}</div>
+      <div class="stat-label">Touches bot / tour en moy.</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🤖</span>
+      <div class="stat-value orange">${botPct}%</div>
+      <div class="stat-label">Victoires bot (${d.bot_wins} parties)</div>
+    </div>
+  `;
+}
+
+function trustColor(score) {
+  const colors = ['#4ecb8e','#a8d86e','#f0c040','#f5903a','#f05030','#cc2222'];
+  return colors[Math.min(score, 5)] || '#6B7399';
+}
+
+function renderTrustChart(dist) {
+  const labels = ['0','1','2','3','4','5'];
+  const data   = labels.map(k => dist[k] || 0);
+  const colors = labels.map(k => trustColor(parseInt(k)));
+
+  if (chartTrust) chartTrust.destroy();
+  chartTrust = new Chart($('chart-trust'), {
+    type: 'bar',
+    data: {
+      labels: labels.map(l => `Score ${l}`),
+      datasets: [{ data, backgroundColor: colors, borderRadius: 5, borderSkipped: false }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      plugins: { ...chartDefaults.plugins },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', stepSize: 1 } },
+      }
+    }
+  });
+}
+
+function renderQuotaChart(quotaData) {
+  if (!quotaData || !quotaData.length) return;
+  const labels = quotaData.map(r => `Quota ${r.quota}`);
+  const values = quotaData.map(r => r.avg_trust);
+  const colors = values.map(v => trustColor(Math.round(v)));
+
+  if (chartQuota) chartQuota.destroy();
+  chartQuota = new Chart($('chart-quota'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Confiance moy.',
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#6B7399' },
+          min: 0, max: 5,
+          title: { display: true, text: 'Score moyen', color: '#6B7399', font: { size: 10 } }
+        },
+      },
+      plugins: {
+        ...chartDefaults.plugins,
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: {
+            afterLabel: (ctx) => {
+              const cnt = quotaData[ctx.dataIndex]?.count;
+              return cnt ? `  (${cnt} tour${cnt > 1 ? 's' : ''})` : '';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderWinsChart(playerW, botW) {
+  if (chartWins) chartWins.destroy();
+  const total = playerW + botW;
+  if (!total) return;
+
+  chartWins = new Chart($('chart-wins'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Joueur', 'Pepper Bot'],
+      datasets: [{
+        data: [playerW, botW],
+        backgroundColor: ['rgba(0,200,255,.7)', 'rgba(255,85,0,.7)'],
+        borderColor:     ['rgba(0,200,255,.4)', 'rgba(255,85,0,.4)'],
+        borderWidth: 2,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#0C0F23', borderColor: 'rgba(0,200,255,.2)', borderWidth: 1 }
+      }
+    }
+  });
+
+  $('wins-legend').innerHTML = `
+    <span style="color:var(--accent);">■</span> Joueur ${playerW} &nbsp;
+    <span style="color:var(--accent2);">■</span> Bot ${botW}
+  `;
+}
+
+// ─── Games table ─────────────────────────────────────────────────────────────
+async function loadGames() {
+  allGames = await fetch('/api/admin/games').then(r => r.json());
+  renderTable();
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = false; }
+  renderTable();
+}
+
+function renderTable(filter = '') {
+  const tbody = $('games-tbody');
+  let games = [...allGames];
+
+  if (filter) {
+    const q = filter.toLowerCase();
+    games = games.filter(g => (g.player_name || '').toLowerCase().includes(q));
+  }
+
+  games.sort((a, b) => {
+    let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return sortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+
+  if (!games.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Aucune partie trouvée.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = games.map(g => {
+    const date = g.date_played ? g.date_played.slice(0, 16).replace('T', ' ') : '—';
+    const winnerBadge = g.winner === 'Pepper Bot'
+      ? `<span class="badge badge-bot">🤖 Bot</span>`
+      : g.winner
+        ? `<span class="badge badge-player">👤 Joueur</span>`
+        : `<span class="badge badge-none">—</span>`;
+
+    const trust = g.avg_trust;
+    const trustClass = trust === null ? 'trust-2'
+      : trust <= 1 ? 'trust-0' : trust <= 3 ? 'trust-2' : 'trust-4';
+    const trustDisplay = trust !== null
+      ? `<span class="trust-pill ${trustClass}">⭐ ${trust}</span>`
+      : '<span class="td-muted">—</span>';
+
+    return `
+      <tr onclick="openDetail(${g.id})">
+        <td class="td-muted">#${g.id}</td>
+        <td><strong>${esc(g.player_name || '?')}</strong></td>
+        <td class="td-muted">${date}</td>
+        <td style="text-align:center;">${g.turn_count || 0}</td>
+        <td>${winnerBadge}</td>
+        <td>${trustDisplay}</td>
+        <td><button class="btn-detail" onclick="event.stopPropagation(); openDetail(${g.id})">Détail →</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ─── Detail modal ─────────────────────────────────────────────────────────────
+async function openDetail(gameId) {
+  const modal = $('modal-detail');
+  const content = $('detail-modal-content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div> Chargement…</div>';
+  modal.classList.add('active');
+
+  const d = await fetch(`/api/admin/game/${gameId}`).then(r => r.json());
+  if (d.error) {
+    content.innerHTML = `<div class="loading" style="color:var(--accent2);">Erreur : ${d.error}</div>`;
+    return;
+  }
+
+  const g = d.game;
+  const date = (g.date_played || '').slice(0, 16).replace('T', ' ');
+  const avgTrust = d.turns.length
+    ? (d.turns.reduce((s,t) => s + (t.trust_score || 0), 0) / d.turns.length).toFixed(1)
+    : '—';
+
+  const turnsHtml = d.turns.map(t => {
+    const shots = (t.shots || []).map(s => {
+      const coord = `${COLS[s.pos_x] || '?'}${s.pos_y}`;
+      const cls = s.result === 'Coulé' ? 'shot-sunk' : s.result === 'Touché' ? 'shot-hit' : 'shot-miss';
+      return `<span class="shot-chip ${cls}">${coord}</span>`;
+    }).join('');
+
+    const hits = (t.shots || []).filter(s => s.result !== 'Raté').length;
+    const ts = t.trust_score !== null && t.trust_score !== undefined;
+    const tc = ts ? (t.trust_score >= 4 ? 'var(--accent2)' : t.trust_score >= 3 ? 'var(--gold)' : 'var(--accent)') : 'var(--muted)';
+
+    return `
+      <div class="turn-row">
+        <div class="turn-num">Tour ${t.turn_number}</div>
+        <div class="turn-quota">Quota <strong>${t.bot_quota ?? '?'}</strong> / ${hits} touché${hits > 1 ? 's' : ''}</div>
+        <div class="shots-list">${shots || '<span style="color:var(--muted);font-size:.78rem;">—</span>'}</div>
+        <div class="turn-trust-val" style="color:${tc};">${ts ? '⭐ ' + t.trust_score : '—'}</div>
+      </div>
+    `;
+  }).join('');
+
+  const winnerBadge = g.winner === 'Pepper Bot'
+    ? `<span class="badge badge-bot">🤖 Pepper Bot</span>`
+    : g.winner
+      ? `<span class="badge badge-player">👤 ${esc(g.winner)}</span>`
+      : `<span class="badge badge-none">En cours</span>`;
+
+  content.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-header-left">
+        <h3>Partie #${g.id} — ${esc(g.player_name || '?')}</h3>
+        <p>${date} · ${g.player_type || 'Digital'}</p>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-meta">
+      <div class="meta-item">
+        <span class="meta-label">Gagnant</span>
+        <span class="meta-value">${winnerBadge}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Nb de tours</span>
+        <span class="meta-value" style="color:var(--accent);">${d.turns.length}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Confiance moy. / tour</span>
+        <span class="meta-value" style="color:var(--gold);">⭐ ${avgTrust}</span>
+      </div>
+    </div>
+    <div class="detail-turns">
+      <div class="turns-title">Détail des tours du bot</div>
+      <div style="display:grid; grid-template-columns:60px 80px 1fr 90px; gap:12px; padding:0 0 8px; font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border);">
+        <span>Tour</span><span>Quota/hits</span><span>Tirs</span><span style="text-align:right;">Confiance</span>
+      </div>
+      ${turnsHtml || '<div style="padding:24px;color:var(--muted);text-align:center;">Aucun tour enregistré.</div>'}
+    </div>
+  `;
+}
+
+function closeDetail() {
+  $('modal-detail').classList.remove('active');
+}
+
+// ─── Utils ───────────────────────────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Close modal on overlay click
+document.getElementById('modal-detail').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-detail')) closeDetail();
+});
+
+// Search filter
+document.getElementById('search-input').addEventListener('input', e => {
+  renderTable(e.target.value);
+});
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>

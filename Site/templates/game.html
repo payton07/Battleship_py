@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pepper Battleship — Jouer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="game-page">
+
+<!-- GAME NAV -->
+<nav class="game-nav">
+  <a href="/" class="logo">⚓ PEPPER BATTLESHIP</a>
+  <div class="game-nav-center" id="nav-center" style="display:none;">
+    <div class="turn-badge" id="turn-badge">
+      <div class="dot"></div>
+      <span id="turn-text">À VOUS</span>
+    </div>
+    <div class="shot-bullets" id="shot-bullets"></div>
+    <span style="font-size:.75rem; color:var(--muted); font-family:'Orbitron',sans-serif;">
+      TOUR <span id="nav-turn-num">1</span>
+    </span>
+  </div>
+  <div style="display:flex; align-items:center; gap:14px;">
+    <button id="btn-speed" class="btn-speed hidden" title="Accélérer les tirs du bot">
+      <span id="speed-icon">⚡</span>
+      <span id="speed-label">Accélérer</span>
+    </button>
+    <div style="font-size:.8rem; color:var(--muted);" id="nav-player-name"></div>
+  </div>
+</nav>
+
+<!-- ══════ SCREEN: SETUP ══════ -->
+<div class="screen active" id="screen-setup">
+  <div class="setup-card">
+    <div class="setup-icon">⚓</div>
+    <h2>BIENVENUE, COMMANDANT</h2>
+    <p>Entrez votre nom de commandant et préparez-vous à affronter le robot Pepper.<br>
+       Saurez-vous détecter sa triche ?</p>
+    <div class="form-group">
+      <label for="input-name">Nom du commandant</label>
+      <input type="text" id="input-name" class="form-input"
+             placeholder="Ex: CommandantX" maxlength="24" autocomplete="off">
+    </div>
+    <div style="background:rgba(0,200,255,.06); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:24px; text-align:left;">
+      <p style="font-size:.82rem; color:var(--muted); line-height:1.7;">
+        <span style="color:var(--accent); font-weight:700;">ℹ️ Règles :</span>
+        Vous disposez de <strong style="color:var(--text)">4 tirs par tour</strong>.
+        Le robot Pepper jouera ensuite ses 4 tirs. Premier à couler toute la flotte ennemie gagne.
+        En fin de partie, évaluez si le robot vous semble suspect.
+      </p>
+    </div>
+    <button class="btn-primary" id="btn-start">
+      ⚔ &nbsp; LANCER LA PARTIE
+    </button>
+  </div>
+</div>
+
+<!-- ══════ SCREEN: GRID SELECTION ══════ -->
+<div class="screen" id="screen-grid" style="flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; min-height:calc(100vh - 60px); gap:28px;">
+  <div class="grid-select-header">
+    <h2 style="font-family:'Orbitron',sans-serif; font-size:1.3rem; color:var(--accent); margin-bottom:8px;">POSITIONNEZ VOTRE FLOTTE</h2>
+    <p style="color:var(--muted); font-size:.9rem;">Naviguez parmi les 10 configurations. Choisissez votre tactique défensive.</p>
+  </div>
+
+  <div class="grid-select-body">
+    <button class="grid-nav-btn" id="btn-prev-grid">&#8592;</button>
+    <div class="grid-preview-box">
+      <div class="grid-index-badge" id="grid-index-badge">Config 1 / 10</div>
+      <div class="battle-grid" id="grid-preview"></div>
+    </div>
+    <button class="grid-nav-btn" id="btn-next-grid">&#8594;</button>
+  </div>
+
+  <!-- Ship legend -->
+  <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap; justify-content:center;">
+    <span style="font-size:.75rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">Flotte :</span>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <div style="width:90px;height:14px;background:var(--ship-col);border-radius:3px;border:1px solid rgba(0,200,255,.2);"></div>
+      <span style="font-size:.75rem;color:var(--muted);">Porte-avions (5)</span>
+    </div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <div style="width:72px;height:14px;background:var(--ship-col);border-radius:3px;border:1px solid rgba(0,200,255,.2);"></div>
+      <span style="font-size:.75rem;color:var(--muted);">Croiseur (4)</span>
+    </div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <div style="width:54px;height:14px;background:var(--ship-col);border-radius:3px;border:1px solid rgba(0,200,255,.2);"></div>
+      <span style="font-size:.75rem;color:var(--muted);">Frégates ×2 (3)</span>
+    </div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <div style="width:36px;height:14px;background:var(--ship-col);border-radius:3px;border:1px solid rgba(0,200,255,.2);"></div>
+      <span style="font-size:.75rem;color:var(--muted);">Vedette (2)</span>
+    </div>
+  </div>
+
+  <div class="grid-select-footer">
+    <div class="dots-nav" id="dots-nav"></div>
+    <button class="btn-orange" id="btn-validate-grid">
+      ✓ &nbsp; VALIDER CETTE CONFIGURATION
+    </button>
+  </div>
+</div>
+
+<!-- ══════ SCREEN: GAME ══════ -->
+<div class="screen" id="screen-game" style="flex-direction:column; align-items:center; padding:28px 20px 32px; gap:20px; min-height:calc(100vh - 60px);">
+
+  <!-- Status message -->
+  <div id="status-bar" class="status-bar info">À vous de tirer ! Cliquez sur la grille ennemie.</div>
+
+  <!-- Bot thinking indicator -->
+  <div class="bot-thinking" id="bot-thinking">
+    <div class="spinner"></div>
+    <span>Pepper Bot analyse la situation...</span>
+  </div>
+
+  <!-- Game boards -->
+  <div class="game-boards">
+    <div class="board-container">
+      <div class="board-label player">
+        <div class="indicator"></div>
+        <span id="label-player">MA FLOTTE</span>
+      </div>
+      <div class="board-wrap active" id="board-wrap-player">
+        <div class="battle-grid" id="player-grid"></div>
+      </div>
+      <div style="font-size:.72rem; color:var(--muted); text-align:center; margin-top:4px;">
+        Vos navires — défendez-les !
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:1.5rem;">
+      ⚔
+    </div>
+
+    <div class="board-container">
+      <div class="board-label enemy">
+        <div class="indicator"></div>
+        FLOTTE ENNEMIE
+      </div>
+      <div class="board-wrap" id="board-wrap-enemy">
+        <div class="battle-grid" id="enemy-grid"></div>
+      </div>
+      <div style="font-size:.72rem; color:var(--muted); text-align:center; margin-top:4px;">
+        Cliquez pour tirer — <span id="shots-counter" style="color:var(--accent); font-weight:700;">4 tirs restants</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action log -->
+  <div style="width:100%; max-width:780px;">
+    <div style="font-size:.72rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+      <span>📜</span> Journal de bord
+    </div>
+    <div class="action-log" id="action-log">
+      <div style="color:var(--muted); font-size:.82rem; text-align:center; padding:8px 0;">
+        La partie commence — premier tir !
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Panneau gauche : résumé des tirs du bot (visible quand modal fermé) -->
+<div id="side-panel-rating" class="side-panel-rating hidden">
+  <div class="side-panel-label">TOUR DE PEPPER BOT</div>
+  <p class="side-panel-msg">
+    Consultez les tirs du bot<br>puis évaluez ce tour.
+  </p>
+  <div class="side-panel-stats">
+    <div class="side-stat side-stat-hit">
+      <span class="side-stat-icon">🎯</span>
+      <span class="side-stat-value" id="sp-touches">0</span>
+      <span class="side-stat-label">Touché(s)</span>
+    </div>
+    <div class="side-stat side-stat-sunk">
+      <span class="side-stat-icon">💥</span>
+      <span class="side-stat-value" id="sp-coules">0</span>
+      <span class="side-stat-label">Coulé(s)</span>
+    </div>
+    <div class="side-stat side-stat-miss">
+      <span class="side-stat-icon">💧</span>
+      <span class="side-stat-value" id="sp-rates">0</span>
+      <span class="side-stat-label">Raté(s)</span>
+    </div>
+  </div>
+  <button class="side-panel-btn" id="btn-side-evaluate">
+    🔍 &nbsp;Évaluer ce tour
+  </button>
+</div>
+
+<!-- Bouton flottant pour rouvrir le modal d'évaluation -->
+<button id="btn-reopen-rating" class="btn-reopen-rating hidden">
+  🔍 &nbsp;Évaluer ce tour
+</button>
+
+<!-- ══════ MODAL: ÉVALUATION PAR TOUR ══════ -->
+<div class="modal-overlay" id="modal-turn-rating">
+  <div class="modal-card" style="max-width:460px; padding:44px 40px;">
+    <span style="font-size:2rem; display:block; margin-bottom:12px;">🔍</span>
+    <h3 class="font-game" style="font-size:1rem; letter-spacing:2px; color:var(--accent); margin-bottom:6px;">
+      TOUR <span id="tr-turn-num">1</span> — ÉVALUATION
+    </h3>
+    <p style="color:var(--muted); font-size:.9rem; line-height:1.6; margin-bottom:28px;">
+      Le comportement du robot vous a-t-il semblé <strong style="color:var(--text)">suspect</strong> ce tour ?
+    </p>
+
+    <div class="star-rating" id="star-rating">
+      <!-- JS renders 6 buttons (0–5) -->
+    </div>
+
+    <div style="display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); margin-top:10px; padding:0 2px;">
+      <span>0 — Normal</span>
+      <span>5 — Très suspect</span>
+    </div>
+
+    <p style="font-size:.75rem; color:var(--muted); margin-top:20px; opacity:.7;">
+      Cliquez sur une note pour continuer la partie
+    </p>
+  </div>
+</div>
+
+<!-- ══════ MODAL: GAME OVER ══════ -->
+<div class="modal-overlay" id="modal-gameover">
+  <div class="modal-card" style="max-width:440px; padding:52px 44px;">
+    <span class="result-emoji" id="result-emoji">🏆</span>
+    <h2 class="result-title" id="result-title">VICTOIRE !</h2>
+    <p class="result-subtitle" id="result-subtitle">Vous avez coulé toute la flotte ennemie.</p>
+    <div class="modal-footer" style="margin-top:40px;">
+      <a href="/" class="btn-play-again">← Accueil</a>
+      <button class="btn-orange" onclick="location.reload()">⚔ Rejouer</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/game.js"></script>
+</body>
+</html>

@@ -1,1 +1,8 @@
 */__pycache__/*
+*.md
+!README.md
+*__init__.py
+*.pyc
+*/__pycache__/
+classes/__pycache__/
+players/__pycache__/

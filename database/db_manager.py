@@ -88,20 +88,30 @@ class DatabaseManager(object):
         """
         Enregistre un tour complet et ses tirs.
         bot_shots: liste de dictionnaires [{'x', 'y', 'result'}]
+        Retourne le turn_id pour permettre une mise à jour ultérieure du trust_score.
         """
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            # 1. Sauvegarde du tour
             cursor.execute(
                 "INSERT INTO Turn (game_id, turn_number, bot_quota, trust_score) VALUES (?, ?, ?, ?)",
                 (game_id, turn_number, bot_quota, trust_score)
             )
             turn_id = cursor.lastrowid
-            
-            # 2. Sauvegarde des tirs
+
             for i, shot in enumerate(bot_shots):
                 cursor.execute(
                     "INSERT INTO BotShot (turn_id, shot_number, pos_x, pos_y, result) VALUES (?, ?, ?, ?, ?)",
                     (turn_id, i + 1, shot['x'], shot['y'], shot['result'])
                 )
+            conn.commit()
+            return turn_id
+
+    def update_turn_trust(self, turn_id, trust_score):
+        """Met à jour le score de confiance d'un tour spécifique."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE Turn SET trust_score = ? WHERE id = ?",
+                (trust_score, turn_id)
+            )
             conn.commit()
