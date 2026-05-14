@@ -11,6 +11,7 @@ const S = {
   playerName:       '',
   phase:            'setup',   // setup | grid | playing | bot | gameover
   gridIndex:        0,
+  grids:            null,      // toutes les configs pré-chargées
   shotsLeft:        SHOTS_PER_TURN,
   turnNumber:       1,
   playerGrid:       null,
@@ -218,10 +219,15 @@ async function onStart() {
   try {
     const data = await API.newGame(name);
     S.gameId = data.game_id;
-
     $('nav-player-name').textContent = `⚓ ${name}`;
 
-    await loadGridPreview(0);
+    $('btn-start').textContent = '⌛ Chargement des configurations...';
+    const previews = await Promise.all(
+      Array.from({ length: 10 }, (_, i) => API.preview(S.gameId, i))
+    );
+    S.grids = previews.map(p => p.cells);
+
+    showGridPreview(0);
     buildDotsNav();
     showScreen('grid');
   } catch (e) {
@@ -232,10 +238,9 @@ async function onStart() {
 }
 
 // ─── GRID SELECTION ────────────────────────────────────────────────────────
-async function loadGridPreview(index) {
+function showGridPreview(index) {
   S.gridIndex = ((index % 10) + 10) % 10;
-  const data = await API.preview(S.gameId, S.gridIndex);
-  buildGrid('grid-preview', data.cells, false);
+  buildGrid('grid-preview', S.grids[S.gridIndex], false);
   $('grid-index-badge').textContent = `Config ${S.gridIndex + 1} / 10`;
   updateDotsNav(S.gridIndex);
 }
@@ -246,7 +251,7 @@ function buildDotsNav() {
   for (let i = 0; i < 10; i++) {
     const d = el('div', `dot-nav${i === 0 ? ' active' : ''}`);
     d.dataset.i = i;
-    d.addEventListener('click', () => loadGridPreview(i));
+    d.addEventListener('click', () => showGridPreview(i));
     nav.appendChild(d);
   }
 }
@@ -499,15 +504,15 @@ document.addEventListener('DOMContentLoaded', () => {
   $('input-name').addEventListener('keydown', e => { if (e.key === 'Enter') onStart(); });
 
   // Grid select
-  $('btn-next-grid').addEventListener('click', () => loadGridPreview(S.gridIndex + 1));
-  $('btn-prev-grid').addEventListener('click', () => loadGridPreview(S.gridIndex - 1));
+  $('btn-next-grid').addEventListener('click', () => showGridPreview(S.gridIndex + 1));
+  $('btn-prev-grid').addEventListener('click', () => showGridPreview(S.gridIndex - 1));
   $('btn-validate-grid').addEventListener('click', onValidateGrid);
 
   // Keyboard navigation in grid select
   document.addEventListener('keydown', e => {
     if (S.phase === 'setup' || screens.grid.classList.contains('active')) {
-      if (e.key === 'ArrowRight') loadGridPreview(S.gridIndex + 1);
-      if (e.key === 'ArrowLeft')  loadGridPreview(S.gridIndex - 1);
+      if (e.key === 'ArrowRight') showGridPreview(S.gridIndex + 1);
+      if (e.key === 'ArrowLeft')  showGridPreview(S.gridIndex - 1);
       if (e.key === 'Enter' && screens.grid.classList.contains('active')) onValidateGrid();
     }
   });
