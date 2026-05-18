@@ -56,6 +56,22 @@ class GameRepository:
             row = cur.fetchone()
             return dict(row) if row else None
 
+    def delete_by_id(self, game_id):
+        with self.db.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                DELETE FROM BotShot WHERE turn_id IN (
+                    SELECT id FROM Turn WHERE game_id = %s
+                )
+            """, (game_id,))
+            cur.execute("DELETE FROM Turn WHERE game_id = %s", (game_id,))
+            cur.execute("DELETE FROM Game WHERE id = %s", (game_id,))
+
+    def delete_all(self):
+        with self.db.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("TRUNCATE TABLE BotShot, Turn, Game RESTART IDENTITY")
+
     def get_overview_stats(self):
         with self.db.get_connection() as conn:
             cur = conn.cursor()

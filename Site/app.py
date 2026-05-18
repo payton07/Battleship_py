@@ -37,7 +37,10 @@ if not DATABASE_URL:
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)s %(levelname)s %(name)s: %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────
@@ -79,6 +82,7 @@ def add_security_headers(resp):
         "img-src 'self' data:; "
         "connect-src 'self';"
     )
+    resp.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return resp
 
 # ── Validation des entrées ────────────────────────────────────────────────────
@@ -109,6 +113,8 @@ def require_admin(f):
     def decorated(*args, **kwargs):
         auth = request.authorization
         if not auth or auth.password != ADMIN_PASSWORD:
+            ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            logger.warning("Admin auth failed from IP %s on %s", ip, request.path)
             return Response(
                 'Accès refusé.',
                 401,
@@ -445,11 +451,13 @@ def api_stats():
 # ══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/admin')
+@limiter.limit("10 per minute; 30 per hour")
 @require_admin
 def admin_page():
     return render_template('admin.html')
 
 @app.route('/api/admin/overview')
+@limiter.limit("30 per minute")
 @require_admin
 def admin_overview():
     try:
@@ -470,6 +478,7 @@ def admin_overview():
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/admin/games')
+@limiter.limit("30 per minute")
 @require_admin
 def admin_games_list():
     try:
@@ -478,7 +487,32 @@ def admin_games_list():
         logger.error("admin_games_list error: %s", e)
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/admin/game/<int:gid>', methods=['DELETE'])
+@limiter.limit("20 per minute")
+@require_admin
+def admin_delete_game(gid):
+    try:
+        if not game_repo.find_by_id(gid):
+            return jsonify({'error': 'not found'}), 404
+        game_repo.delete_by_id(gid)
+        return jsonify({'ok': True})
+    except Exception as e:
+        logger.error("admin_delete_game error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/admin/reset', methods=['POST'])
+@limiter.limit("5 per hour")
+@require_admin
+def admin_reset():
+    try:
+        game_repo.delete_all()
+        return jsonify({'ok': True})
+    except Exception as e:
+        logger.error("admin_reset error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/api/admin/game/<int:gid>')
+@limiter.limit("30 per minute")
 @require_admin
 def admin_game_detail(gid):
     try:

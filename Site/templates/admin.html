@@ -377,12 +377,20 @@
       <div class="admin-title">Tableau de bord</div>
       <div class="admin-sub">Données collectées — Pepper Battleship · TER M1 GL</div>
     </div>
-    <button class="refresh-btn" onclick="loadAll()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M3 12a9 9 0 0 1 15-6.7L21 8M3 16l3 3a9 9 0 0 0 15-7"/>
-      </svg>
-      Actualiser
-    </button>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="refresh-btn" onclick="loadAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8M3 16l3 3a9 9 0 0 0 15-7"/>
+        </svg>
+        Actualiser
+      </button>
+      <button class="refresh-btn" onclick="resetAll()" style="border-color:rgba(255,85,0,.4); color:#ff6666;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+        Vider la base
+      </button>
+    </div>
   </div>
 </div>
 
@@ -816,7 +824,10 @@ function renderTable(filter = '') {
         <td>${winnerBadge}</td>
         <td>${trustDisplay}</td>
         <td>${verdictDisplay}</td>
-        <td><button class="btn-detail" onclick="event.stopPropagation(); openDetail(${g.id})">Détail →</button></td>
+        <td style="display:flex; gap:6px;">
+          <button class="btn-detail" onclick="event.stopPropagation(); openDetail(${g.id})">Détail →</button>
+          <button class="btn-detail" onclick="event.stopPropagation(); deleteGame(${g.id}, '${esc(g.player_name || '?')}')" style="border-color:rgba(255,85,0,.3); color:#ff6666;">✕</button>
+        </td>
       </tr>
     `;
   }).join('');
@@ -922,6 +933,29 @@ async function openDetail(gameId) {
 
 function closeDetail() {
   $('modal-detail').classList.remove('active');
+}
+
+async function deleteGame(gameId, playerName) {
+  if (!confirm(`Supprimer la partie #${gameId} de "${playerName}" ? Cette action est irréversible.`)) return;
+  const r = await fetch(`/api/admin/game/${gameId}`, { method: 'DELETE' });
+  if (r.ok) {
+    allGames = allGames.filter(g => g.id !== gameId);
+    renderTable($('search-input').value);
+    await loadOverview();
+  } else {
+    alert('Erreur lors de la suppression.');
+  }
+}
+
+async function resetAll() {
+  if (!confirm('Vider TOUTE la base de données ? Toutes les parties seront supprimées définitivement.')) return;
+  if (!confirm('Confirmer : supprimer toutes les données ?')) return;
+  const r = await fetch('/api/admin/reset', { method: 'POST' });
+  if (r.ok) {
+    await loadAll();
+  } else {
+    alert('Erreur lors de la réinitialisation.');
+  }
 }
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
