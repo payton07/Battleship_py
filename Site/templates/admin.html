@@ -332,6 +332,20 @@
       font-weight: 700;
     }
 
+    .tab-btn {
+      padding: 9px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tab-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,200,255,.08); }
+
     .loading {
       display: flex;
       align-items: center;
@@ -437,30 +451,65 @@
 
 </div>
 
-<!-- GAMES TABLE -->
+<!-- TABS -->
 <div class="table-section">
-  <div class="table-header">
-    <span class="table-title">📋 Parties enregistrées</span>
-    <input type="text" class="search-input" id="search-input" placeholder="🔍 Rechercher un joueur…">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+    <div style="display:flex; gap:8px;">
+      <button class="tab-btn active" id="tab-games" onclick="switchTab('games')">📋 Parties</button>
+      <button class="tab-btn" id="tab-players" onclick="switchTab('players')">👥 Joueurs</button>
+    </div>
+    <div id="tab-controls-games" style="display:flex; gap:10px; align-items:center;">
+      <input type="text" class="search-input" id="search-input" placeholder="🔍 Rechercher un joueur…">
+    </div>
+    <div id="tab-controls-players" style="display:none;">
+      <input type="text" class="search-input" id="search-players-input" placeholder="🔍 Rechercher…">
+    </div>
   </div>
-  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
-    <table>
-      <thead>
-        <tr>
-          <th onclick="sortTable('id')">#</th>
-          <th onclick="sortTable('player_name')">Joueur</th>
-          <th onclick="sortTable('date_played')">Date</th>
-          <th onclick="sortTable('turn_count')">Tours</th>
-          <th onclick="sortTable('winner')">Gagnant</th>
-          <th onclick="sortTable('avg_trust')">Suspicion moy.</th>
-          <th onclick="sortTable('trust_final')">Verdict</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="games-tbody">
-        <tr class="empty-row"><td colspan="8">Chargement des données…</td></tr>
-      </tbody>
-    </table>
+
+  <!-- TABLE PARTIES -->
+  <div id="panel-games">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('id')">#</th>
+            <th onclick="sortTable('player_name')">Joueur</th>
+            <th onclick="sortTable('date_played')">Date</th>
+            <th onclick="sortTable('turn_count')">Tours</th>
+            <th onclick="sortTable('winner')">Gagnant</th>
+            <th onclick="sortTable('avg_trust')">Suspicion moy.</th>
+            <th onclick="sortTable('trust_final')">Verdict</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="games-tbody">
+          <tr class="empty-row"><td colspan="8">Chargement des données…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABLE JOUEURS -->
+  <div id="panel-players" style="display:none;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortPlayers('player_name')">Joueur</th>
+            <th onclick="sortPlayers('game_count')">Parties</th>
+            <th onclick="sortPlayers('first_seen')">Première visite</th>
+            <th onclick="sortPlayers('last_seen')">Dernière visite</th>
+            <th onclick="sortPlayers('avg_trust')">Suspicion moy.</th>
+            <th onclick="sortPlayers('detected_count')">A détecté</th>
+            <th onclick="sortPlayers('player_wins')">Victoires</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="players-tbody">
+          <tr class="empty-row"><td colspan="8">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -474,6 +523,7 @@
 <script>
 let chartTrust = null, chartDetection = null, chartQuota = null, chartHits = null, chartWins = null;
 let allGames = [], sortKey = 'id', sortAsc = false;
+let allPlayers = [], playerSortKey = 'last_seen', playerSortAsc = false;
 
 const COLS = 'ABCDEFGHIJ';
 const QUOTA_MAX = 4;
@@ -489,9 +539,22 @@ const chartDefaults = {
   }
 };
 
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  const isGames = tab === 'games';
+  $('panel-games').style.display   = isGames ? '' : 'none';
+  $('panel-players').style.display = isGames ? 'none' : '';
+  $('tab-controls-games').style.display   = isGames ? '' : 'none';
+  $('tab-controls-players').style.display = isGames ? 'none' : '';
+  $('tab-games').classList.toggle('active', isGames);
+  $('tab-players').classList.toggle('active', !isGames);
+  if (!isGames && !allPlayers.length) loadPlayers();
+}
+
 // ─── Load all ────────────────────────────────────────────────────────────────
 async function loadAll() {
   await Promise.all([loadOverview(), loadGames()]);
+  if ($('panel-players').style.display !== 'none') loadPlayers();
 }
 
 // ─── Overview ────────────────────────────────────────────────────────────────
@@ -760,6 +823,68 @@ function renderWinsChart(playerW, botW) {
   `;
 }
 
+// ─── Players table ───────────────────────────────────────────────────────────
+async function loadPlayers() {
+  allPlayers = await fetch('/api/admin/players').then(r => r.json());
+  renderPlayers();
+}
+
+function sortPlayers(key) {
+  if (playerSortKey === key) playerSortAsc = !playerSortAsc;
+  else { playerSortKey = key; playerSortAsc = false; }
+  renderPlayers();
+}
+
+function renderPlayers(filter = '') {
+  const tbody = $('players-tbody');
+  let players = [...allPlayers];
+  if (filter) {
+    const q = filter.toLowerCase();
+    players = players.filter(p => (p.player_name || '').toLowerCase().includes(q));
+  }
+  players.sort((a, b) => {
+    let va = a[playerSortKey] ?? '', vb = b[playerSortKey] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return playerSortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+
+  if (!players.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Aucun joueur trouvé.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = players.map(p => {
+    const first = p.first_seen ? p.first_seen.slice(0, 16).replace('T', ' ') : '—';
+    const last  = p.last_seen  ? p.last_seen.slice(0, 16).replace('T', ' ')  : '—';
+    const trust = p.avg_trust;
+    const trustClass = trust === null ? 'trust-2'
+      : trust <= 1 ? 'trust-0' : trust <= 3 ? 'trust-2' : 'trust-4';
+    const trustDisplay = trust !== null
+      ? `<span class="trust-pill ${trustClass}">⭐ ${trust}</span>`
+      : '<span class="td-muted">—</span>';
+    const detDisplay = p.answered_count
+      ? `${p.detected_count}/${p.answered_count}`
+      : '<span class="td-muted">—</span>';
+
+    return `
+      <tr>
+        <td><strong>${esc(p.player_name || '?')}</strong></td>
+        <td style="text-align:center;"><span class="badge badge-player">${p.game_count}</span></td>
+        <td class="td-muted">${first}</td>
+        <td class="td-muted">${last}</td>
+        <td>${trustDisplay}</td>
+        <td style="text-align:center;">${detDisplay}</td>
+        <td style="text-align:center;">${p.player_wins || 0}</td>
+        <td>
+          <button class="btn-detail" onclick="deletePlayer('${esc(p.player_name || '')}')"
+            style="border-color:rgba(255,85,0,.3); color:#ff6666;">🗑 Supprimer</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
 // ─── Games table ─────────────────────────────────────────────────────────────
 async function loadGames() {
   allGames = await fetch('/api/admin/games').then(r => r.json());
@@ -818,7 +943,14 @@ function renderTable(filter = '') {
     return `
       <tr onclick="openDetail(${g.id})">
         <td class="td-muted">#${g.id}</td>
-        <td><strong>${esc(g.player_name || '?')}</strong></td>
+        <td>
+          <span style="display:flex; align-items:center; gap:6px;">
+            <strong>${esc(g.player_name || '?')}</strong>
+            <button class="btn-detail" title="Supprimer toutes les parties de ce joueur"
+              onclick="event.stopPropagation(); deletePlayer('${esc(g.player_name || '')}')"
+              style="border-color:rgba(255,85,0,.3); color:#ff6666; padding:2px 7px; font-size:.7rem;">🗑</button>
+          </span>
+        </td>
         <td class="td-muted">${date}</td>
         <td style="text-align:center;">${g.turn_count || 0}</td>
         <td>${winnerBadge}</td>
@@ -947,6 +1079,22 @@ async function deleteGame(gameId, playerName) {
   }
 }
 
+async function deletePlayer(playerName) {
+  if (!playerName) return;
+  const count = allGames.filter(g => g.player_name === playerName).length;
+  if (!confirm(`Supprimer toutes les parties de "${playerName}" (${count} partie${count > 1 ? 's' : ''}) ? Cette action est irréversible.`)) return;
+  const r = await fetch(`/api/admin/player/${encodeURIComponent(playerName)}`, { method: 'DELETE' });
+  if (r.ok) {
+    allGames   = allGames.filter(g => g.player_name !== playerName);
+    allPlayers = allPlayers.filter(p => p.player_name !== playerName);
+    renderTable($('search-input').value);
+    renderPlayers($('search-players-input').value);
+    await loadOverview();
+  } else {
+    alert('Erreur lors de la suppression.');
+  }
+}
+
 async function resetAll() {
   if (!confirm('Vider TOUTE la base de données ? Toutes les parties seront supprimées définitivement.')) return;
   if (!confirm('Confirmer : supprimer toutes les données ?')) return;
@@ -967,6 +1115,9 @@ document.getElementById('modal-detail').addEventListener('click', e => {
 });
 document.getElementById('search-input').addEventListener('input', e => {
   renderTable(e.target.value);
+});
+document.getElementById('search-players-input').addEventListener('input', e => {
+  renderPlayers(e.target.value);
 });
 
 loadAll();

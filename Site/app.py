@@ -487,6 +487,27 @@ def admin_games_list():
         logger.error("admin_games_list error: %s", e)
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/admin/players')
+@limiter.limit("30 per minute")
+@require_admin
+def admin_players_list():
+    try:
+        return jsonify(game_repo.find_all_players())
+    except Exception as e:
+        logger.error("admin_players_list error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/admin/player/<player_name>', methods=['DELETE'])
+@limiter.limit("20 per minute")
+@require_admin
+def admin_delete_player(player_name):
+    try:
+        game_repo.delete_by_player(player_name)
+        return jsonify({'ok': True})
+    except Exception as e:
+        logger.error("admin_delete_player error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/api/admin/game/<int:gid>', methods=['DELETE'])
 @limiter.limit("20 per minute")
 @require_admin
