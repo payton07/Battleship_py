@@ -379,9 +379,14 @@
     <a href="/game">Jouer</a>
     <a href="/admin" style="color:var(--accent);">Admin</a>
   </div>
-  <span style="font-family:'Orbitron',sans-serif; font-size:.7rem; letter-spacing:2px; color:var(--muted); padding:6px 14px; border:1px solid var(--border); border-radius:6px;">
-    RESEARCH DASHBOARD
-  </span>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span style="font-family:'Orbitron',sans-serif; font-size:.7rem; letter-spacing:2px; color:var(--muted); padding:6px 14px; border:1px solid var(--border); border-radius:6px;">
+      RESEARCH DASHBOARD
+    </span>
+    <button onclick="logout()" style="padding:6px 14px; border:1px solid rgba(255,85,0,.4); border-radius:6px; background:transparent; color:#ff6666; font-size:.78rem; font-weight:600; cursor:pointer;">
+      Déconnexion
+    </button>
+  </div>
 </nav>
 
 <!-- HEADER -->
@@ -1119,6 +1124,13 @@ document.getElementById('search-input').addEventListener('input', e => {
 document.getElementById('search-players-input').addEventListener('input', e => {
   renderPlayers(e.target.value);
 });
+
+async function logout() {
+  await fetch('/admin/logout', {
+    headers: { 'Authorization': 'Basic ' + btoa('logout:logout') }
+  }).catch(() => {});
+  window.location.href = '/';
+}
 
 loadAll();
 </script>

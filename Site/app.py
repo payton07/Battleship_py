@@ -456,6 +456,14 @@ def api_stats():
 def admin_page():
     return render_template('admin.html')
 
+@app.route('/admin/logout')
+def admin_logout():
+    return Response(
+        'Déconnecté.',
+        401,
+        {'WWW-Authenticate': 'Basic realm="Admin PBattleship"'}
+    )
+
 @app.route('/api/admin/overview')
 @limiter.limit("30 per minute")
 @require_admin
