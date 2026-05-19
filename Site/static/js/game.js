@@ -146,7 +146,7 @@ function setTurnBadge(isPlayer) {
   const badge = $('turn-badge');
   const text  = $('turn-text');
   badge.className = `turn-badge ${isPlayer ? 'player-turn' : 'bot-turn'}`;
-  text.textContent = isPlayer ? 'À VOUS' : 'PEPPER BOT';
+  text.textContent = isPlayer ? 'À VOUS' : S.botName.toUpperCase();
 }
 
 // ─── Status ────────────────────────────────────────────────────────────────
