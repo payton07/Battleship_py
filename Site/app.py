@@ -476,7 +476,7 @@ def api_stats():
 # ══════════════════════════════════════════════════════════════════════════════
 
 @app.route('/admin')
-@limiter.limit("10 per minute; 30 per hour")
+@limiter.limit("60 per minute")
 @require_admin
 def admin_page():
     return render_template('admin.html')
