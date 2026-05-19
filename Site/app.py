@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, Response
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
-import sys, os, uuid, functools, time, logging
+import sys, os, uuid, functools, time, logging, subprocess
 
 load_dotenv()
 
@@ -37,6 +37,18 @@ if not DATABASE_URL:
 # ── App ───────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
+
+try:
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    GIT_HASH = subprocess.check_output(
+        ['git', 'rev-parse', '--short', 'HEAD'], cwd=_root
+    ).decode().strip()
+except Exception:
+    GIT_HASH = '1'
+
+@app.context_processor
+def inject_version():
+    return {'v': GIT_HASH}
 
 logging.basicConfig(
     level=logging.WARNING,
