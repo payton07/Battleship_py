@@ -58,6 +58,20 @@
   </div>
 </div>
 
+<!-- ══════ SCREEN: PERSONA SELECTION ══════ -->
+<div class="screen" id="screen-persona" style="flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; min-height:calc(100vh - 60px); gap:32px;">
+  <div style="text-align:center;">
+    <h2 style="font-family:'Orbitron',sans-serif; font-size:1.3rem; color:var(--accent); margin-bottom:8px;">CHOISISSEZ VOTRE ADVERSAIRE</h2>
+    <p style="color:var(--muted); font-size:.9rem;">Contre qui allez-vous affronter votre flotte ?</p>
+  </div>
+  <div id="persona-cards" style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; max-width:860px;">
+    <div style="color:var(--muted); font-size:.9rem;">Chargement…</div>
+  </div>
+  <button class="btn-orange" id="btn-validate-persona" disabled style="opacity:.4; cursor:not-allowed;">
+    ✓ &nbsp; AFFRONTER CET ADVERSAIRE
+  </button>
+</div>
+
 <!-- ══════ SCREEN: GRID SELECTION ══════ -->
 <div class="screen" id="screen-grid" style="flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; min-height:calc(100vh - 60px); gap:28px;">
   <div class="grid-select-header">
@@ -112,7 +126,7 @@
   <!-- Bot thinking indicator -->
   <div class="bot-thinking" id="bot-thinking">
     <div class="spinner"></div>
-    <span>Pepper Bot analyse la situation...</span>
+    <span id="bot-thinking-text">… analyse la situation…</span>
   </div>
 
   <!-- Game boards -->
@@ -164,7 +178,7 @@
 
 <!-- Panneau gauche : résumé des tirs du bot (visible quand modal fermé) -->
 <div id="side-panel-rating" class="side-panel-rating hidden">
-  <div class="side-panel-label">TOUR DE PEPPER BOT</div>
+  <div class="side-panel-label" id="side-panel-title">TOUR DE L'ADVERSAIRE</div>
   <p class="side-panel-msg">
     Consultez les tirs du bot<br>puis évaluez ce tour.
   </p>
@@ -230,7 +244,7 @@
     </h3>
     <p style="color:var(--muted); font-size:.95rem; line-height:1.7; margin-bottom:36px;">
       Au regard de toute la partie,<br>
-      pensez-vous que <strong style="color:var(--text)">Pepper Bot a triché</strong> ?
+      pensez-vous que <strong style="color:var(--text)" id="final-trust-bot-name">l'adversaire a triché</strong> ?
     </p>
     <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
       <button class="final-trust-btn yes" id="btn-final-yes">

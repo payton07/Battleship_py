@@ -60,3 +60,19 @@ class Database:
             cur.execute("""
                 ALTER TABLE Game ADD COLUMN IF NOT EXISTS trust_final INTEGER
             """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS BotPersona (
+                    id          SERIAL PRIMARY KEY,
+                    name        TEXT NOT NULL UNIQUE,
+                    emoji       TEXT DEFAULT '🤖',
+                    description TEXT,
+                    active      BOOLEAN DEFAULT TRUE
+                )
+            """)
+
+            cur.execute("""
+                INSERT INTO BotPersona (name, emoji, description)
+                VALUES ('Pepper Bot', '🤖', 'Le robot Pepper. Rapide, précis, redoutable.')
+                ON CONFLICT (name) DO NOTHING
+            """)

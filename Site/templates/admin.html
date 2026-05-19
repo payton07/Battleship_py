@@ -462,6 +462,7 @@
     <div style="display:flex; gap:8px;">
       <button class="tab-btn active" id="tab-games" onclick="switchTab('games')">📋 Parties</button>
       <button class="tab-btn" id="tab-players" onclick="switchTab('players')">👥 Joueurs</button>
+      <button class="tab-btn" id="tab-personas" onclick="switchTab('personas')">🎭 Personnages</button>
     </div>
     <div id="tab-controls-games" style="display:flex; gap:10px; align-items:center;">
       <input type="text" class="search-input" id="search-input" placeholder="🔍 Rechercher un joueur…">
@@ -469,6 +470,7 @@
     <div id="tab-controls-players" style="display:none;">
       <input type="text" class="search-input" id="search-players-input" placeholder="🔍 Rechercher…">
     </div>
+    <div id="tab-controls-personas" style="display:none;"></div>
   </div>
 
   <!-- TABLE PARTIES -->
@@ -489,6 +491,52 @@
         </thead>
         <tbody id="games-tbody">
           <tr class="empty-row"><td colspan="8">Chargement des données…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PANEL PERSONNAGES -->
+  <div id="panel-personas" style="display:none;">
+    <!-- Formulaire de création -->
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:24px 28px; margin-bottom:20px;">
+      <div style="font-family:'Orbitron',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:16px;">
+        + Créer un personnage
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label style="font-size:.72rem; color:var(--muted); letter-spacing:1px;">EMOJI</label>
+          <input type="text" id="new-persona-emoji" class="search-input" placeholder="🤖" maxlength="4" style="width:70px; text-align:center; font-size:1.2rem;">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; flex:1; min-width:140px;">
+          <label style="font-size:.72rem; color:var(--muted); letter-spacing:1px;">NOM *</label>
+          <input type="text" id="new-persona-name" class="search-input" placeholder="Ex: Mallory" maxlength="32" style="width:100%;">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; flex:2; min-width:200px;">
+          <label style="font-size:.72rem; color:var(--muted); letter-spacing:1px;">DESCRIPTION</label>
+          <input type="text" id="new-persona-desc" class="search-input" placeholder="Ex: L'adversaire mystérieux…" maxlength="200" style="width:100%;">
+        </div>
+        <button class="refresh-btn" onclick="createPersona()" style="border-color:rgba(0,200,255,.4); color:var(--accent); white-space:nowrap;">
+          + Créer
+        </button>
+      </div>
+      <div id="persona-create-error" style="color:#ff6666; font-size:.78rem; margin-top:8px; display:none;"></div>
+    </div>
+
+    <!-- Liste des personnages -->
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>Emoji</th>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="personas-tbody">
+          <tr class="empty-row"><td colspan="5">Chargement…</td></tr>
         </tbody>
       </table>
     </div>
@@ -529,6 +577,7 @@
 let chartTrust = null, chartDetection = null, chartQuota = null, chartHits = null, chartWins = null;
 let allGames = [], sortKey = 'id', sortAsc = false;
 let allPlayers = [], playerSortKey = 'last_seen', playerSortAsc = false;
+let allPersonas = [];
 
 const COLS = 'ABCDEFGHIJ';
 const QUOTA_MAX = 4;
@@ -546,20 +595,20 @@ const chartDefaults = {
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 function switchTab(tab) {
-  const isGames = tab === 'games';
-  $('panel-games').style.display   = isGames ? '' : 'none';
-  $('panel-players').style.display = isGames ? 'none' : '';
-  $('tab-controls-games').style.display   = isGames ? '' : 'none';
-  $('tab-controls-players').style.display = isGames ? 'none' : '';
-  $('tab-games').classList.toggle('active', isGames);
-  $('tab-players').classList.toggle('active', !isGames);
-  if (!isGames && !allPlayers.length) loadPlayers();
+  ['games','players','personas'].forEach(t => {
+    $(`panel-${t}`).style.display         = t === tab ? '' : 'none';
+    $(`tab-controls-${t}`).style.display  = t === tab ? '' : 'none';
+    $(`tab-${t}`).classList.toggle('active', t === tab);
+  });
+  if (tab === 'players'  && !allPlayers.length)  loadPlayers();
+  if (tab === 'personas' && !allPersonas.length) loadPersonas();
 }
 
 // ─── Load all ────────────────────────────────────────────────────────────────
 async function loadAll() {
   await Promise.all([loadOverview(), loadGames()]);
-  if ($('panel-players').style.display !== 'none') loadPlayers();
+  if ($('panel-players').style.display  !== 'none') loadPlayers();
+  if ($('panel-personas').style.display !== 'none') loadPersonas();
 }
 
 // ─── Overview ────────────────────────────────────────────────────────────────
@@ -826,6 +875,80 @@ function renderWinsChart(playerW, botW) {
     <span style="color:var(--accent);">■</span> Joueur ${playerW} &nbsp;
     <span style="color:var(--accent2);">■</span> Bot ${botW}
   `;
+}
+
+// ─── Personas ────────────────────────────────────────────────────────────────
+async function loadPersonas() {
+  allPersonas = await fetch('/api/admin/personas').then(r => r.json());
+  renderPersonas();
+}
+
+function renderPersonas() {
+  const tbody = $('personas-tbody');
+  if (!allPersonas.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aucun personnage.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allPersonas.map(p => `
+    <tr>
+      <td style="font-size:1.4rem; text-align:center;">${esc(p.emoji || '🤖')}</td>
+      <td><strong>${esc(p.name)}</strong></td>
+      <td class="td-muted">${esc(p.description || '—')}</td>
+      <td>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" ${p.active ? 'checked' : ''} onchange="togglePersona(${p.id}, this.checked)"
+            ${p.name === 'Pepper Bot' ? 'disabled' : ''}>
+          <span style="font-size:.8rem; color:${p.active ? 'var(--accent)' : 'var(--muted)'};">
+            ${p.active ? 'Actif' : 'Inactif'}
+          </span>
+        </label>
+      </td>
+      <td>
+        ${p.name !== 'Pepper Bot' ? `<button class="btn-detail" onclick="deletePersona(${p.id}, '${esc(p.name)}')"
+          style="border-color:rgba(255,85,0,.3); color:#ff6666;">🗑</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function createPersona() {
+  const name  = $('new-persona-name').value.trim();
+  const emoji = $('new-persona-emoji').value.trim() || '🤖';
+  const desc  = $('new-persona-desc').value.trim();
+  const errEl = $('persona-create-error');
+
+  if (!name) { errEl.textContent = 'Le nom est obligatoire.'; errEl.style.display = ''; return; }
+  errEl.style.display = 'none';
+
+  const r = await fetch('/api/admin/personas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, emoji, description: desc })
+  });
+  const data = await r.json();
+  if (!r.ok) { errEl.textContent = data.error || 'Erreur.'; errEl.style.display = ''; return; }
+
+  $('new-persona-name').value  = '';
+  $('new-persona-emoji').value = '';
+  $('new-persona-desc').value  = '';
+  await loadPersonas();
+}
+
+async function togglePersona(id, active) {
+  await fetch(`/api/admin/personas/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active })
+  });
+  const p = allPersonas.find(p => p.id === id);
+  if (p) { p.active = active; renderPersonas(); }
+}
+
+async function deletePersona(id, name) {
+  if (!confirm(`Supprimer le personnage "${name}" ?`)) return;
+  const r = await fetch(`/api/admin/personas/${id}`, { method: 'DELETE' });
+  if (r.ok) { allPersonas = allPersonas.filter(p => p.id !== id); renderPersonas(); }
+  else alert('Erreur lors de la suppression.');
 }
 
 // ─── Players table ───────────────────────────────────────────────────────────

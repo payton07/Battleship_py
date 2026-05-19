@@ -9,7 +9,10 @@ const COLS = 'ABCDEFGHIJ';
 const S = {
   gameId:           null,
   playerName:       '',
-  phase:            'setup',   // setup | grid | playing | bot | gameover
+  botName:          'Pepper Bot',
+  botEmoji:         '🤖',
+  personaId:        null,
+  phase:            'setup',   // setup | persona | grid | playing | bot | gameover
   gridIndex:        0,
   grids:            null,      // toutes les configs pré-chargées
   shotsLeft:        SHOTS_PER_TURN,
@@ -26,9 +29,10 @@ const S = {
 const $ = id => document.getElementById(id);
 
 const screens = {
-  setup: $('screen-setup'),
-  grid:  $('screen-grid'),
-  game:  $('screen-game'),
+  setup:   $('screen-setup'),
+  persona: $('screen-persona'),
+  grid:    $('screen-grid'),
+  game:    $('screen-game'),
 };
 
 // ─── Screen transitions ──────────────────────────────────────────────────────
@@ -47,7 +51,8 @@ const API = {
 
   get: url => fetch(url).then(r => r.json()),
 
-  newGame: name      => API.post('/api/game/new', { player_name: name }),
+  personas: ()       => API.get('/api/personas'),
+  newGame: (name, personaId) => API.post('/api/game/new', { player_name: name, persona_id: personaId }),
   preview: (gid, i)  => API.get(`/api/game/${gid}/preview/${i}`),
   select:  (gid, i)  => API.post(`/api/game/${gid}/select-grid`, { index: i }),
   shoot:   (gid,x,y) => API.post(`/api/game/${gid}/shoot`, { x, y }),
@@ -212,16 +217,71 @@ function resultClass(r) {
 async function onStart() {
   const name = $('input-name').value.trim() || 'Commandant';
   S.playerName = name;
+  $('nav-player-name').textContent = `⚓ ${name}`;
 
-  $('btn-start').textContent = '⌛ Connexion...';
+  $('btn-start').textContent = '⌛ Chargement...';
   $('btn-start').disabled = true;
 
   try {
-    const data = await API.newGame(name);
-    S.gameId = data.game_id;
-    $('nav-player-name').textContent = `⚓ ${name}`;
+    const personas = await API.personas();
+    renderPersonaCards(personas);
+    showScreen('persona');
+  } catch (e) {
+    setStatus('Erreur de connexion au serveur.', 'warn');
+  } finally {
+    $('btn-start').textContent = '⚔ LANCER LA PARTIE';
+    $('btn-start').disabled = false;
+  }
+}
 
-    $('btn-start').textContent = '⌛ Chargement des configurations...';
+// ─── PERSONA SELECTION ─────────────────────────────────────────────────────
+function renderPersonaCards(personas) {
+  const container = $('persona-cards');
+  if (!personas.length) {
+    container.innerHTML = '<div style="color:var(--muted);">Aucun adversaire disponible.</div>';
+    return;
+  }
+  container.innerHTML = personas.map(p => `
+    <div class="persona-card" data-id="${p.id}" data-name="${p.name}" data-emoji="${p.emoji || '🤖'}"
+         onclick="selectPersona(this)">
+      <div style="font-size:3rem; margin-bottom:12px;">${p.emoji || '🤖'}</div>
+      <div style="font-family:'Orbitron',sans-serif; font-size:.9rem; font-weight:700; color:var(--text); margin-bottom:8px;">${p.name}</div>
+      <div style="font-size:.78rem; color:var(--muted); line-height:1.5;">${p.description || ''}</div>
+    </div>
+  `).join('');
+
+  if (personas.length === 1) selectPersona(container.querySelector('.persona-card'));
+}
+
+function selectPersona(card) {
+  document.querySelectorAll('.persona-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  S.personaId = parseInt(card.dataset.id);
+  S.botName   = card.dataset.name;
+  S.botEmoji  = card.dataset.emoji;
+  const btn = $('btn-validate-persona');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  btn.style.cursor  = 'pointer';
+}
+
+async function onValidatePersona() {
+  if (!S.personaId) return;
+  const btn = $('btn-validate-persona');
+  btn.textContent = '⌛ Connexion...';
+  btn.disabled    = true;
+
+  try {
+    const data = await API.newGame(S.playerName, S.personaId);
+    S.gameId   = data.game_id;
+    S.botName  = data.bot_name  || S.botName;
+    S.botEmoji = data.bot_emoji || S.botEmoji;
+
+    $('bot-thinking-text').textContent  = `${S.botName} analyse la situation...`;
+    $('side-panel-title').textContent   = `TOUR DE ${S.botName.toUpperCase()}`;
+    $('final-trust-bot-name').textContent = `${S.botName} a triché`;
+
+    btn.textContent = '⌛ Chargement des configurations...';
     const previews = await Promise.all(
       Array.from({ length: 10 }, (_, i) => API.preview(S.gameId, i))
     );
@@ -232,8 +292,8 @@ async function onStart() {
     showScreen('grid');
   } catch (e) {
     setStatus('Erreur de connexion au serveur.', 'warn');
-    $('btn-start').textContent = '⚔ LANCER LA PARTIE';
-    $('btn-start').disabled = false;
+    btn.textContent = '✓  AFFRONTER CET ADVERSAIRE';
+    btn.disabled    = false;
   }
 }
 
@@ -328,7 +388,7 @@ async function onEnemyCellClick(x, y) {
   updateShotsCounter(Math.max(data.shots_left, 0));
 
   if (data.turn_ended) {
-    setStatus('Pepper Bot prépare ses tirs...', 'warn');
+    setStatus(`${S.botName} prépare ses tirs...`, 'warn');
     setTurnBadge(false);
     renderBullets(0);
     updateShotsCounter(0);
@@ -345,7 +405,7 @@ async function onEnemyCellClick(x, y) {
 // ─── BOT TURN ──────────────────────────────────────────────────────────────
 async function triggerBotTurn() {
   setBotThinking(true);
-  setStatus('Pepper Bot analyse et vise...', 'warn');
+  setStatus(`${S.botName} analyse et vise...`, 'warn');
 
   const data = await API.botTurn(S.gameId);
   setBotThinking(false);
@@ -389,8 +449,8 @@ async function triggerBotTurn() {
 
     const shot = shots[idx++];
     updateGrid('player-grid', data.player_grid, false, [{x: shot.x, y: shot.y}]);
-    addLog('Pepper Bot', shot.coord, shot.result, 'bot');
-    setStatus(`Pepper Bot tire en ${shot.coord} — ${shot.result} !`, 'warn');
+    addLog(S.botName, shot.coord, shot.result, 'bot');
+    setStatus(`${S.botName} tire en ${shot.coord} — ${shot.result} !`, 'warn');
     setTimeout(animateNextShot, S.fastMode ? 120 : 750);
   }
 
@@ -492,8 +552,8 @@ async function onFinalTrustAnswer(detected) {
   $('result-title').textContent    = isWin ? 'VICTOIRE !' : 'DÉFAITE';
   $('result-title').className      = `result-title ${isWin ? 'win' : 'lose'}`;
   $('result-subtitle').textContent = isWin
-    ? 'Bravo Commandant ! Vous avez coulé toute la flotte de Pepper Bot.'
-    : 'Pepper Bot a coulé toute votre flotte. Meilleure chance la prochaine fois !';
+    ? `Bravo Commandant ! Vous avez coulé toute la flotte de ${S.botName}.`
+    : `${S.botName} a coulé toute votre flotte. Meilleure chance la prochaine fois !`;
 
   setStatus(isWin ? '🏆 Victoire !' : '💀 Défaite.', isWin ? 'info' : 'warn');
   setTimeout(() => $('modal-gameover').classList.add('active'), 400);
@@ -507,6 +567,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup screen
   $('btn-start').addEventListener('click', onStart);
   $('input-name').addEventListener('keydown', e => { if (e.key === 'Enter') onStart(); });
+
+  // Persona select
+  $('btn-validate-persona').addEventListener('click', onValidatePersona);
 
   // Grid select
   $('btn-next-grid').addEventListener('click', () => showGridPreview(S.gridIndex + 1));

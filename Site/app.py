@@ -20,6 +20,7 @@ from game_logic.game import Game
 from database.connection import Database
 from database.repositories.game_repository import GameRepository
 from database.repositories.turn_repository import TurnRepository
+from database.repositories.persona_repository import PersonaRepository
 
 # ── Config depuis variables d'environnement ───────────────────────────────────
 SECRET_KEY     = os.environ.get('SECRET_KEY')
@@ -54,8 +55,9 @@ limiter = Limiter(
 # ── Repositories (partagés par toute l'app) ───────────────────────────────────
 _db        = Database(DATABASE_URL)
 _db.init()
-game_repo  = GameRepository(_db)
-turn_repo  = TurnRepository(_db)
+game_repo    = GameRepository(_db)
+turn_repo    = TurnRepository(_db)
+persona_repo = PersonaRepository(_db)
 
 # ── Sessions de jeu ───────────────────────────────────────────────────────────
 games    = {}
@@ -129,8 +131,10 @@ def require_admin(f):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class WebGame:
-    def __init__(self, player_name):
+    def __init__(self, player_name, bot_name='Pepper Bot', bot_emoji='🤖'):
         self.player_name    = player_name
+        self.bot_name       = bot_name
+        self.bot_emoji      = bot_emoji
         self.phase          = 'setup'
         self.current_turn   = 'player'
         self.player_shots_left = Variable.SHOTS_PER_TURN
@@ -141,7 +145,7 @@ class WebGame:
         self.created_at     = time.time()
 
         self.player = Player(player_name)
-        self.bot    = CheatBot('Pepper Bot')
+        self.bot    = CheatBot(bot_name)
 
         self.game = Game()
         self.game.add_player(self.player)
@@ -257,7 +261,7 @@ class WebGame:
             shot = {'x': sx, 'y': sy, 'coord': f"{col}{sy}", 'result': result}
             shots.append(shot)
             self.bot_shots_this_turn.append({'x': sx, 'y': sy, 'result': result})
-            self.action_log.insert(0, {'actor': 'Pepper Bot', **shot, 'type': 'bot'})
+            self.action_log.insert(0, {'actor': self.bot_name, **shot, 'type': 'bot'})
 
             over, winner, msg = self._is_over()
             if over:
@@ -288,7 +292,7 @@ class WebGame:
 
     def _save_winner(self, winner_key):
         if self.game_id:
-            name = self.player_name if winner_key == 'player' else 'Pepper Bot'
+            name = self.player_name if winner_key == 'player' else self.bot_name
             try:
                 game_repo.update_winner(self.game_id, name)
             except Exception as e:
@@ -321,6 +325,8 @@ class WebGame:
             'current_turn': self.current_turn,
             'shots_left':   self.player_shots_left,
             'turn_number':  self.turn_number,
+            'bot_name':     self.bot_name,
+            'bot_emoji':    self.bot_emoji,
             **self._grids(),
             'action_log':   self.action_log[:10],
         }
@@ -338,15 +344,34 @@ def index():
 def game_page():
     return render_template('game.html')
 
+@app.route('/api/personas')
+@limiter.limit("60 per minute")
+def api_personas():
+    try:
+        return jsonify(persona_repo.find_all_active())
+    except Exception as e:
+        logger.error("api_personas error: %s", e)
+        return jsonify([])
+
 @app.route('/api/game/new', methods=['POST'])
 @limiter.limit("10 per hour")
 def new_game():
     cleanup_old_games()
-    data = request.json or {}
-    name = sanitize_name(data.get('player_name'))
-    gid  = str(uuid.uuid4())
-    games[gid] = WebGame(name)
-    return jsonify({'game_id': gid})
+    data       = request.json or {}
+    name       = sanitize_name(data.get('player_name'))
+    persona_id = validate_int(data.get('persona_id'), 1, 9999)
+
+    bot_name  = 'Pepper Bot'
+    bot_emoji = '🤖'
+    if persona_id:
+        persona = persona_repo.find_by_id(persona_id)
+        if persona and persona['active']:
+            bot_name  = persona['name']
+            bot_emoji = persona['emoji'] or '🤖'
+
+    gid        = str(uuid.uuid4())
+    games[gid] = WebGame(name, bot_name, bot_emoji)
+    return jsonify({'game_id': gid, 'bot_name': bot_name, 'bot_emoji': bot_emoji})
 
 @app.route('/api/game/<gid>/preview/<int:idx>')
 @limiter.limit("60 per minute")
@@ -455,6 +480,62 @@ def api_stats():
 @require_admin
 def admin_page():
     return render_template('admin.html')
+
+@app.route('/api/admin/personas')
+@limiter.limit("30 per minute")
+@require_admin
+def admin_personas_list():
+    try:
+        return jsonify(persona_repo.find_all())
+    except Exception as e:
+        logger.error("admin_personas_list error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/admin/personas', methods=['POST'])
+@limiter.limit("20 per hour")
+@require_admin
+def admin_persona_create():
+    try:
+        data = request.json or {}
+        name = str(data.get('name', '')).strip()[:32]
+        emoji = str(data.get('emoji', '🤖')).strip()[:8] or '🤖'
+        description = str(data.get('description', '')).strip()[:200]
+        if not name:
+            return jsonify({'error': 'name required'}), 400
+        pid = persona_repo.create(name, emoji, description)
+        return jsonify({'ok': True, 'id': pid})
+    except Exception as e:
+        logger.error("admin_persona_create error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/admin/personas/<int:pid>', methods=['PATCH'])
+@limiter.limit("30 per minute")
+@require_admin
+def admin_persona_toggle(pid):
+    try:
+        data   = request.json or {}
+        active = bool(data.get('active', True))
+        persona_repo.toggle_active(pid, active)
+        return jsonify({'ok': True})
+    except Exception as e:
+        logger.error("admin_persona_toggle error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/admin/personas/<int:pid>', methods=['DELETE'])
+@limiter.limit("20 per minute")
+@require_admin
+def admin_persona_delete(pid):
+    try:
+        persona = persona_repo.find_by_id(pid)
+        if not persona:
+            return jsonify({'error': 'not found'}), 404
+        if persona['name'] == 'Pepper Bot':
+            return jsonify({'error': 'cannot delete default persona'}), 400
+        persona_repo.delete(pid)
+        return jsonify({'ok': True})
+    except Exception as e:
+        logger.error("admin_persona_delete error: %s", e)
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/admin/logout')
 def admin_logout():

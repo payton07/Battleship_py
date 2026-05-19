@@ -1205,3 +1205,26 @@ footer .logo-foot {
 .text-gold    { color: var(--gold); }
 .text-muted   { color: var(--muted); }
 .font-game    { font-family: 'Orbitron', sans-serif; }
+
+/* ─── Persona cards ──────────────────────────────────────────────────────── */
+.persona-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 200px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  user-select: none;
+}
+.persona-card:hover {
+  border-color: rgba(0,200,255,.5);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,200,255,.15);
+}
+.persona-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,200,255,.25), 0 8px 24px rgba(0,200,255,.2);
+  transform: translateY(-4px);
+}
