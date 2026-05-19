@@ -1,7 +1,7 @@
 class Variable:
     # --- Configuration du Jeu ---
     SIZE_GRID = 10
-    SHIP_SIZES = [5, 4, 3, 3, 2]
+    SHIP_SIZES = [5, 5, 4, 3, 3, 2]
     SHOTS_PER_TURN = 4
     
     # --- Symboles d'Affichage ---
@@ -36,7 +36,7 @@ class Variable:
     # Générée une fois via random.choices([0,1,2,3,4], weights=[1,4,6,4,1], k=20).
     # Distribution cible : 0→6%, 1→25%, 2→38%, 3→25%, 4→6% (cloche centrée sur 2).
     # Chaque partie suit cette même séquence. Modifier manuellement si besoin.
-    QUOTA_SEQUENCE = [1, 2, 2, 2, 2, 1, 0, 3, 1, 1, 4, 2, 3, 2, 2, 1, 2, 3, 2, 3]
+    QUOTA_SEQUENCE = [1, 2, 0, 3, 3, 2, 1, 4, 2, 1, 3]
 
     # --- Noms par défaut ---
     DEFAULT_PLAYER_1_NAME = "Joueur 1"
