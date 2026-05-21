@@ -584,7 +584,9 @@ const QUOTA_MAX = 4;
 
 function formatDate(iso) {
   if (!iso) return '—';
-  const d = new Date(iso.includes('Z') || iso.includes('+') ? iso : iso + 'Z');
+  const normalized = String(iso).replace(' ', 'T');
+  const d = new Date(normalized.includes('Z') || normalized.includes('+') ? normalized : normalized + 'Z');
+  if (isNaN(d.getTime())) return String(iso).slice(0, 16).replace('T', ' ');
   return d.toLocaleString('fr-FR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
