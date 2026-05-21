@@ -585,12 +585,16 @@ const QUOTA_MAX = 4;
 
 function formatDate(iso) {
   if (!iso) return { date: '—', time: '—' };
-  const normalized = String(iso).replace(' ', 'T');
-  const d = new Date(normalized.includes('Z') || normalized.includes('+') ? normalized : normalized + 'Z');
-  if (isNaN(d.getTime())) return { date: String(iso).slice(0, 10), time: String(iso).slice(11, 16) };
+  const pad = n => String(n).padStart(2, '0');
+  let d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    const n = String(iso).trim().replace(' ', 'T');
+    d = new Date(n.includes('Z') || n.includes('+') ? n : n + 'Z');
+  }
+  if (isNaN(d.getTime())) return { date: '—', time: '—' };
   return {
-    date: d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-    time: d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    date: `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`,
+    time: `${pad(d.getHours())}h${pad(d.getMinutes())}`
   };
 }
 
