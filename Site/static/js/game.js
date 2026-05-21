@@ -343,6 +343,7 @@ async function onValidateGrid() {
   $('label-player').textContent = S.playerName.toUpperCase();
   $('nav-center').style.display = 'flex';
   $('btn-speed').classList.remove('hidden');
+  $('btn-new-game').classList.remove('hidden');
   setTurnBadge(true);
   renderBullets(SHOTS_PER_TURN);
   updateShotsCounter(SHOTS_PER_TURN);
@@ -564,6 +565,16 @@ async function onFinalTrustAnswer(detected) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+//  NOUVELLE PARTIE
+// ──────────────────────────────────────────────────────────────────────────────
+function newGame() {
+  if (!confirm('Abandonner la partie en cours et démarrer une nouvelle ?')) return;
+  sessionStorage.removeItem('pbattleship_gid');
+  sessionStorage.removeItem('pbattleship_player');
+  location.reload();
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 //  RESTORE ON RELOAD
 // ──────────────────────────────────────────────────────────────────────────────
 async function tryRestore() {
@@ -604,6 +615,7 @@ async function tryRestore() {
 
     $('nav-center').style.display = 'flex';
     $('btn-speed').classList.remove('hidden');
+  $('btn-new-game').classList.remove('hidden');
     $('nav-turn-num').textContent = data.turn_number;
     renderBullets(data.shots_left);
     updateShotsCounter(data.shots_left);
