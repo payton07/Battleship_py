@@ -12,14 +12,15 @@ class CheatBot(Player):
     - Simule un comportement humain en contrôlant le nombre de touches par tour
     """
 
-    def __init__(self, name):
+    def __init__(self, name, use_socket=True):
         super(CheatBot, self).__init__(name)
         self.planned_shots = []
         self.success_quota = 2
         self.target_grid = None # La grille qu'on va "espionner"
-        self.client_socket = Client("10.161.177.181", server_port=5000)
-        self.client_socket.connect()
-        # On ne connecte pas ici pour éviter de bloquer l'interface au démarrage
+        self.client_socket = None
+        if use_socket:
+            self.client_socket = Client("10.161.177.181", server_port=5000)
+            self.client_socket.connect()
 
     def set_target_grid(self, grid):
         """Permet au GameMaster de donner l'accès à la grille adverse."""
@@ -30,9 +31,10 @@ class CheatBot(Player):
 
     def _send_safe_message(self, message):
         """Tente d'envoyer un message, en se connectant si nécessaire."""
+        if not self.client_socket:
+            return False
         if not self.client_socket.connected:
             self.client_socket.connect()
-        
         if self.client_socket.connected:
             return self.client_socket.send_message(message)
         return False

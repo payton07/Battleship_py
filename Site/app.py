@@ -157,7 +157,7 @@ class WebGame:
         self.created_at     = time.time()
 
         self.player = Player(player_name)
-        self.bot    = CheatBot(bot_name)
+        self.bot    = CheatBot(bot_name, use_socket=False)
 
         self.game = Game()
         self.game.add_player(self.player)
