@@ -529,6 +529,9 @@ def admin_persona_create():
         pid = persona_repo.create(name, emoji, description)
         return jsonify({'ok': True, 'id': pid})
     except Exception as e:
+        msg = str(e)
+        if 'unique' in msg.lower() or 'duplicate' in msg.lower():
+            return jsonify({'error': f'Un personnage nommé "{name}" existe déjà.'}), 409
         logger.error("admin_persona_create error: %s", e)
         return jsonify({'error': 'Internal server error'}), 500
 
