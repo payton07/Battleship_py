@@ -582,6 +582,15 @@ let allPersonas = [];
 const COLS = 'ABCDEFGHIJ';
 const QUOTA_MAX = 4;
 
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso.includes('Z') || iso.includes('+') ? iso : iso + 'Z');
+  return d.toLocaleString('fr-FR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
 const chartDefaults = {
   plugins: {
     legend: { display: false },
@@ -983,8 +992,8 @@ function renderPlayers(filter = '') {
   }
 
   tbody.innerHTML = players.map(p => {
-    const first = p.first_seen ? p.first_seen.slice(0, 16).replace('T', ' ') : '—';
-    const last  = p.last_seen  ? p.last_seen.slice(0, 16).replace('T', ' ')  : '—';
+    const first = formatDate(p.first_seen);
+    const last  = formatDate(p.last_seen);
     const trust = p.avg_trust;
     const trustClass = trust === null ? 'trust-2'
       : trust <= 1 ? 'trust-0' : trust <= 3 ? 'trust-2' : 'trust-4';
@@ -1047,7 +1056,7 @@ function renderTable(filter = '') {
   }
 
   tbody.innerHTML = games.map(g => {
-    const date = g.date_played ? g.date_played.slice(0, 16).replace('T', ' ') : '—';
+    const date = formatDate(g.date_played);
 
     const winnerBadge = g.winner === 'Pepper Bot'
       ? `<span class="badge badge-bot">🤖 Bot</span>`
@@ -1107,7 +1116,7 @@ async function openDetail(gameId) {
   }
 
   const g = d.game;
-  const date = (g.date_played || '').slice(0, 16).replace('T', ' ');
+  const date = formatDate(g.date_played);
   const avgTrust = d.turns.length
     ? (d.turns.filter(t => t.trust_score !== null)
                .reduce((s, t) => s + t.trust_score, 0)
