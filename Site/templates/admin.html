@@ -482,6 +482,7 @@
             <th onclick="sortTable('id')">#</th>
             <th onclick="sortTable('player_name')">Joueur</th>
             <th onclick="sortTable('date_played')">Date</th>
+            <th onclick="sortTable('date_played')">Heure</th>
             <th onclick="sortTable('turn_count')">Tours</th>
             <th onclick="sortTable('winner')">Gagnant</th>
             <th onclick="sortTable('avg_trust')">Suspicion moy.</th>
@@ -490,7 +491,7 @@
           </tr>
         </thead>
         <tbody id="games-tbody">
-          <tr class="empty-row"><td colspan="8">Chargement des données…</td></tr>
+          <tr class="empty-row"><td colspan="9">Chargement des données…</td></tr>
         </tbody>
       </table>
     </div>
@@ -583,14 +584,14 @@ const COLS = 'ABCDEFGHIJ';
 const QUOTA_MAX = 4;
 
 function formatDate(iso) {
-  if (!iso) return '—';
+  if (!iso) return { date: '—', time: '—' };
   const normalized = String(iso).replace(' ', 'T');
   const d = new Date(normalized.includes('Z') || normalized.includes('+') ? normalized : normalized + 'Z');
-  if (isNaN(d.getTime())) return String(iso).slice(0, 16).replace('T', ' ');
-  return d.toLocaleString('fr-FR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
+  if (isNaN(d.getTime())) return { date: String(iso).slice(0, 10), time: String(iso).slice(11, 16) };
+  return {
+    date: d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    time: d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  };
 }
 
 const chartDefaults = {
@@ -1053,12 +1054,12 @@ function renderTable(filter = '') {
   });
 
   if (!games.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Aucune partie trouvée.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="9">Aucune partie trouvée.</td></tr>';
     return;
   }
 
   tbody.innerHTML = games.map(g => {
-    const date = formatDate(g.date_played);
+    const { date, time } = formatDate(g.date_played);
 
     const winnerBadge = g.winner === 'Pepper Bot'
       ? `<span class="badge badge-bot">🤖 Bot</span>`
@@ -1091,6 +1092,7 @@ function renderTable(filter = '') {
           </span>
         </td>
         <td class="td-muted">${date}</td>
+        <td class="td-muted">${time}</td>
         <td style="text-align:center;">${g.turn_count || 0}</td>
         <td>${winnerBadge}</td>
         <td>${trustDisplay}</td>
@@ -1118,7 +1120,7 @@ async function openDetail(gameId) {
   }
 
   const g = d.game;
-  const date = formatDate(g.date_played);
+  const { date, time } = formatDate(g.date_played);
   const avgTrust = d.turns.length
     ? (d.turns.filter(t => t.trust_score !== null)
                .reduce((s, t) => s + t.trust_score, 0)
@@ -1170,7 +1172,7 @@ async function openDetail(gameId) {
     <div class="detail-header">
       <div class="detail-header-left">
         <h3>Partie #${g.id} — ${esc(g.player_name || '?')}</h3>
-        <p>${date} · ${g.player_type || 'Digital'}</p>
+        <p>${date} ${time} · ${g.player_type || 'Digital'}</p>
       </div>
       <button class="detail-close" onclick="closeDetail()">✕</button>
     </div>
