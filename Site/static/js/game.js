@@ -276,6 +276,8 @@ async function onValidatePersona() {
     S.gameId   = data.game_id;
     S.botName  = data.bot_name  || S.botName;
     S.botEmoji = data.bot_emoji || S.botEmoji;
+    sessionStorage.setItem('pbattleship_gid',    S.gameId);
+    sessionStorage.setItem('pbattleship_player', S.playerName);
 
     $('bot-thinking-text').textContent  = `${S.botName} analyse la situation...`;
     $('side-panel-title').textContent   = `TOUR DE ${S.botName.toUpperCase()}`;
@@ -542,6 +544,8 @@ function endGame(winner, message) {
 
 async function onFinalTrustAnswer(detected) {
   $('modal-final-trust').classList.remove('active');
+  sessionStorage.removeItem('pbattleship_gid');
+  sessionStorage.removeItem('pbattleship_player');
 
   // Enregistrement fire-and-forget
   API.finalTrust(S.gameId, detected).catch(() => {});
@@ -560,9 +564,79 @@ async function onFinalTrustAnswer(detected) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+//  RESTORE ON RELOAD
+// ──────────────────────────────────────────────────────────────────────────────
+async function tryRestore() {
+  const gid   = sessionStorage.getItem('pbattleship_gid');
+  const pname = sessionStorage.getItem('pbattleship_player');
+  if (!gid || !pname) return false;
+
+  try {
+    const data = await API.get(`/api/game/${gid}/state`);
+    if (data.error || data.phase === 'gameover') {
+      sessionStorage.removeItem('pbattleship_gid');
+      sessionStorage.removeItem('pbattleship_player');
+      return false;
+    }
+
+    S.gameId     = gid;
+    S.playerName = pname;
+    S.botName    = data.bot_name;
+    S.botEmoji   = data.bot_emoji;
+    S.phase      = data.phase;
+    S.shotsLeft  = data.shots_left;
+    S.turnNumber = data.turn_number;
+    S.playerGrid = data.player_grid;
+    S.enemyGrid  = data.enemy_grid;
+
+    $('bot-thinking-text').textContent    = `${S.botName} analyse la situation...`;
+    $('side-panel-title').textContent     = `TOUR DE ${S.botName.toUpperCase()}`;
+    $('final-trust-bot-name').textContent = `${S.botName} a triché`;
+    $('label-player').textContent         = S.playerName.toUpperCase();
+    $('nav-player-name').textContent      = pname;
+
+    buildGrid('player-grid', S.playerGrid, false);
+    buildGrid('enemy-grid',  S.enemyGrid,  true);
+
+    const logEl = $('action-log');
+    logEl.innerHTML = '';
+    (data.action_log || []).slice().reverse().forEach(e => addLog(e.actor, e.coord, e.result, e.type));
+
+    $('nav-center').style.display = 'flex';
+    $('btn-speed').classList.remove('hidden');
+    $('nav-turn-num').textContent = data.turn_number;
+    renderBullets(data.shots_left);
+    updateShotsCounter(data.shots_left);
+
+    const isPlayerTurn = data.current_turn === 'player';
+    setTurnBadge(isPlayerTurn);
+    setBoardActive(isPlayerTurn ? 'enemy' : 'player');
+    setStatus('Partie restaurée — à vous de tirer !', 'info');
+
+    showScreen('game');
+    return true;
+  } catch {
+    sessionStorage.removeItem('pbattleship_gid');
+    sessionStorage.removeItem('pbattleship_player');
+    return false;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 //  EVENT BINDING
 // ──────────────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const restored = await tryRestore();
+  if (restored) {
+    // rebind events only — no focus/init needed
+    bindEvents();
+    return;
+  }
+  bindEvents();
+  setTimeout(() => $('input-name').focus(), 100);
+});
+
+function bindEvents() {
 
   // Setup screen
   $('btn-start').addEventListener('click', onStart);
@@ -609,6 +683,4 @@ document.addEventListener('DOMContentLoaded', () => {
     $('speed-label').textContent = S.fastMode ? 'Normal'    : 'Accélérer';
   });
 
-  // Focus name input on load
-  setTimeout(() => $('input-name').focus(), 100);
-});
+}

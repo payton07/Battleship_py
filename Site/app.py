@@ -410,6 +410,18 @@ def select_grid(gid):
     wg.select_grid(idx)
     return jsonify(wg.get_state())
 
+@app.route('/api/game/<gid>/state')
+@limiter.limit("60 per minute")
+def game_state(gid):
+    if validate_uuid(gid) is None:
+        return jsonify({'error': 'invalid id'}), 400
+    wg = games.get(gid)
+    if not wg:
+        return jsonify({'error': 'not found'}), 404
+    state = wg.get_state()
+    state['player_name'] = wg.player_name
+    return jsonify(state)
+
 @app.route('/api/game/<gid>/shoot', methods=['POST'])
 def shoot(gid):
     if validate_uuid(gid) is None:
