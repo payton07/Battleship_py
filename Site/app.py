@@ -157,7 +157,7 @@ class WebGame:
         self.created_at     = time.time()
 
         self.player = Player(player_name)
-        self.bot    = CheatBot(bot_name, use_socket=False)
+        self.bot    = CheatBot(bot_name)
 
         self.game = Game()
         self.game.add_player(self.player)
@@ -423,6 +423,7 @@ def game_state(gid):
     return jsonify(state)
 
 @app.route('/api/game/<gid>/shoot', methods=['POST'])
+@limiter.limit("120 per minute; 1000 per hour")
 def shoot(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
@@ -437,6 +438,7 @@ def shoot(gid):
     return jsonify(wg.player_shoot(x, y))
 
 @app.route('/api/game/<gid>/bot-turn', methods=['POST'])
+@limiter.limit("60 per minute; 500 per hour")
 def bot_turn(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
