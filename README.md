@@ -6,7 +6,7 @@ Jeu de Bataille Navale développé dans le cadre d'un TER (Travail d'Étude et d
 
 ## Concept
 
-Le bot adverse (**CheatBot**) a accès à la grille du joueur et peut viser directement ses bateaux. Cependant, pour paraître naturel, il respecte un **quota de succès** aléatoire par tour (0 à 3 touches sur 4 tirs). En fin de partie, le joueur évalue sur une échelle de 0 à 5 s'il a perçu la triche. Ces données sont enregistrées pour analyse.
+Le bot adverse (**CheatBot**) a accès à la grille du joueur et peut viser directement ses bateaux. Pour paraître naturel, il respecte un **quota de succès** prédéfini par tour (séquence `[1,2,0,3,3,2,1,4,2,1,3]`, max 4 touches sur 4 tirs). Après chaque tour du bot, le joueur évalue de 0 à 5 si le comportement lui a semblé suspect. En fin de partie, il donne un verdict binaire (triché / normal). Ces données sont enregistrées pour analyse.
 
 ---
 
@@ -16,11 +16,10 @@ Le bot adverse (**CheatBot**) a accès à la grille du joueur et peut viser dire
 - **Deux modes adversaire** :
   - *Digital* : le joueur joue sur PC, le CheatBot voit sa grille et triche
   - *Hybride* : le joueur joue sur une grille papier et déclare manuellement les résultats
-- **CheatBot** avec quota de succès variable pour simuler un comportement humain
-- **Communication socket** avec un robot Pepper (envoi des tirs en temps réel)
-- **Persistance SQLite** : historique des parties, tours, tirs du bot et scores de confiance
+- **CheatBot** avec quota de succès variable pour simuler un comportement humain (séquence `[1,2,0,3,3,2,1,4,2,1,3]`)
+- **Persistance PostgreSQL** : historique des parties, tours, tirs du bot et scores de confiance
 - **10 configurations de grille** prédéfinies + générateur aléatoire
-- **4 tirs par tour** par joueur
+- **4 tirs par tour** par joueur — **6 bateaux** : deux porte-avions (5), croiseur (4), deux frégates (3), vedette (2)
 
 ---
 
@@ -28,8 +27,7 @@ Le bot adverse (**CheatBot**) a accès à la grille du joueur et peut viser dire
 
 - Python 3.x
 - `tkinter` (inclus dans la plupart des distributions Python)
-- `sqlite3` (inclus dans Python)
-- Accès réseau au robot Pepper sur `10.161.177.181:5000` (optionnel — la connexion échoue silencieusement)
+- PostgreSQL (ou `DATABASE_URL` pointant vers une instance PostgreSQL)
 
 ---
 
@@ -91,7 +89,7 @@ Le `CheatBot` implémente une triche discrète en trois étapes à chaque tour :
 2. **Quota de succès** — il tire ensuite N touches (0 ≤ N ≤ 4), en ciblant d'abord un bateau déjà touché ; s'il n'y en a pas, il choisit un bateau et concentre ses touches dessus
 3. **Complétion aléatoire** — il termine le tour avec des tirs aléatoires restants (priorité à l'eau)
 
-Chaque tir est également transmis au robot Pepper via socket TCP au format `P<colonne><ligne>` (ex: `PA3`).
+Les tirs sont mélangés pour masquer la stratégie. Le code socket Pepper a été supprimé (bloquait les threads serveur).
 
 ---
 
@@ -114,8 +112,9 @@ Tous les paramètres globaux sont centralisés dans `classes/variable.py` :
 | Paramètre | Valeur par défaut | Description |
 |-----------|-------------------|-------------|
 | `SIZE_GRID` | `10` | Taille de la grille |
-| `SHIP_SIZES` | `[5, 4, 3, 3, 2]` | Tailles des bateaux |
+| `SHIP_SIZES` | `[5, 5, 4, 3, 3, 2]` | Tailles des bateaux (22 cases) |
 | `SHOTS_PER_TURN` | `4` | Nombre de tirs par tour |
+| `QUOTA_SEQUENCE` | `[1,2,0,3,3,2,1,4,2,1,3]` | Quota de succès du CheatBot par tour |
 
 ---
 
