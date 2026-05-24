@@ -49,32 +49,15 @@ class CheatBot(Player):
         )
 
     def execute_turn(self, grid, enemy_ships):
-<<<<<<< Updated upstream
         """Planifie les tirs selon un quota de succès et l'état des bateaux."""
         if not 0 <= self.success_quota <= Variable.SHOTS_PER_TURN:
-=======
-        if not 0 <= self.success_quota <= 4:
->>>>>>> Stashed changes
             self.success_quota = 2
         size = Variable.get_size_grid()
 
-<<<<<<< Updated upstream
         # Cases vides (eau intacte)
         water_cells = []
         for x in range(size):
             for y in range(size):
-=======
-        untouched_ship_cells = []
-        for ship in enemy_ships:
-            if not ship.is_sunk():
-                for pos in ship.get_positions():
-                    if grid[pos.get_x()][pos.get_y()] == Variable.get_case_bateau():
-                        untouched_ship_cells.append((pos.get_x(), pos.get_y()))
-
-        empty_cells = []
-        for x in range(Variable.get_size_grid()):
-            for y in range(Variable.get_size_grid()):
->>>>>>> Stashed changes
                 if grid[x][y] == Variable.get_case_default():
                     water_cells.append((x, y))
 
@@ -92,7 +75,6 @@ class CheatBot(Player):
         total_ship_cells = sum(len(cells) for _, cells in ship_cells_by_ship)
         success_quota = min(self.success_quota, Variable.SHOTS_PER_TURN, total_ship_cells)
 
-<<<<<<< Updated upstream
         shots = []
         selected = set()
 
@@ -147,21 +129,6 @@ class CheatBot(Player):
                         break
                     if cell in selected:
                         continue
-=======
-        quota = min(self.success_quota, len(untouched_ship_cells))
-
-        shots = []
-        if untouched_ship_cells:
-            random.shuffle(untouched_ship_cells)
-            shots.extend(untouched_ship_cells[:quota])
-
-        if empty_cells:
-            random.shuffle(empty_cells)
-            for cell in empty_cells:
-                if len(shots) >= Variable.SHOTS_PER_TURN:
-                    break
-                if cell not in shots:
->>>>>>> Stashed changes
                     shots.append(cell)
                     selected.add(cell)
                     remaining_successes -= 1
