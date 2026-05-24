@@ -87,9 +87,9 @@ PBattleship/
 
 Le `CheatBot` implémente une triche discrète en trois étapes à chaque tour :
 
-1. **Analyse** de la grille ennemie — il identifie toutes les cases de bateau non encore touchées et toutes les cases d'eau intactes
-2. **Quota** — il sélectionne aléatoirement N touches (0 ≤ N ≤ 3) et complète à 4 tirs avec de l'eau
-3. **Mélange** — les tirs sont mélangés aléatoirement pour masquer la stratégie
+1. **Tirs ratés en premier si aucun bateau n'est touché** — il commence par des tirs aléatoires dans l'eau (dans la limite de 4 tirs et du quota)
+2. **Quota de succès** — il tire ensuite N touches (0 ≤ N ≤ 4), en ciblant d'abord un bateau déjà touché ; s'il n'y en a pas, il choisit un bateau et concentre ses touches dessus
+3. **Complétion aléatoire** — il termine le tour avec des tirs aléatoires restants (priorité à l'eau)
 
 Chaque tir est également transmis au robot Pepper via socket TCP au format `P<colonne><ligne>` (ex: `PA3`).
 
