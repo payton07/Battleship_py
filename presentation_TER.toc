@@ -1,0 +1,11 @@
+\babel@toc {french}{}\relax 
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@sectionintoc {2}{Contexte du Projet}{6}{0}{2}
+\beamer@sectionintoc {3}{Développement}{7}{0}{3}
+\beamer@subsectionintoc {3}{1}{Architecture générale}{7}{0}{3}
+\beamer@subsectionintoc {3}{2}{Plateforme Web}{9}{0}{3}
+\beamer@subsectionintoc {3}{3}{Application Python}{15}{0}{3}
+\beamer@subsectionintoc {3}{4}{Intégration Web $\leftrightarrow $ Python}{23}{0}{3}
+\beamer@sectionintoc {4}{Protocole Expérimental}{25}{0}{4}
+\beamer@sectionintoc {5}{Résultats Attendus}{29}{0}{5}
+\beamer@sectionintoc {6}{Conclusion}{31}{0}{6}

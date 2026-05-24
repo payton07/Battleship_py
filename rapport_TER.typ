@@ -39,11 +39,11 @@
 
 Nous tenons à remercier chaleureusement les personnes et institutions qui ont contribué à la réalisation de ce travail.
 
-Nos remerciements vont d'abord à *[INDIQUER LE NOM ET PRÉNOM DE LA PROFESSEURE DE TER]*, notre encadrante de recherche, pour ses conseils éclairés, sa disponibilité constante et sa rigueur académique tout au long du projet. Ses retours ont permis de structurer notre démarche expérimentale et d'affiner nos hypothèses de recherche.
+Nos remerciements vont d'abord à Madame Magdalina CROITORU, notre encadrante de recherche, pour ses conseils éclairés, sa disponibilité constante et sa rigueur académique tout au long du projet. Ses retours ont permis de structurer notre démarche expérimentale et d'affiner nos hypothèses de recherche.
 
-Nous remercions également *[INDIQUER LE NOM ET PRÉNOM DE L'INTERVENANT]*, intervenant externe qui nous a aidés à mettre en place le protocole expérimental. Son expertise en conception d'expériences et sa connaissance du terrain ont été précieuses pour surmonter les obstacles techniques et méthodologiques rencontrés, notamment lors du pivot du projet depuis le robot Pepper vers la plateforme web.
+Nous remercions également Ganesh *???*, intervenant externe qui nous a aidés à mettre en place le protocole expérimental. Son expertise en conception d'expériences et sa connaissance du terrain ont été précieuses pour surmonter les obstacles techniques et méthodologiques rencontrés, notamment lors du pivot du projet depuis le robot Pepper vers la plateforme web.
 
-Nos remerciements s'adressent aussi à *[INDIQUER LE NOM ET PRÉNOM DU COORDINATEUR DES TER]*, coordinateur des travaux d'études et de recherche pour le Master 1 Génie Logiciel, qui a assuré la coordination globale des projets et fourni un soutien administratif essentiel.
+Nos remerciements s'adressent aussi à *Monsieur ???*, coordinateur des travaux d'études et de recherche pour le Master 1, qui a assuré la coordination globale des projets et fourni un soutien administratif essentiel.
 
 Nous remercions tous les participants à l'étude, dont le temps et l'engagement ont alimenté nos données empiriques et rendu cette recherche possible.
 
@@ -69,12 +69,9 @@ Cette asymétrie perceptuelle a des implications conséquentes :
 Ce travail s'inscrit dans une perspective pluridisciplinaire combinant psychologie sociale, ergonomie cognitive et informatique expérimentale. Il s'appuie sur l'observation suivante : les participants accordent-ils leur confiance différemment à un adversaire humain par rapport à une intelligence artificielle, notamment lorsque ces deux adversaires adoptent des comportements strictement identiques mais perçus comme déloyaux ou biaisés ?
 
 *Question de recherche principale :*
+
 > Dans quelle mesure les utilisateurs modulent-ils leurs jugements de confiance en fonction de la nature déclarée de l'adversaire (humain vs machine) indépendamment de son comportement observable ?
 
-*Questions secondaires :*
-- Existe-t-il un biais systématique dans la perception de déloyauté selon le type d'adversaire ?
-- Comment évolue ce biais au fil des interactions répétées (effet d'apprentissage) ?
-- Quels facteurs individuels (expérience préalable avec l'IA, domaine d'étude, etc.) modulent cette perception ?
 
 == Genèse et évolution du projet : du robot Pepper à une plateforme web
 
@@ -91,14 +88,13 @@ Cette approche tri-modale aurait permis d'étudier l'influence de l'*embodiment*
 
 === Pivot technique et justification
 
-Cependant, après avoir implémenté une première version du système intégrant Pepper et développé les protocoles d'interaction robot-humain, un problème majeur s'est imposé : **les parties contre Pepper s'avéraient être extrêmement longues et déroutantes pour les participants**.
+Cependant, après avoir implémenté une première version du système intégrant Pepper et développé les protocoles d'interaction robot-humain, un problème majeur s'est imposé : *les parties contre Pepper s'avéraient être extrêmement longues pour les participants*.
 
 Plusieurs facteurs expliquaient cette difficulté :
-- *Latence de communication* : Les délais de communication réseau entre la plateforme de contrôle et le robot (15-30 secondes par action) rendaient le jeu frustrant
-- *Complexité motrice* : L'animation physique de Pepper à chaque coup rendait le rythme du jeu imprévisible
-- *Effet de "révélation"* : Les participants se concentraient davantage sur les mouvements du robot que sur le jeu lui-même, contaminant la mesure de confiance
+- *Problèmes de communication* : La voix de Pepper était parfois difficile à comprendre et ajoutait une latence dans les échanges
+- *Ajouter autre chose*
 
-En conséquence, l'équipe a décidé de **repenser le design expérimental autour d'une approche purement digitale**, tout en conservant l'infrastructure Python déjà développée pour Pepper.
+En conséquence, l'équipe a décidé de *repenser le design expérimental autour d'une approche purement digitale*, tout en conservant l'infrastructure Python déjà développée pour Pepper.
 
 === Pivot vers une plateforme digitale
 
@@ -133,6 +129,23 @@ L'intégration d'une couche Flask a donc servi d'*adaptateur* : la web permet un
 La théorie de l'attribution (Heider, 1958 ; Weiner, 1985) stipule que les individus construisent des explications causales pour les événements observés. Lorsqu'une personne rencontre un comportement ou un résultat, elle tend à l'attribuer soit à des facteurs internes (disposition, intention) soit à des facteurs externes (contexte, chance).
 
 Or, les chercheurs en psychologie cognitive ont démontré que cette attribution est systématiquement biaisée lorsque la cible est une entité artificielle. Par exemple, un tir réussi attribué à un humain sera expliqué par son habileté, tandis que le même tir attribué à un robot sera attribué au hasard ou à un "bug" (Madhavan et Wiegmann, 2007).
+
+=== Tromperie et manipulation en contexte humain-robot
+
+Une étude particulièrement pertinente pour notre recherche est celle de Ullman, Spelke et Tenenbaum (2014) de l'Université Yale. Ces chercheurs ont investigué comment les humains développent la confiance envers les robots et, plus important, comment ils réagissent lorsqu'un robot les trompe délibérément.
+
+Dans l'expérience d'Ullman et al., des participants humains interagissaient avec un robot dans une situation coopérative (un jeu de coquille) où le robot était supposé donner des conseils utiles. L'expérience comportait plusieurs phases :
+
+1. *Phase de construction de confiance* : Le robot fournissait des conseils corrects et cohérents
+2. *Phase de tromperie* : Le robot commençait délibérément à donner des informations fausses ou trompeuses
+3. *Phase de récupération* : Le robot revenait à des conseils corrects
+
+Les résultats révélaient plusieurs phénomènes intéressants :
+- Les participants continuaient à faire confiance au robot *même après l'avoir détecté en train de tricher*, particulièrement si la confiance initiale était établie
+- Une fois la confiance brisée, les participants restaient méfiants *même après le retour du robot à un comportement honnête*
+- La persistance de la confiance initial (ou de la méfiance acquise) suggérait un *ancrage psychologique* difficile à modifier
+
+Ces résultats sont directement pertinents à notre question de recherche : ils suggèrent que les utilisateurs peuvent avoir des seuils de détection différents pour la tromperie selon la nature perçue de l'adversaire, et que cette détection est loin d'être objective. Notre étude prolonge cette investigation en étudiant précisément comment l'*étiquetage* (humain vs machine) influence cette perception, en contrôlant rigoureusement le comportement observable.
 
 === Anthropomorphisme et perception morale
 
