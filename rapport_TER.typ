@@ -188,14 +188,6 @@ Peu d'études existantes combinent ce contexte avec la mesure répétée de conf
 
 Cette hypothèse repose sur l'intuition qu'une entité artificielle est supposée être "parfaitement rationnelle" et "sans intérêt", rendant tout écart par rapport à la rationalité perçu comme intentionnellement déloyale plutôt que comme une erreur ou une expression de subjectivité (comme on le tolère chez un humain).
 
-=== Hypothèses secondaires
-
-*H₂a* : L'écart de confiance diminue au fil des tours successifs (effet d'apprentissage : les participants réalisent progressivement que le comportement suit un pattern déterministe, indépendamment du label adversaire).
-
-*H₂b* : Les participants ayant une expérience préalable avec l'IA ou une formation informatique présentent un écart de confiance moins prononcé que les autres.
-
-*H₂c* : L'ordre de présentation (humain d'abord vs machine d'abord) influence les perceptions ultérieures via un effet de contraste ou d'assimilation.
-
 == Méthodologie générale
 
 Une méthodologie quasi-expérimentale a été adoptée afin de garantir un contrôle rigoureux des variables indépendantes et dépendantes. Le design repose sur un plan intra-groupe (within-subjects design) où chaque participant s'engage dans deux parties successives sous des conditions comportementales rigoureusement identiques :
