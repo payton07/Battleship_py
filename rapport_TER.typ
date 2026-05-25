@@ -75,7 +75,6 @@ Ce travail s'inscrit dans une perspective pluridisciplinaire combinant psycholog
 
 #h(1em) Dans quelle mesure les utilisateurs modulent-ils leurs jugements de confiance en fonction de la nature déclarée de l'adversaire (humain vs IA) indépendamment de son comportement observable ?
 
-
 == Genèse et évolution du projet : du robot Pepper à une plateforme web
 
 === Contexte initial et objectif ambitieux
@@ -700,7 +699,7 @@ Les caractéristiques sociodémographiques sont décrites en 5.1.1. L'analyse de
 Les évaluations de confiance (échelle 0-5, indiquant la perception de déloyauté) ont été collectées pour chaque tour de chaque partie. On peut présenter les résultats sous forme d'histogramme de la distribution des scores par condition (IA vs Humain) et par quota de réussite du bot.
 
 #figure(
-  image("diagrams/plot_quota_comparison.png", width: 90%),
+  image("diagrams/plot_quota_comparison.png", width: 100%),
   caption: "Suspicion moyenne par quota (IA vs Humain)."
 )
 
@@ -718,7 +717,7 @@ Les résultats descriptifs montrent une suspicion moyenne plus élevée lorsque 
 - *Variabilité inter-individuelle* : Identification de profils distincts
 
 #figure(
-  image("plot_trust_effects.png", width: 95%),
+  image("plot_trust_effects.png", width: 100%),
   caption: "Analyses secondaires : effet d'ordre, effet de tour et variabilité inter-individuelle."
 )
 
@@ -737,13 +736,6 @@ Cependant, ces observations restent exploratoires en l'absence de tests statisti
 
 Les résultats descriptifs sont compatibles avec *H₁* : à comportement identique, l'IA est jugée plus suspecte que l'humain, ce qui va dans le sens d'un biais d'étiquetage. *H₂a* (diminution de l'écart au fil des tours) n'est pas clairement confirmée : les scores augmentent plutôt en fin de partie, avec un écart IA/humain qui reste présent. *H₂b* (effet d'ordre) est suggérée par la moyenne plus élevée chez les participants ayant commencé par la machine, mais cet effet reste exploratoire en l'absence de test statistique formel et compte tenu de la taille de l'échantillon.
 
-=== Implications théoriques
-
-Ces résultats contribuent à la compréhension des mécanismes de confiance interpersonnelle et des biais de perception liés à l'IA. Ils éclairent notamment :
-- Le rôle de la catégorisation (humain vs IA) dans les jugements moraux
-- Les vulnérabilités des utilisateurs face aux comportements perçus comme déloyaux
-- Les applications potentielles dans la conception d'interfaces homme-machine
-
 === Limitations et perspectives futures
 
 Plusieurs limites méthodologiques doivent être signalées. L'échantillon est restreint (20 participants, 29 parties) et de convenance (proches, amis/famille), ce qui limite la représentativité et la généralisation des résultats. La population est déséquilibrée en termes de genre (≈ 80\% d'hommes) et les caractéristiques sociodémographiques détaillées ne sont pas systématiquement enregistrées, empêchant des analyses fines par sous-groupes. Enfin, l'étude reste ponctuelle et ne contrôle pas totalement l'effet d'apprentissage ou d'habituation d'une partie à l'autre.
@@ -752,9 +744,9 @@ Plusieurs limites méthodologiques doivent être signalées. L'échantillon est 
 
 = Conclusion
 
-Cette étude offre une contribution empirique à la question fondamentale des biais de confiance dans les interactions compétitives homme-machine. En isolant le rôle du label d'adversaire (humain vs IA) tout en maintenant un comportement de jeu identique, elle permet une évaluation rigoureuse de la manière dont les utilisateurs réagissent différemment selon la nature perçue de leur adversaire.
+Cette étude apporte un éclairage sur la manière dont l'étiquetage « humain » vs « IA » module la perception de déloyauté pour un même comportement. Au-delà des résultats, le projet nous a appris l'importance du contrôle expérimental : pour isoler un biais perceptif, il faut garantir une stricte équivalence des stimuli (mêmes quotas, même logique d'action) et tracer finement chaque interaction en base. Le pivot technique vers une plateforme web a également montré qu'une instrumentation robuste et une UX fluide sont indispensables pour collecter des données exploitables. Enfin, l'analyse met en évidence la variabilité inter‑individuelle, rappelant qu'un même comportement n'est pas perçu de manière uniforme, ce qui invite à nuancer toute conclusion globale sur la « confiance ».
 
-Les implications de cette recherche dépassent le contexte ludique pour toucher à des enjeux plus larges d'acceptabilité, de confiance, et de coopération dans les environnements intégrant l'intelligence artificielle.
+Les implications dépassent le cadre ludique : ces résultats soutiennent l'idée que les jugements portés sur les agents artificiels ne dépendent pas uniquement de leur performance objective, mais aussi de leur catégorisation. Cela ouvre des pistes concrètes pour le design d'IA responsables (transparence, cadrage, communication) et pour des protocoles expérimentaux mieux outillés afin d'étudier les effets d'étiquetage en contexte réel.
 
 #pagebreak()
 #bibliography("references.bib", style: "ieee")
