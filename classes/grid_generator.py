@@ -25,7 +25,7 @@ class GridGenerator:
                 ship = Ship(size, Position(x, y), orient)
                 # On utilise la validation de Grid qui vérifie les collisions et les bords
                 if grid.place_ship(ship):
-                    ship_configs.append((size, x, y, orient.value))
+                    ship_configs.append((size, x, y, orient))
                     placed = True
                 attempts += 1
         

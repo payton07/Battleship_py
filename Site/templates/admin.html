@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Pepper Battleship</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css?v={{ v }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body { padding-top: 65px; }
+
+    .admin-header {
+      padding: 40px 40px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .admin-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .admin-sub { color: var(--muted); font-size: .88rem; }
+    .refresh-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Stat cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      padding: 32px 40px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .stat-card:hover { border-color: rgba(0,200,255,.3); }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(0,200,255,.05), transparent 60%);
+      pointer-events: none;
+    }
+    .stat-icon { font-size: 1.6rem; margin-bottom: 12px; display: block; }
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-value.orange { color: var(--accent2); }
+    .stat-value.gold   { color: var(--gold); }
+    .stat-value.green  { color: #4ecb8e; }
+    .stat-value.red    { color: #ff6666; }
+    .stat-label { font-size: .78rem; color: var(--muted); letter-spacing: .5px; }
+    .stat-sub   { font-size: .72rem; color: var(--muted); margin-top: 4px; opacity: .7; }
+
+    /* ── Charts section ── */
+    .charts-section { padding: 0 40px 32px; }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .charts-grid-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr 260px;
+      gap: 20px;
+    }
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .chart-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-title span { color: var(--accent); }
+    .chart-subtitle {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      opacity: .8;
+    }
+    .chart-wrap { position: relative; height: 200px; }
+
+    /* ── Games table ── */
+    .table-section { padding: 0 40px 60px; }
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .table-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .search-input {
+      padding: 9px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
+      outline: none;
+      width: 220px;
+      transition: border-color .2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--muted); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+      cursor: pointer;
+      user-select: none;
+    }
+    thead th:hover { color: var(--accent); }
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    tbody tr:hover { background: rgba(0,200,255,.04); }
+    tbody td { padding: 13px 16px; color: var(--text); vertical-align: middle; }
+    .td-muted { color: var(--muted); font-size: .8rem; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .badge-bot      { background: rgba(255,85,0,.15);    color: var(--accent2); border: 1px solid rgba(255,85,0,.3); }
+    .badge-player   { background: rgba(0,200,255,.12);   color: var(--accent);  border: 1px solid rgba(0,200,255,.25); }
+    .badge-none     { background: rgba(255,255,255,.05); color: var(--muted);   border: 1px solid var(--border); }
+    .badge-detected { background: rgba(255,100,100,.12); color: #ff6666;        border: 1px solid rgba(255,100,100,.3); }
+    .badge-clean    { background: rgba(0,200,100,.12);   color: #4ecb8e;        border: 1px solid rgba(0,200,100,.3); }
+
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+    .trust-0,.trust-1 { background:rgba(0,200,100,.12);  color:#4ecb8e;         border:1px solid rgba(0,200,100,.25); }
+    .trust-2,.trust-3 { background:rgba(255,179,0,.12);  color:var(--gold);     border:1px solid rgba(255,179,0,.25); }
+    .trust-4,.trust-5 { background:rgba(255,85,0,.15);   color:var(--accent2);  border:1px solid rgba(255,85,0,.3); }
+
+    .btn-detail {
+      padding: 5px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-detail:hover { border-color: var(--accent); color: var(--accent); }
+
+    .empty-row td {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    /* ── Detail modal ── */
+    .modal-overlay { align-items: flex-start; padding: 60px 20px; overflow-y: auto; }
+    .detail-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      overflow: hidden;
+      animation: modal-up .35s cubic-bezier(.22,1,.36,1);
+    }
+    .detail-header {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .detail-header-left h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .detail-header-left p { font-size: .82rem; color: var(--muted); }
+    .detail-close {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+    .detail-close:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    .detail-meta {
+      padding: 20px 32px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .meta-label { font-size: .68rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+    .meta-value { font-size: .95rem; font-weight: 700; }
+
+    .detail-turns { padding: 24px 32px; }
+    .turns-title {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .turn-row {
+      display: grid;
+      grid-template-columns: 60px 100px 1fr 90px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .turn-row:last-child { border-bottom: none; }
+    .turn-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+    .turn-quota { font-size: .78rem; color: var(--muted); }
+    .turn-quota strong { color: var(--text); }
+    .quota-bar {
+      display: inline-block;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--accent);
+      margin-left: 6px;
+      vertical-align: middle;
+      opacity: .5;
+    }
+    .shots-list { display: flex; gap: 6px; flex-wrap: wrap; }
+    .shot-chip {
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: .72rem;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .shot-hit   { background: rgba(204,34,34,.2);  color: #ff6666;     border: 1px solid rgba(204,34,34,.4); }
+    .shot-sunk  { background: rgba(204,136,0,.2);  color: var(--gold); border: 1px solid rgba(204,136,0,.4); }
+    .shot-miss  { background: rgba(26,61,107,.4);  color: #6699cc;     border: 1px solid rgba(26,61,107,.5); }
+    .turn-trust-val {
+      text-align: right;
+      font-family: 'Orbitron', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .tab-btn {
+      padding: 9px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tab-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,200,255,.08); }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px;
+      color: var(--muted);
+      gap: 12px;
+    }
+
+    @media (max-width: 1100px) {
+      .charts-grid-bottom { grid-template-columns: 1fr 1fr; }
+      .charts-grid-bottom > :last-child { grid-column: span 2; }
+    }
+    @media (max-width: 900px) {
+      .stats-grid { padding: 24px 20px; }
+      .charts-grid, .charts-grid-bottom { grid-template-columns: 1fr; }
+      .charts-section,.table-section { padding-left: 20px; padding-right: 20px; }
+      .admin-header { padding: 24px 20px; }
+      .turn-row { grid-template-columns: 48px 1fr; }
+      .turn-row > :nth-child(3), .turn-row > :nth-child(4) { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">⚓ PEPPER<span> BATTLESHIP</span></a>
+  <div class="nav-links">
+    <a href="/">Accueil</a>
+    <a href="/game">Jouer</a>
+    <a href="/admin" style="color:var(--accent);">Admin</a>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span style="font-family:'Orbitron',sans-serif; font-size:.7rem; letter-spacing:2px; color:var(--muted); padding:6px 14px; border:1px solid var(--border); border-radius:6px;">
+      RESEARCH DASHBOARD
+    </span>
+    <button onclick="logout()" style="padding:6px 14px; border:1px solid rgba(255,85,0,.4); border-radius:6px; background:transparent; color:#ff6666; font-size:.78rem; font-weight:600; cursor:pointer;">
+      Déconnexion
+    </button>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<div class="admin-header">
+  <div class="admin-header-top">
+    <div>
+      <div class="admin-title">Tableau de bord</div>
+      <div class="admin-sub">Données collectées — Pepper Battleship · TER M1 GL</div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="refresh-btn" onclick="loadAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8M3 16l3 3a9 9 0 0 0 15-7"/>
+        </svg>
+        Actualiser
+      </button>
+      <button class="refresh-btn" onclick="resetAll()" style="border-color:rgba(255,85,0,.4); color:#ff6666;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+        Vider la base
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="stats-grid" id="stats-grid">
+  <div class="stat-card"><span class="stat-icon">⏳</span><div class="stat-value">—</div><div class="stat-label">Chargement…</div></div>
+</div>
+
+<!-- CHARTS -->
+<div class="charts-section">
+
+  <!-- Ligne 1 : suspicion Likert + détection binaire par quota -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Distribution des scores de suspicion</div>
+      <div class="chart-subtitle">Likert 0–5 par tour · tous joueurs</div>
+      <div class="chart-wrap"><canvas id="chart-trust"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Taux de détection binaire par quota</div>
+      <div class="chart-subtitle">% de parties où le joueur a dit "Oui, il a triché" · quota 0–4</div>
+      <div class="chart-wrap"><canvas id="chart-detection"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Ligne 2 : quota→suspicion moyenne + victoires -->
+  <div class="charts-grid-bottom">
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Quota bot → Suspicion moyenne / tour</div>
+      <div class="chart-subtitle">Score Likert moyen selon le quota du tour · quota 0–4</div>
+      <div class="chart-wrap"><canvas id="chart-quota"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Quota bot → Hits effectifs moyens</div>
+      <div class="chart-subtitle">Nombre de touches/coulés moyens par tour selon le quota</div>
+      <div class="chart-wrap"><canvas id="chart-hits"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span>■</span> Victoires</div>
+      <div class="chart-wrap" style="height:160px;"><canvas id="chart-wins"></canvas></div>
+      <div id="wins-legend" style="margin-top:14px; font-size:.78rem; color:var(--muted); text-align:center;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TABS -->
+<div class="table-section">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+    <div style="display:flex; gap:8px;">
+      <button class="tab-btn active" id="tab-games" onclick="switchTab('games')">📋 Parties</button>
+      <button class="tab-btn" id="tab-players" onclick="switchTab('players')">👥 Joueurs</button>
+      <button class="tab-btn" id="tab-personas" onclick="switchTab('personas')">🎭 Personnages</button>
+    </div>
+    <div id="tab-controls-games" style="display:flex; gap:10px; align-items:center;">
+      <input type="text" class="search-input" id="search-input" placeholder="🔍 Rechercher un joueur…">
+    </div>
+    <div id="tab-controls-players" style="display:none;">
+      <input type="text" class="search-input" id="search-players-input" placeholder="🔍 Rechercher…">
+    </div>
+    <div id="tab-controls-personas" style="display:none;"></div>
+  </div>
+
+  <!-- TABLE PARTIES -->
+  <div id="panel-games">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('id')">#</th>
+            <th onclick="sortTable('player_name')">Joueur</th>
+            <th onclick="sortTable('date_played')">Date</th>
+            <th onclick="sortTable('date_played')">Heure</th>
+            <th onclick="sortTable('turn_count')">Tours</th>
+            <th onclick="sortTable('winner')">Gagnant</th>
+            <th onclick="sortTable('avg_trust')">Suspicion moy.</th>
+            <th onclick="sortTable('trust_final')">Verdict</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="games-tbody">
+          <tr class="empty-row"><td colspan="9">Chargement des données…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PANEL PERSONNAGES -->
+  <div id="panel-personas" style="display:none;">
+    <!-- Formulaire de création -->
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:24px 28px; margin-bottom:20px;">
+      <div style="font-family:'Orbitron',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:16px;">
+        + Créer un personnage
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label style="font-size:.72rem; color:var(--muted); letter-spacing:1px;">EMOJI</label>
+          <input type="text" id="new-persona-emoji" class="search-input" placeholder="🤖" maxlength="4" style="width:70px; text-align:center; font-size:1.2rem;">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; flex:1; min-width:140px;">
+          <label style="font-size:.72rem; color:var(--muted); letter-spacing:1px;">NOM *</label>
+          <input type="text" id="new-persona-name" class="search-input" placeholder="Ex: Mallory" maxlength="32" style="width:100%;">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; flex:2; min-width:200px;">
+          <label style="font-size:.72rem; color:var(--muted); letter-spacing:1px;">DESCRIPTION</label>
+          <input type="text" id="new-persona-desc" class="search-input" placeholder="Ex: L'adversaire mystérieux…" maxlength="200" style="width:100%;">
+        </div>
+        <button class="refresh-btn" onclick="createPersona()" style="border-color:rgba(0,200,255,.4); color:var(--accent); white-space:nowrap;">
+          + Créer
+        </button>
+      </div>
+      <div id="persona-create-error" style="color:#ff6666; font-size:.78rem; margin-top:8px; display:none;"></div>
+    </div>
+
+    <!-- Liste des personnages -->
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>Emoji</th>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="personas-tbody">
+          <tr class="empty-row"><td colspan="5">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABLE JOUEURS -->
+  <div id="panel-players" style="display:none;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortPlayers('player_name')">Joueur</th>
+            <th onclick="sortPlayers('game_count')">Parties</th>
+            <th onclick="sortPlayers('first_seen')">Première visite</th>
+            <th onclick="sortPlayers('last_seen')">Dernière visite</th>
+            <th onclick="sortPlayers('avg_trust')">Suspicion moy.</th>
+            <th onclick="sortPlayers('detected_count')">A détecté</th>
+            <th onclick="sortPlayers('player_wins')">Victoires</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="players-tbody">
+          <tr class="empty-row"><td colspan="8">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="detail-modal" id="detail-modal-content">
+    <div class="loading"><div class="spinner"></div> Chargement…</div>
+  </div>
+</div>
+
+<script>
+let chartTrust = null, chartDetection = null, chartQuota = null, chartHits = null, chartWins = null;
+let allGames = [], sortKey = 'id', sortAsc = false;
+let allPlayers = [], playerSortKey = 'last_seen', playerSortAsc = false;
+let allPersonas = [];
+
+const COLS = 'ABCDEFGHIJ';
+const QUOTA_MAX = 4;
+
+function formatDate(iso) {
+  if (!iso) return { date: '—', time: '—' };
+  const pad = n => String(n).padStart(2, '0');
+  let d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    const n = String(iso).trim().replace(' ', 'T');
+    d = new Date(n.includes('Z') || n.includes('+') ? n : n + 'Z');
+  }
+  if (isNaN(d.getTime())) return { date: '—', time: '—' };
+  return {
+    date: `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`,
+    time: `${pad(d.getHours())}h${pad(d.getMinutes())}`
+  };
+}
+
+const chartDefaults = {
+  plugins: {
+    legend: { display: false },
+    tooltip: { backgroundColor: '#0C0F23', borderColor: 'rgba(0,200,255,.2)', borderWidth: 1 }
+  },
+  scales: {
+    x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399' } },
+    y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399' } },
+  }
+};
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  ['games','players','personas'].forEach(t => {
+    $(`panel-${t}`).style.display         = t === tab ? '' : 'none';
+    $(`tab-controls-${t}`).style.display  = t === tab ? '' : 'none';
+    $(`tab-${t}`).classList.toggle('active', t === tab);
+  });
+  if (tab === 'players'  && !allPlayers.length)  loadPlayers();
+  if (tab === 'personas' && !allPersonas.length) loadPersonas();
+}
+
+// ─── Load all ────────────────────────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadOverview(), loadGames()]);
+  if ($('panel-players').style.display  !== 'none') loadPlayers();
+  if ($('panel-personas').style.display !== 'none') loadPersonas();
+}
+
+// ─── Overview ────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  const d = await fetch('/api/admin/overview').then(r => r.json());
+  if (d.error) return;
+  renderStatCards(d);
+  renderTrustChart(d.trust_distribution);
+  renderDetectionChart(d.quota_detection);
+  renderQuotaChart(d.quota_trust);
+  renderHitsChart(d.quota_trust);
+  renderWinsChart(d.player_wins, d.bot_wins);
+}
+
+function renderStatCards(d) {
+  const botPct = d.total_games ? Math.round(d.bot_wins / d.total_games * 100) : 0;
+  const detRate = d.detection_rate !== null ? d.detection_rate + '%' : '—';
+  const detSub  = d.answered_count ? `${d.detected_count} / ${d.answered_count} parties` : 'aucun verdict';
+
+  $('stats-grid').innerHTML = `
+    <div class="stat-card">
+      <span class="stat-icon">🎮</span>
+      <div class="stat-value">${d.total_games}</div>
+      <div class="stat-label">Parties jouées</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <div class="stat-value">${d.unique_players}</div>
+      <div class="stat-label">Joueurs uniques</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📊</span>
+      <div class="stat-value">${d.total_turns}</div>
+      <div class="stat-label">Tours analysés</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">⭐</span>
+      <div class="stat-value gold">${d.avg_trust}</div>
+      <div class="stat-label">Suspicion moy. / tour (0–5)</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🎯</span>
+      <div class="stat-value">${d.avg_hits_per_turn}</div>
+      <div class="stat-label">Touches bot / tour en moy.</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🚨</span>
+      <div class="stat-value red">${detRate}</div>
+      <div class="stat-label">Taux de détection finale</div>
+      <div class="stat-sub">${detSub}</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🤖</span>
+      <div class="stat-value orange">${botPct}%</div>
+      <div class="stat-label">Victoires bot (${d.bot_wins} parties)</div>
+    </div>
+  `;
+}
+
+function trustColor(score) {
+  const colors = ['#4ecb8e','#a8d86e','#f0c040','#f5903a','#f05030','#cc2222'];
+  return colors[Math.min(Math.round(score), 5)] || '#6B7399';
+}
+
+// Graphique 1 : Distribution Likert 0–5
+function renderTrustChart(dist) {
+  const labels = ['0','1','2','3','4','5'];
+  const data   = labels.map(k => dist[k] || 0);
+  const colors = labels.map(k => trustColor(parseInt(k)));
+
+  if (chartTrust) chartTrust.destroy();
+  chartTrust = new Chart($('chart-trust'), {
+    type: 'bar',
+    data: {
+      labels: labels.map(l => `Score ${l}`),
+      datasets: [{ data, backgroundColor: colors, borderRadius: 5, borderSkipped: false }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', stepSize: 1 },
+             title: { display: true, text: 'Nb de tours', color: '#6B7399', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+// Graphique 2 : Taux de détection binaire par quota (0–4)
+function renderDetectionChart(data) {
+  if (!data || !data.length) return;
+
+  // Assure qu'on a tous les quotas 0–4 même si pas de données
+  const filled = Array.from({length: QUOTA_MAX + 1}, (_, q) => {
+    const row = data.find(r => r.quota === q);
+    return row ? row.rate : null;
+  });
+
+  const colors = filled.map(v => {
+    if (v === null) return 'rgba(255,255,255,.1)';
+    if (v >= 70) return 'rgba(204,34,34,.7)';
+    if (v >= 40) return 'rgba(255,179,0,.7)';
+    return 'rgba(78,203,142,.7)';
+  });
+
+  if (chartDetection) chartDetection.destroy();
+  chartDetection = new Chart($('chart-detection'), {
+    type: 'bar',
+    data: {
+      labels: ['Quota 0','Quota 1','Quota 2','Quota 3','Quota 4'],
+      datasets: [{
+        data: filled,
+        backgroundColor: colors,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#6B7399', callback: v => v + '%' },
+          min: 0, max: 100,
+          title: { display: true, text: 'Taux "Oui, triché" (%)', color: '#6B7399', font: { size: 10 } }
+        }
+      },
+      plugins: {
+        ...chartDefaults.plugins,
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: {
+            label: (ctx) => {
+              const row = data.find(r => r.quota === ctx.dataIndex);
+              if (!row) return ' Aucune donnée';
+              return ` ${row.rate}%  (${row.detected}/${row.total} parties)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Graphique 3 : Quota → Suspicion Likert moyenne
+function renderQuotaChart(quotaData) {
+  if (!quotaData || !quotaData.length) return;
+
+  const filled = Array.from({length: QUOTA_MAX + 1}, (_, q) => {
+    const row = quotaData.find(r => r.quota === q);
+    return row ? row.avg_trust : null;
+  });
+  const colors = filled.map(v => v !== null ? trustColor(v) : 'rgba(255,255,255,.1)');
+
+  if (chartQuota) chartQuota.destroy();
+  chartQuota = new Chart($('chart-quota'), {
+    type: 'bar',
+    data: {
+      labels: ['Quota 0','Quota 1','Quota 2','Quota 3','Quota 4'],
+      datasets: [{
+        label: 'Suspicion moy.',
+        data: filled,
+        backgroundColor: colors,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#6B7399' },
+          min: 0, max: 5,
+          title: { display: true, text: 'Score moyen (0–5)', color: '#6B7399', font: { size: 10 } }
+        }
+      },
+      plugins: {
+        ...chartDefaults.plugins,
+        tooltip: {
+          ...chartDefaults.plugins.tooltip,
+          callbacks: {
+            afterLabel: (ctx) => {
+              const row = quotaData.find(r => r.quota === ctx.dataIndex);
+              return row ? `  (${row.count} tour${row.count > 1 ? 's' : ''})` : '';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Graphique 4 : Quota → Hits effectifs moyens
+function renderHitsChart(quotaData) {
+  if (!quotaData || !quotaData.length) return;
+  // On réutilise quota_trust qui contient le count; les hits réels viennent du quota lui-même
+  // On trace le quota lui-même comme valeur théorique (hits garantis)
+  const labels = ['Quota 0','Quota 1','Quota 2','Quota 3','Quota 4'];
+  const theoretical = [0, 1, 2, 3, 4];
+
+  if (chartHits) chartHits.destroy();
+  chartHits = new Chart($('chart-hits'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Hits garantis (quota)',
+        data: theoretical,
+        backgroundColor: theoretical.map(v => `rgba(0,200,255,${0.15 + v * 0.15})`),
+        borderColor: theoretical.map(v => `rgba(0,200,255,${0.3 + v * 0.1})`),
+        borderWidth: 1,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6B7399', font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,.05)' },
+          ticks: { color: '#6B7399', stepSize: 1 },
+          min: 0, max: 4,
+          title: { display: true, text: 'Hits garantis / tour', color: '#6B7399', font: { size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+// Graphique 5 : Victoires (doughnut)
+function renderWinsChart(playerW, botW) {
+  if (chartWins) chartWins.destroy();
+  if (!playerW && !botW) return;
+  chartWins = new Chart($('chart-wins'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Joueur', 'Pepper Bot'],
+      datasets: [{
+        data: [playerW, botW],
+        backgroundColor: ['rgba(0,200,255,.7)', 'rgba(255,85,0,.7)'],
+        borderColor:     ['rgba(0,200,255,.4)', 'rgba(255,85,0,.4)'],
+        borderWidth: 2,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#0C0F23', borderColor: 'rgba(0,200,255,.2)', borderWidth: 1 }
+      }
+    }
+  });
+  $('wins-legend').innerHTML = `
+    <span style="color:var(--accent);">■</span> Joueur ${playerW} &nbsp;
+    <span style="color:var(--accent2);">■</span> Bot ${botW}
+  `;
+}
+
+// ─── Personas ────────────────────────────────────────────────────────────────
+async function loadPersonas() {
+  allPersonas = await fetch('/api/admin/personas').then(r => r.json());
+  renderPersonas();
+}
+
+function renderPersonas() {
+  const tbody = $('personas-tbody');
+  if (!allPersonas.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aucun personnage.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allPersonas.map(p => `
+    <tr>
+      <td style="font-size:1.4rem; text-align:center;">${esc(p.emoji || '🤖')}</td>
+      <td><strong>${esc(p.name)}</strong></td>
+      <td class="td-muted">${esc(p.description || '—')}</td>
+      <td>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" ${p.active ? 'checked' : ''} onchange="togglePersona(${p.id}, this.checked)"
+            ${p.name === 'Pepper Bot' ? 'disabled' : ''}>
+          <span style="font-size:.8rem; color:${p.active ? 'var(--accent)' : 'var(--muted)'};">
+            ${p.active ? 'Actif' : 'Inactif'}
+          </span>
+        </label>
+      </td>
+      <td>
+        ${p.name !== 'Pepper Bot' ? `<button class="btn-detail" onclick="deletePersona(${p.id}, '${esc(p.name)}')"
+          style="border-color:rgba(255,85,0,.3); color:#ff6666;">🗑</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function createPersona() {
+  const name  = $('new-persona-name').value.trim();
+  const emoji = $('new-persona-emoji').value.trim() || '🤖';
+  const desc  = $('new-persona-desc').value.trim();
+  const errEl = $('persona-create-error');
+
+  if (!name) { errEl.textContent = 'Le nom est obligatoire.'; errEl.style.display = ''; return; }
+  errEl.style.display = 'none';
+
+  const r = await fetch('/api/admin/personas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, emoji, description: desc })
+  });
+  const data = await r.json();
+  if (!r.ok) { errEl.textContent = data.error || 'Erreur.'; errEl.style.display = ''; return; }
+
+  $('new-persona-name').value  = '';
+  $('new-persona-emoji').value = '';
+  $('new-persona-desc').value  = '';
+  await loadPersonas();
+}
+
+async function togglePersona(id, active) {
+  await fetch(`/api/admin/personas/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active })
+  });
+  const p = allPersonas.find(p => p.id === id);
+  if (p) { p.active = active; renderPersonas(); }
+}
+
+async function deletePersona(id, name) {
+  if (!confirm(`Supprimer le personnage "${name}" ?`)) return;
+  const r = await fetch(`/api/admin/personas/${id}`, { method: 'DELETE' });
+  if (r.ok) { allPersonas = allPersonas.filter(p => p.id !== id); renderPersonas(); }
+  else alert('Erreur lors de la suppression.');
+}
+
+// ─── Players table ───────────────────────────────────────────────────────────
+async function loadPlayers() {
+  allPlayers = await fetch('/api/admin/players').then(r => r.json());
+  renderPlayers();
+}
+
+function sortPlayers(key) {
+  if (playerSortKey === key) playerSortAsc = !playerSortAsc;
+  else { playerSortKey = key; playerSortAsc = false; }
+  renderPlayers();
+}
+
+function renderPlayers(filter = '') {
+  const tbody = $('players-tbody');
+  let players = [...allPlayers];
+  if (filter) {
+    const q = filter.toLowerCase();
+    players = players.filter(p => (p.player_name || '').toLowerCase().includes(q));
+  }
+  players.sort((a, b) => {
+    let va = a[playerSortKey] ?? '', vb = b[playerSortKey] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return playerSortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+
+  if (!players.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Aucun joueur trouvé.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = players.map(p => {
+    const first = formatDate(p.first_seen);
+    const last  = formatDate(p.last_seen);
+    const trust = p.avg_trust;
+    const trustClass = trust === null ? 'trust-2'
+      : trust <= 1 ? 'trust-0' : trust <= 3 ? 'trust-2' : 'trust-4';
+    const trustDisplay = trust !== null
+      ? `<span class="trust-pill ${trustClass}">⭐ ${trust}</span>`
+      : '<span class="td-muted">—</span>';
+    const detDisplay = p.answered_count
+      ? `${p.detected_count}/${p.answered_count}`
+      : '<span class="td-muted">—</span>';
+
+    return `
+      <tr>
+        <td><strong>${esc(p.player_name || '?')}</strong></td>
+        <td style="text-align:center;"><span class="badge badge-player">${p.game_count}</span></td>
+        <td class="td-muted">${first}</td>
+        <td class="td-muted">${last}</td>
+        <td>${trustDisplay}</td>
+        <td style="text-align:center;">${detDisplay}</td>
+        <td style="text-align:center;">${p.player_wins || 0}</td>
+        <td>
+          <button class="btn-detail" onclick="deletePlayer('${esc(p.player_name || '')}')"
+            style="border-color:rgba(255,85,0,.3); color:#ff6666;">🗑 Supprimer</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ─── Games table ─────────────────────────────────────────────────────────────
+async function loadGames() {
+  allGames = await fetch('/api/admin/games').then(r => r.json());
+  renderTable();
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = false; }
+  renderTable();
+}
+
+function renderTable(filter = '') {
+  const tbody = $('games-tbody');
+  let games = [...allGames];
+
+  if (filter) {
+    const q = filter.toLowerCase();
+    games = games.filter(g => (g.player_name || '').toLowerCase().includes(q));
+  }
+
+  games.sort((a, b) => {
+    let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return sortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+
+  if (!games.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="9">Aucune partie trouvée.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = games.map(g => {
+    const { date, time } = formatDate(g.date_played);
+
+    const winnerBadge = g.winner === 'Pepper Bot'
+      ? `<span class="badge badge-bot">🤖 Bot</span>`
+      : g.winner
+        ? `<span class="badge badge-player">👤 Joueur</span>`
+        : `<span class="badge badge-none">—</span>`;
+
+    const trust = g.avg_trust;
+    const trustClass = trust === null ? 'trust-2'
+      : trust <= 1 ? 'trust-0' : trust <= 3 ? 'trust-2' : 'trust-4';
+    const trustDisplay = trust !== null
+      ? `<span class="trust-pill ${trustClass}">⭐ ${trust}</span>`
+      : '<span class="td-muted">—</span>';
+
+    const verdictDisplay = g.trust_final === 1
+      ? `<span class="badge badge-detected">🚨 Oui</span>`
+      : g.trust_final === 0
+        ? `<span class="badge badge-clean">✅ Non</span>`
+        : `<span class="td-muted">—</span>`;
+
+    return `
+      <tr onclick="openDetail(${g.id})">
+        <td class="td-muted">#${g.id}</td>
+        <td>
+          <span style="display:flex; align-items:center; gap:6px;">
+            <strong>${esc(g.player_name || '?')}</strong>
+            <button class="btn-detail" title="Supprimer toutes les parties de ce joueur"
+              onclick="event.stopPropagation(); deletePlayer('${esc(g.player_name || '')}')"
+              style="border-color:rgba(255,85,0,.3); color:#ff6666; padding:2px 7px; font-size:.7rem;">🗑</button>
+          </span>
+        </td>
+        <td class="td-muted">${date}</td>
+        <td class="td-muted">${time}</td>
+        <td style="text-align:center;">${g.turn_count || 0}</td>
+        <td>${winnerBadge}</td>
+        <td>${trustDisplay}</td>
+        <td>${verdictDisplay}</td>
+        <td style="display:flex; gap:6px;">
+          <button class="btn-detail" onclick="event.stopPropagation(); openDetail(${g.id})">Détail →</button>
+          <button class="btn-detail" onclick="event.stopPropagation(); deleteGame(${g.id}, '${esc(g.player_name || '?')}')" style="border-color:rgba(255,85,0,.3); color:#ff6666;">✕</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ─── Detail modal ─────────────────────────────────────────────────────────────
+async function openDetail(gameId) {
+  const modal = $('modal-detail');
+  const content = $('detail-modal-content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div> Chargement…</div>';
+  modal.classList.add('active');
+
+  const d = await fetch(`/api/admin/game/${gameId}`).then(r => r.json());
+  if (d.error) {
+    content.innerHTML = `<div class="loading" style="color:var(--accent2);">Erreur : ${d.error}</div>`;
+    return;
+  }
+
+  const g = d.game;
+  const { date, time } = formatDate(g.date_played);
+  const avgTrust = d.turns.length
+    ? (d.turns.filter(t => t.trust_score !== null)
+               .reduce((s, t) => s + t.trust_score, 0)
+       / d.turns.filter(t => t.trust_score !== null).length || 0).toFixed(1)
+    : '—';
+
+  const winnerBadge = g.winner === 'Pepper Bot'
+    ? `<span class="badge badge-bot">🤖 Pepper Bot</span>`
+    : g.winner
+      ? `<span class="badge badge-player">👤 ${esc(g.winner)}</span>`
+      : `<span class="badge badge-none">En cours</span>`;
+
+  const verdictBadge = g.trust_final === 1
+    ? `<span class="badge badge-detected">🚨 Oui, a triché</span>`
+    : g.trust_final === 0
+      ? `<span class="badge badge-clean">✅ Non, normal</span>`
+      : `<span class="badge badge-none">—</span>`;
+
+  const turnsHtml = d.turns.map((t, idx) => {
+    const displayTurn = idx + 1;
+    const shots = (t.shots || []).map(s => {
+      const coord = `${COLS[s.pos_x] || '?'}${s.pos_y}`;
+      const cls = s.result === 'Coulé' ? 'shot-sunk' : s.result === 'Touché' ? 'shot-hit' : 'shot-miss';
+      return `<span class="shot-chip ${cls}">${coord}</span>`;
+    }).join('');
+
+    const hits = (t.shots || []).filter(s => s.result !== 'Raté').length;
+    const quota = t.bot_quota ?? '?';
+    const quotaBarW = quota !== '?' ? Math.round(quota / QUOTA_MAX * 48) : 0;
+    const ts = t.trust_score !== null && t.trust_score !== undefined;
+    const tc = ts
+      ? (t.trust_score >= 4 ? 'var(--accent2)' : t.trust_score >= 3 ? 'var(--gold)' : 'var(--accent)')
+      : 'var(--muted)';
+
+    return `
+      <div class="turn-row">
+        <div class="turn-num">Tour ${displayTurn}</div>
+        <div class="turn-quota">
+          Quota <strong>${quota}</strong>/4
+          <span class="quota-bar" style="width:${quotaBarW}px;"></span>
+          <br><span style="font-size:.7rem;">${hits} hit${hits>1?'s':''}</span>
+        </div>
+        <div class="shots-list">${shots || '<span style="color:var(--muted);font-size:.78rem;">—</span>'}</div>
+        <div class="turn-trust-val" style="color:${tc};">${ts ? '⭐ ' + t.trust_score : '—'}</div>
+      </div>
+    `;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-header-left">
+        <h3>Partie #${g.id} — ${esc(g.player_name || '?')}</h3>
+        <p>${date} ${time} · ${g.player_type || 'Digital'}</p>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-meta">
+      <div class="meta-item">
+        <span class="meta-label">Gagnant</span>
+        <span class="meta-value">${winnerBadge}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Nb de tours</span>
+        <span class="meta-value" style="color:var(--accent);">${d.turns.length}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Suspicion moy. / tour</span>
+        <span class="meta-value" style="color:var(--gold);">⭐ ${avgTrust}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Verdict final</span>
+        <span class="meta-value">${verdictBadge}</span>
+      </div>
+    </div>
+    <div class="detail-turns">
+      <div class="turns-title">Détail des tours du bot</div>
+      <div style="display:grid; grid-template-columns:60px 100px 1fr 90px; gap:12px; padding:0 0 8px; font-size:.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border);">
+        <span>Tour</span><span>Quota/hits</span><span>Tirs</span><span style="text-align:right;">Suspicion</span>
+      </div>
+      ${turnsHtml || '<div style="padding:24px;color:var(--muted);text-align:center;">Aucun tour enregistré.</div>'}
+    </div>
+  `;
+}
+
+function closeDetail() {
+  $('modal-detail').classList.remove('active');
+}
+
+async function deleteGame(gameId, playerName) {
+  if (!confirm(`Supprimer la partie #${gameId} de "${playerName}" ? Cette action est irréversible.`)) return;
+  const r = await fetch(`/api/admin/game/${gameId}`, { method: 'DELETE' });
+  if (r.ok) {
+    allGames = allGames.filter(g => g.id !== gameId);
+    renderTable($('search-input').value);
+    await loadOverview();
+  } else {
+    alert('Erreur lors de la suppression.');
+  }
+}
+
+async function deletePlayer(playerName) {
+  if (!playerName) return;
+  const count = allGames.filter(g => g.player_name === playerName).length;
+  if (!confirm(`Supprimer toutes les parties de "${playerName}" (${count} partie${count > 1 ? 's' : ''}) ? Cette action est irréversible.`)) return;
+  const r = await fetch(`/api/admin/player/${encodeURIComponent(playerName)}`, { method: 'DELETE' });
+  if (r.ok) {
+    allGames   = allGames.filter(g => g.player_name !== playerName);
+    allPlayers = allPlayers.filter(p => p.player_name !== playerName);
+    renderTable($('search-input').value);
+    renderPlayers($('search-players-input').value);
+    await loadOverview();
+  } else {
+    alert('Erreur lors de la suppression.');
+  }
+}
+
+async function resetAll() {
+  if (!confirm('Vider TOUTE la base de données ? Toutes les parties seront supprimées définitivement.')) return;
+  if (!confirm('Confirmer : supprimer toutes les données ?')) return;
+  const r = await fetch('/api/admin/reset', { method: 'POST' });
+  if (r.ok) {
+    await loadAll();
+  } else {
+    alert('Erreur lors de la réinitialisation.');
+  }
+}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.getElementById('modal-detail').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-detail')) closeDetail();
+});
+document.getElementById('search-input').addEventListener('input', e => {
+  renderTable(e.target.value);
+});
+document.getElementById('search-players-input').addEventListener('input', e => {
+  renderPlayers(e.target.value);
+});
+
+async function logout() {
+  await fetch('/admin/logout', {
+    headers: { 'Authorization': 'Basic ' + btoa('logout:logout') }
+  }).catch(() => {});
+  window.location.href = '/';
+}
+
+loadAll();
+</script>
+</body>
+</html>
