@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["500 per day", "100 per hour"],
+    default_limits=["10000 per day"],
     storage_uri="memory://",
 )
 
@@ -366,7 +366,7 @@ def api_personas():
         return jsonify([])
 
 @app.route('/api/game/new', methods=['POST'])
-@limiter.limit("10 per hour")
+@limiter.limit("50 per hour")
 def new_game():
     cleanup_old_games()
     data       = request.json or {}
@@ -386,7 +386,7 @@ def new_game():
     return jsonify({'game_id': gid, 'bot_name': bot_name, 'bot_emoji': bot_emoji})
 
 @app.route('/api/game/<gid>/preview/<int:idx>')
-@limiter.limit("60 per minute")
+@limiter.limit("60 per minute; 3000 per hour")
 def preview(gid, idx):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
@@ -398,6 +398,7 @@ def preview(gid, idx):
     return jsonify({'cells': wg.get_grid_preview(idx)})
 
 @app.route('/api/game/<gid>/select-grid', methods=['POST'])
+@limiter.limit("60 per minute; 1000 per hour")
 def select_grid(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
@@ -411,7 +412,7 @@ def select_grid(gid):
     return jsonify(wg.get_state())
 
 @app.route('/api/game/<gid>/state')
-@limiter.limit("60 per minute")
+@limiter.limit("60 per minute; 3000 per hour")
 def game_state(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
@@ -423,7 +424,7 @@ def game_state(gid):
     return jsonify(state)
 
 @app.route('/api/game/<gid>/shoot', methods=['POST'])
-@limiter.limit("120 per minute; 1000 per hour")
+@limiter.limit("200 per minute; 10000 per hour")
 def shoot(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
@@ -438,7 +439,7 @@ def shoot(gid):
     return jsonify(wg.player_shoot(x, y))
 
 @app.route('/api/game/<gid>/bot-turn', methods=['POST'])
-@limiter.limit("60 per minute; 500 per hour")
+@limiter.limit("120 per minute; 5000 per hour")
 def bot_turn(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
@@ -448,6 +449,7 @@ def bot_turn(gid):
     return jsonify(wg.execute_bot_turn())
 
 @app.route('/api/game/<gid>/final-trust', methods=['POST'])
+@limiter.limit("60 per minute; 1000 per hour")
 def final_trust(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
@@ -461,6 +463,7 @@ def final_trust(gid):
     return jsonify({'ok': True})
 
 @app.route('/api/game/<gid>/turn-trust', methods=['POST'])
+@limiter.limit("60 per minute; 3000 per hour")
 def turn_trust(gid):
     if validate_uuid(gid) is None:
         return jsonify({'error': 'invalid id'}), 400
