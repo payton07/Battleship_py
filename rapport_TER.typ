@@ -13,6 +13,7 @@
     authors: (auteur,),
     date: "Mai 2026",
     lang: "fr",
+    img : image("1683380277628.jpeg", width: auto)
   )
   doc
 }
@@ -652,6 +653,10 @@ Chaque participant est accueilli et informé de la nature générale de l'étude
 
 *Deuxième partie* : Le participant joue une deuxième partie contre un adversaire présenté comme le type opposé. Les conditions de jeu restent identiques.
 
+Pendant chaque partie, l'opposant du participant tirera selon la même séquence de quotas, garantissant un comportement rigoureusement contrôlé. La séquance est la sa suivante : 1, 2, 0, 3, 3, 2, 1, 4, 2, 1, 3 (succès garantis par tour).
+
+Dans cette séquance, le 0 et le 4 n'apparaissent qu'une seul fois car nous faisons l'hypothèse que pour les extrèmes, les participants auront une perception plus claire de la triche (0 = pas de succès donc pas de triche, 4 = tous les tirs réussis donc triche garanti), ce qui pourrait biaiser les résultats. Nous ne souhaitions donc pas que ces extrêmes soient surreprésentés dans la séquence. De plus, il risquerait de biaiser les analyses secondaires (notamment l'effet de tour).
+
 === Mesure de confiance
 
 À la fin de chaque tour, le participant doit répondre à la question suivante sur une échelle de 0 à 5 :
@@ -667,7 +672,7 @@ Les réponses sont enregistrées immédiatement dans la base de données.
 - *4* : Probable qu'il/elle ait triché
 - *5* : Certainement triché
 
-=== Questionnaire post-expérience
+=== Question post-expérience
 
 À l'issue de chaques parties, une question supplémentaire est posée au participant afin de connaître son ressenti général sur la partie : 
 _"Pensez-vous que votre adversaire a triché durant la partie ?"_
@@ -688,14 +693,11 @@ Pour assurer la validité interne de l'étude :
 
 === Caractéristiques de l'échantillon
 
-L'échantillon analysé comprend 20 participants (29 parties exploitables contre *Pepper Bot*, *Mallory* ou *Jayson*). Conformément à la population décrite en 5.1.1, les participants sont majoritairement des hommes (≈ 80\%) et l'âge moyen se situe autour de 25 ans, avec une forte concentration autour de 23 ans. Le recrutement s'est fait essentiellement par l'entourage (amis et famille).
+Les caractéristiques sociodémographiques sont décrites en 5.1.1. L'analyse des résultats porte sur 20 participants (29 parties exploitables contre *Pepper Bot* (IA), *Mallory* ou *Jayson* (Humain)).
 
 === Scores de confiance par condition
 
-Les évaluations de confiance (échelle 0-5, indiquant la perception de déloyauté) ont été collectées pour chaque tour de chaque partie. On peut présenter les résultats de manière descriptive :
-
-- *IA (Pepper Bot)* : moyenne = 2.09, écart-type = 1.78 (n = 150 tours)
-- *Humain (Mallory + Jayson)* : moyenne = 1.57, écart-type = 1.77 (n = 140 tours)
+Les évaluations de confiance (échelle 0-5, indiquant la perception de déloyauté) ont été collectées pour chaque tour de chaque partie. On peut présenter les résultats sous forme d'histogramme de la distribution des scores par condition (IA vs Humain) et par quota de réussite du bot.
 
 #figure(
   image("diagrams/plot_quota_comparison.png", width: 90%),
@@ -704,13 +706,10 @@ Les évaluations de confiance (échelle 0-5, indiquant la perception de déloyau
 
 == Analyse statistique
 
-=== Test de comparaison
+=== Résultats principaux
 
-Un test statistique approprié permettra de tester l'hypothèse principale :
+Les résultats descriptifs montrent une suspicion moyenne plus élevée lorsque l'adversaire est présenté comme une IA que lorsqu'il est présenté comme une IA. Il y a un écart systématique d'environ 0.5 point sur l'échelle de confiance, ce qui suggère un biais d'étiquetage (H₁).
 
-*H₀* : Les évaluations de confiance ne diffèrent pas significativement entre l'adversaire humain et l'adversaire IA.
-
-*H₁* : Les évaluations de confiance diffèrent significativement selon le type d'adversaire.
 
 === Analyses secondaires
 
@@ -723,9 +722,14 @@ Un test statistique approprié permettra de tester l'hypothèse principale :
   caption: "Analyses secondaires : effet d'ordre, effet de tour et variabilité inter-individuelle."
 )
 
-== Résultats principaux
+Pour les analyses secondaires, les tendances suggèrent un effet d'ordre. Les participants ayant commencé par la machine rapportent une suspicion moyenne plus forte lors de leur première partie que ceux ayant commencé par un humain (voir grpahique Effet d'ordre).
 
-Les résultats descriptifs montrent une suspicion moyenne plus élevée lorsque l'adversaire est présenté comme une IA (M = 2.09, ET = 1.78) que lorsqu'il est présenté comme humain (M = 1.57, ET = 1.77). L'effet d'ordre va dans le même sens : les participants ayant commencé par la machine rapportent une suspicion moyenne plus forte lors de leur première partie (M = 2.09, ET = 1.24, n = 9) que ceux ayant commencé par un humain (M = 1.75, ET = 0.79, n = 11). L'évolution par tour indique une hausse progressive des scores en fin de partie, avec des valeurs systématiquement plus élevées côté IA. Enfin, la variabilité inter-individuelle reste marquée : certains joueurs déclarent une suspicion faible dans les deux conditions, tandis que d'autres perçoivent systématiquement plus de triche, ce qui suggère des profils distincts de sensibilité à la déloyauté.
+
+L'évolution par tour indique une hausse progressive des scores en fin de partie, avec des valeurs systématiquement plus élevées côté IA.
+
+Enfin, la variabilité inter-individuelle reste marquée : certains joueurs déclarent une suspicion faible dans les deux conditions, tandis que d'autres perçoivent systématiquement plus de triche, ce qui suggère des profils distincts de sensibilité à la déloyauté.
+
+Cependant, ces observations restent exploratoires en l'absence de tests statistiques formels et compte tenu de la taille limitée de l'échantillon.
 
 == Interprétation et discussion
 
@@ -742,7 +746,7 @@ Ces résultats contribuent à la compréhension des mécanismes de confiance int
 
 === Limitations et perspectives futures
 
-[À compléter : limitations méthodologiques de l'étude et directions de recherche future]
+Plusieurs limites méthodologiques doivent être signalées. L'échantillon est restreint (20 participants, 29 parties) et de convenance (proches, amis/famille), ce qui limite la représentativité et la généralisation des résultats. La population est déséquilibrée en termes de genre (≈ 80\% d'hommes) et les caractéristiques sociodémographiques détaillées ne sont pas systématiquement enregistrées, empêchant des analyses fines par sous-groupes. Enfin, l'étude reste ponctuelle et ne contrôle pas totalement l'effet d'apprentissage ou d'habituation d'une partie à l'autre.
 
 #pagebreak()
 
