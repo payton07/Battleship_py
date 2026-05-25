@@ -74,3 +74,25 @@ LEFT JOIN BotShot bs ON bs.turn_id = t.id
 WHERE t.game_id = 54
 GROUP BY t.turn_number
 ORDER BY t.turn_number;
+
+-- Pepper Bot: average suspicion per quota (based on games where Pepper Bot won)
+SELECT
+  t.bot_quota,
+  ROUND(AVG(t.trust_score)::numeric, 2) AS avg_suspicion
+FROM Turn t
+JOIN Game g ON g.id = t.game_id
+WHERE t.trust_score IS NOT NULL
+  AND g.winner = 'Pepper Bot'
+GROUP BY t.bot_quota
+ORDER BY t.bot_quota;
+
+-- Mallory + Jayson (grouped): average suspicion per quota (based on games they won)
+SELECT
+  t.bot_quota,
+  ROUND(AVG(t.trust_score)::numeric, 2) AS avg_suspicion
+FROM Turn t
+JOIN Game g ON g.id = t.game_id
+WHERE t.trust_score IS NOT NULL
+  AND g.winner IN ('Mallory', 'Jayson')
+GROUP BY t.bot_quota
+ORDER BY t.bot_quota;
