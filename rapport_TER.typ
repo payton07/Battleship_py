@@ -578,14 +578,13 @@ La plateforme calcule nativement les corrélations nécessaires à la recherche 
 - *Taux de détection finale par quota* : proportion de parties où `trust_final = 1` selon le quota dominant, mesure si un quota élevé augmente la détection globale.
 - *Distribution des scores Likert* : répartition 0-5 sur l'ensemble des tours, profil général de suspicion.
 
-\
+#block(width: 110%, inset: (left: -10%))[
+  #figure(
+    table(columns: 3)[#image("diagrams/interfaces_site/accueil.png",width: 100%)][#image("diagrams/interfaces_site/accueil2.png",width: 100%)][#image("diagrams/interfaces_site/config.png",width: 100%)][#image("diagrams/interfaces_site/partie.png",width: 100%)][#image("diagrams/interfaces_site/partie2.png",width: 100%)][#image("diagrams/interfaces_site/partie3.png",width: 100%)][#image("diagrams/interfaces_site/partie4.png",width: 100%)][#image("diagrams/interfaces_site/admin.png",width: 100%)][#image("diagrams/interfaces_site/admin1.png")],
+    caption: "Captures d'écran de l'interface web : PBattleship"
+  )
+]
 
-#figure(
-   table(columns: 3)[#image("diagrams/accueil.png",width: 100%)][#image("diagrams/accueil2.png",width: 100%)][#image("diagrams/config.png",width: 100%)][#image("diagrams/partie.png",width: 100%)][#image("diagrams/partie2.png",width: 100%)][#image("diagrams/partie3.png",width: 100%)][#image("diagrams/partie4.png",width: 100%)][#image("diagrams/admin.png",width: 100%)][#image("diagrams/admin1.png",width: 100%)],
-   caption: "Captures d'écran de l'interface web : PBattleship"
-)
-
-#pagebreak()
 == Interface web & collecte de données
 
 === Séquence d'une partie
