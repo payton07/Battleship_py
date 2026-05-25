@@ -40,11 +40,11 @@
 
 Nous tenons à remercier chaleureusement les personnes et institutions qui ont contribué à la réalisation de ce travail.
 
-Nos remerciements vont d'abord à Madame Magdalina CROITORU, notre encadrante de recherche, pour ses conseils éclairés, sa disponibilité constante et sa rigueur académique tout au long du projet. Ses retours ont permis de structurer notre démarche expérimentale et d'affiner nos hypothèses de recherche.
+Nos remerciements vont d'abord à Madame Madalina CROITORU, notre encadrante de recherche, pour ses conseils éclairés, sa disponibilité constante et sa rigueur académique tout au long du projet. Ses retours ont permis de structurer notre démarche expérimentale et d'affiner nos hypothèses de recherche.
 
-Nous remercions également Ganesh *???*, intervenant externe qui nous a aidés à mettre en place le protocole expérimental. Son expertise en conception d'expériences et sa connaissance du terrain ont été précieuses pour surmonter les obstacles techniques et méthodologiques rencontrés, notamment lors du pivot du projet depuis le robot Pepper vers la plateforme web.
+Nous remercions également Ganesh GOWRISHANKAR, intervenant externe qui nous a aidés à mettre en place le protocole expérimental. Son expertise en conception d'expériences et sa connaissance du terrain ont été précieuses pour surmonter les obstacles techniques et méthodologiques rencontrés, notamment lors du pivot du projet depuis le robot Pepper vers la plateforme web.
 
-Nos remerciements s'adressent aussi à *Monsieur ???*, coordinateur des travaux d'études et de recherche pour le Master 1, qui a assuré la coordination globale des projets et fourni un soutien administratif essentiel.
+Nos remerciements s'adressent aussi à Monsieur Mathieu LAFOURCADE, coordinateur des travaux d'études et de recherche pour le Master 1, qui a assuré la coordination globale des projets et fourni un soutien administratif essentiel.
 
 Nous remercions tous les participants à l'étude, dont le temps et l'engagement ont alimenté nos données empiriques et rendu cette recherche possible.
 
@@ -58,7 +58,7 @@ Enfin, nous exprimons notre gratitude envers nos familles et amis pour leur sout
 
 L'essor de l'intelligence artificielle et des systèmes autonomes transforme profondément les interactions humaines quotidiennes. Des assistants vocaux aux robots collaboratifs, en passant par les systèmes de recommandation et les agents conversationnels, l'IA est devenue omniprésente dans nos environnements de travail et de loisir.
 
-Or, cette prolifération soulève des questions cruciales concernant la confiance, l'acceptabilité et la perception que les utilisateurs ont de ces entités artificielles. Contrairement à ce que suggèrent les modèles classiques de confiance interpersonnelle, les utilisateurs n'appliquent pas les mêmes schémas mentaux lorsqu'ils interagissent avec une machine que lorsqu'ils interagissent avec un humain, même lorsque le comportement observable est strictement identique.
+Or, cette prolifération soulève des questions cruciales concernant la confiance, l'acceptabilité et la perception que les utilisateurs ont de ces entités artificielles. Contrairement à ce que suggèrent les modèles classiques de confiance interpersonnelle, les utilisateurs n'appliquent pas les mêmes schémas mentaux lorsqu'ils interagissent avec une IA que lorsqu'ils interagissent avec un humain, même lorsque le comportement observable est strictement identique.
 
 Cette asymétrie perceptuelle a des implications conséquentes :
 - *En ergonomie* : Comment concevoir des interfaces homme-machine qui favorisent la confiance justifiée sans créer de dépendance excessive ?
@@ -72,7 +72,7 @@ Ce travail s'inscrit dans une perspective pluridisciplinaire combinant psycholog
 
 *Question de recherche principale :*
 
-#h(1em) Dans quelle mesure les utilisateurs modulent-ils leurs jugements de confiance en fonction de la nature déclarée de l'adversaire (humain vs machine) indépendamment de son comportement observable ?
+#h(1em) Dans quelle mesure les utilisateurs modulent-ils leurs jugements de confiance en fonction de la nature déclarée de l'adversaire (humain vs IA) indépendamment de son comportement observable ?
 
 
 == Genèse et évolution du projet : du robot Pepper à une plateforme web
@@ -91,7 +91,7 @@ Cette approche tri-modale aurait permis d'étudier l'influence de l'*embodiment*
 
 === Pivot technique et justification
 
-Cependant, après l'implémentation d'une première version du projet, dont l'objectif était de développer une application intégrée au système du robot Pepper, plusieurs contraintes techniques majeures ont été rencontrées, rendant cette approche difficilement exploitable. Ces contraintes concernaient notamment l'incompatibilité entre les environnements de développement et le système embarqué de Pepper, ainsi que les limitations fonctionnelles de la tablette destinée à servir de support à l'application. #text(red)[Mettre photo de l'appli voir Mallo] // voir @photoAppli\ 
+Cependant, après l'implémentation d'une première version du projet, dont l'objectif était de développer une application intégrée au système du robot Pepper, plusieurs contraintes techniques majeures ont été rencontrées, rendant cette approche difficilement exploitable. Ces contraintes concernaient notamment l'incompatibilité entre les environnements de développement et le système embarqué de Pepper, ainsi que les limitations fonctionnelles de la tablette destinée à servir de support à l'application. 
 
 
 \ En conséquence, une seconde approche a été envisagée afin de permettre une interaction différente avec Pepper, à travers le développement d'un système reposant sur des protocoles d'interaction homme-robot. Ce systeme a ete developpé en Python + Tkinter (partie graphique), langage natif de Pepper, et basé sur une connexion ssh, a permis de maintenir une certaine continuité dans le développement de la logique de jeu. \
@@ -101,10 +101,6 @@ Plusieurs facteurs expliquaient cette difficulté :
 - *Problèmes de communication* : La voix de Pepper était parfois difficile à comprendre et ajoutait une latence dans les échanges
 
 - *Latence dans les réponses* : Le temps de traitement de l'information et de réponse de Pepper était plus long que prévu, car ils etait effectué à la main par une personne via une connexion entre un PC et le systeme de Pepper, et non integré directement à ce dernier, ce qui allongeait considérablement la durée des parties
-
-#text(red)[*Voir si on peut faire un truc avec les videos prise lors des experiences*]
-
-- #text(red)[*Ajouter autre chose*]
 
 En conséquence, l'équipe a décidé de *repenser le design expérimental autour d'une approche purement digitale*, tout en conservant l'infrastructure Python déjà développée pour Pepper.
 
@@ -202,7 +198,7 @@ d'une condition à l'autre.
 
 === Objectifs principaux
 
-1. *Tester l'hypothèse d'asymétrie perceptuelle* : Démontrer empiriquement que les participants évaluent différemment la déloyauté selon que l'adversaire est présenté comme humain ou machine, à comportement constant.
+1. *Tester l'hypothèse d'asymétrie perceptuelle* : Démontrer empiriquement que les participants évaluent différemment la déloyauté selon que l'adversaire est présenté comme humain ou IA, à comportement constant.
 
 2. *Quantifier les écarts de confiance* : Mesurer l'ampleur de cette différence (magnitude de l'effet) et identifier les facteurs qui la modulent.
 
@@ -220,7 +216,7 @@ d'une condition à l'autre.
 
 === Hypothèse principale
 
-*H₁* : Pour un même comportement observable, les participants expriment une évaluation significativement plus élevée de déloyauté lorsque l'adversaire est présenté comme une machine (CheatBot) par rapport à lorsqu'il est présenté comme un humain.
+*H₁* : Pour un même comportement observable, les participants expriment une évaluation significativement plus élevée de déloyauté lorsque l'adversaire est présenté comme une IA (CheatBot) par rapport à lorsqu'il est présenté comme un humain.
 
 Cette hypothèse repose sur l'intuition qu'une entité artificielle est supposée être "parfaitement rationnelle" et "sans intérêt", rendant tout écart par rapport à la rationalité perçu comme intentionnellement déloyale plutôt que comme une erreur ou une expression de subjectivité (comme on le tolère chez un humain).
 
@@ -231,11 +227,11 @@ Une méthodologie quasi-expérimentale a été adoptée afin de garantir un cont
 - *Partie 1* : Affrontement contre Adversaire X présenté comme [TYPE A]
 - *Partie 2* : Affrontement contre Adversaire Y présenté comme [TYPE B]
 
-Où TYPE A et TYPE B représentent l'une des deux conditions (Humain vs Machine), contrebalancées entre les participants.
+Où TYPE A et TYPE B représentent l'une des deux conditions (Humain vs IA), contrebalancées entre les participants.
 
 === Variables contrôlées
 
-- *Variable indépendante manipulée* : Type d'adversaire (Humain déclaré vs Machine déclarée)
+- *Variable indépendante manipulée* : Type d'adversaire (Humain déclaré vs IA déclarée)
 - *Variable indépendante mesurée* : Ordre de présentation, expérience préalable avec l'IA, caractéristiques individuelles
 - *Variable dépendante principale* : Scores de confiance/déloyauté (échelle 0-5 par tour)
 - *Variables dépendantes secondaires* : Temps de décision, patterns de tirs, questions post-expérience
@@ -678,7 +674,7 @@ _"Pensez-vous que votre adversaire a triché durant la partie ?"_
 
 Pour assurer la validité interne de l'étude :
 - *Équivalence des quotas* : Les deux parties utilisent des séquences identiques de réussite/échec
-- *Ordre contrebalancé* : Idéalement, le type d'adversaire (humain ou machine en premier) est contrebalancé
+- *Ordre contrebalancé* : Idéalement, le type d'adversaire (humain ou IA en premier) est contrebalancé
 - *Environnement standardisé* : Chaque participant réalise l'expérience dans des conditions similaires
 - *Instructions standardisées* : Les consignes sont présentées de manière identique à tous
 
@@ -690,15 +686,19 @@ Pour assurer la validité interne de l'étude :
 
 === Caractéristiques de l'échantillon
 
-[À compléter : nombre total de participants, répartition par genre, groupe d'âge, critères supplémentaires]
+L'échantillon analysé comprend 20 participants (29 parties exploitables contre *Pepper Bot*, *Mallory* ou *Jayson*). Conformément à la population décrite en 5.1.1, les participants sont majoritairement des hommes (≈ 80\%) et l'âge moyen se situe autour de 25 ans, avec une forte concentration autour de 23 ans. Le recrutement s'est fait essentiellement par l'entourage (amis et famille).
 
 === Scores de confiance par condition
 
-Les évaluations de confiance (échelle 1-5, indiquant la perception de déloyauté) ont été collectées pour chaque tour de chaque partie. Les statistiques descriptives suivantes seront présentées :
+Les évaluations de confiance (échelle 0-5, indiquant la perception de déloyauté) ont été collectées pour chaque tour de chaque partie. On peut présenter les résultats de manière descriptive :
 
-- *Moyenne et écart-type* des scores selon le type d'adversaire (humain vs machine)
-- *Distribution des réponses* pour chaque condition
-- *Évolution des scores* au fil des tours (effet d'apprentissage)
+- *IA (Pepper Bot)* : moyenne = 2.09, écart-type = 1.78 (n = 150 tours)
+- *Humain (Mallory + Jayson)* : moyenne = 1.57, écart-type = 1.77 (n = 140 tours)
+
+#figure(
+  image("diagrams/plot_quota_comparison.png", width: 90%),
+  caption: "Suspicion moyenne par quota (IA vs Humain)."
+)
 
 == Analyse statistique
 
@@ -706,32 +706,35 @@ Les évaluations de confiance (échelle 1-5, indiquant la perception de déloyau
 
 Un test statistique approprié permettra de tester l'hypothèse principale :
 
-*H₀* : Les évaluations de confiance ne diffèrent pas significativement entre l'adversaire humain et l'adversaire machine.
+*H₀* : Les évaluations de confiance ne diffèrent pas significativement entre l'adversaire humain et l'adversaire IA.
 
 *H₁* : Les évaluations de confiance diffèrent significativement selon le type d'adversaire.
 
 === Analyses secondaires
 
-- *Effet d'ordre* : Comparaison entre les participants ayant affronté d'abord un humain vs la machine
+- *Effet d'ordre* : Comparaison entre les participants ayant affronté d'abord un humain vs l'IA
 - *Effet de tour* : Évolution temporelle des perceptions au cours des parties
 - *Variabilité inter-individuelle* : Identification de profils distincts
 
+#figure(
+  image("plot_trust_effects.png", width: 95%),
+  caption: "Analyses secondaires : effet d'ordre, effet de tour et variabilité inter-individuelle."
+)
+
 == Résultats principaux
 
-[À compléter avec les données empiriques]
-
-Les résultats montreront ou non une différence significative dans les évaluations de déloyauté selon le type d'adversaire. En cas de différence positive, cela indiquerait un biais de confiance lié à l'anthropomorphisme ou à des croyances préexistantes.
+Les résultats descriptifs montrent une suspicion moyenne plus élevée lorsque l'adversaire est présenté comme une IA (M = 2.09, ET = 1.78) que lorsqu'il est présenté comme humain (M = 1.57, ET = 1.77). L'effet d'ordre va dans le même sens : les participants ayant commencé par la machine rapportent une suspicion moyenne plus forte lors de leur première partie (M = 2.09, ET = 1.24, n = 9) que ceux ayant commencé par un humain (M = 1.75, ET = 0.79, n = 11). L'évolution par tour indique une hausse progressive des scores en fin de partie, avec des valeurs systématiquement plus élevées côté IA. Enfin, la variabilité inter-individuelle reste marquée : certains joueurs déclarent une suspicion faible dans les deux conditions, tandis que d'autres perçoivent systématiquement plus de triche, ce qui suggère des profils distincts de sensibilité à la déloyauté.
 
 == Interprétation et discussion
 
 === Validation des hypothèses
 
-[À compléter : interprétation des résultats au regard des hypothèses initiales]
+Les résultats descriptifs sont compatibles avec *H₁* : à comportement identique, l'IA est jugée plus suspecte que l'humain, ce qui va dans le sens d'un biais d'étiquetage. *H₂a* (diminution de l'écart au fil des tours) n'est pas clairement confirmée : les scores augmentent plutôt en fin de partie, avec un écart IA/humain qui reste présent. *H₂b* (effet d'ordre) est suggérée par la moyenne plus élevée chez les participants ayant commencé par la machine, mais cet effet reste exploratoire en l'absence de test statistique formel et compte tenu de la taille de l'échantillon.
 
 === Implications théoriques
 
 Ces résultats contribuent à la compréhension des mécanismes de confiance interpersonnelle et des biais de perception liés à l'IA. Ils éclairent notamment :
-- Le rôle de la catégorisation (humain vs machine) dans les jugements moraux
+- Le rôle de la catégorisation (humain vs IA) dans les jugements moraux
 - Les vulnérabilités des utilisateurs face aux comportements perçus comme déloyaux
 - Les applications potentielles dans la conception d'interfaces homme-machine
 
@@ -743,7 +746,7 @@ Ces résultats contribuent à la compréhension des mécanismes de confiance int
 
 = Conclusion
 
-Cette étude offre une contribution empirique à la question fondamentale des biais de confiance dans les interactions compétitives homme-machine. En isolant le rôle du label d'adversaire (humain vs machine) tout en maintenant un comportement de jeu identique, elle permet une évaluation rigoureuse de la manière dont les utilisateurs réagissent différemment selon la nature perçue de leur adversaire.
+Cette étude offre une contribution empirique à la question fondamentale des biais de confiance dans les interactions compétitives homme-machine. En isolant le rôle du label d'adversaire (humain vs IA) tout en maintenant un comportement de jeu identique, elle permet une évaluation rigoureuse de la manière dont les utilisateurs réagissent différemment selon la nature perçue de leur adversaire.
 
 Les implications de cette recherche dépassent le contexte ludique pour toucher à des enjeux plus larges d'acceptabilité, de confiance, et de coopération dans les environnements intégrant l'intelligence artificielle.
 

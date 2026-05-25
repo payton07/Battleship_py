@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import math
 import psycopg2
 import matplotlib
 
@@ -12,7 +13,9 @@ import matplotlib.pyplot as plt
 
 
 QUERY = """
-SELECT t.bot_quota, AVG(t.trust_score)::float AS avg_suspicion
+SELECT t.bot_quota,
+       AVG(t.trust_score)::float AS avg_suspicion,
+       STDDEV_SAMP(t.trust_score)::float AS stddev_suspicion
 FROM Turn t
 JOIN Game g ON g.id = t.game_id
 WHERE t.trust_score IS NOT NULL
@@ -31,11 +34,25 @@ def fetch_avg_by_quota(conn, winners):
     return rows
 
 
-def to_dict(rows):
-    data = {}
-    for quota, avg in rows:
-        data[int(quota)] = float(avg)
-    return data
+def to_stats(rows):
+    avg = {}
+    std = {}
+    for quota, mean, stddev in rows:
+        if quota is None:
+            continue
+        q = int(quota)
+        avg[q] = float(mean)
+        std[q] = float(stddev) if stddev is not None else 0.0
+    return avg, std
+
+
+def add_labels(ax, xs, means, stds, y_offset, color):
+    for x_pos, mean, stddev in zip(xs, means, stds):
+        if math.isnan(mean):
+            continue
+        label = "{:.2f} +/- {:.2f}".format(mean, stddev)
+        ax.text(x_pos, mean + y_offset, label,
+                ha='center', va='bottom', fontsize=8, color=color)
 
 
 def _load_env_file(path):
@@ -89,12 +106,14 @@ def main():
     finally:
         conn.close()
 
-    pepper = to_dict(pepper_rows)
-    other = to_dict(other_rows)
+    pepper_avg, pepper_std = to_stats(pepper_rows)
+    other_avg, other_std = to_stats(other_rows)
 
-    quotas = sorted(set(list(pepper.keys()) + list(other.keys())))
-    pepper_vals = [pepper.get(q, float('nan')) for q in quotas]
-    other_vals = [other.get(q, float('nan')) for q in quotas]
+    quotas = sorted(set(list(pepper_avg.keys()) + list(other_avg.keys())))
+    pepper_vals = [pepper_avg.get(q, float('nan')) for q in quotas]
+    other_vals = [other_avg.get(q, float('nan')) for q in quotas]
+    pepper_errs = [pepper_std.get(q, 0.0) for q in quotas]
+    other_errs = [other_std.get(q, 0.0) for q in quotas]
 
     x = list(range(len(quotas)))
     width = 0.35
@@ -102,8 +121,10 @@ def main():
     x_right = [i + width / 2 for i in x]
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    ax.bar(x_left, pepper_vals, width, label='Versus IA')
-    ax.bar(x_right, other_vals, width, label='Versus Humain')
+    ax.bar(x_left, pepper_vals, width, label='Pepper Bot',
+           yerr=pepper_errs, capsize=3, ecolor='#1b6fa8')
+    ax.bar(x_right, other_vals, width, label='Mallory + Jayson',
+           yerr=other_errs, capsize=3, ecolor='#a86f1b')
 
     ax.set_xticks(x)
     ax.set_xticklabels([str(q) for q in quotas])
@@ -112,6 +133,14 @@ def main():
     ax.set_title('Suspicion moyenne par quota')
     ax.grid(axis='y', alpha=0.2)
     ax.legend()
+
+    valid_vals = [v for v in (pepper_vals + other_vals) if not math.isnan(v)]
+    max_val = max(valid_vals) if valid_vals else 0.0
+    y_offset = max_val * 0.03 if max_val else 0.1
+    add_labels(ax, x_left, pepper_vals, pepper_errs, y_offset, '#1b6fa8')
+    add_labels(ax, x_right, other_vals, other_errs, y_offset, '#a86f1b')
+    if max_val:
+        ax.set_ylim(top=max_val + 4 * y_offset)
 
     fig.tight_layout()
     if HAS_DISPLAY:
