@@ -315,7 +315,7 @@ Le développement de PBattleship s'est déroulé en cinq phases entre avril et m
 5. *Robustesse & production (21-22 mai 2026)* : Restauration de l'état de partie après rechargement (sessionStorage), correctif du freeze multi-joueurs (connexion socket Pepper bloquante), correctif d'affichage des dates PostgreSQL, ajustement du rate limit sur `/shoot` et `/bot-turn`.
 
 #figure(
-  image("diagrams/images/gantt_dev.png"),
+  image("diagrams/images/gantt_dev_nv.png",width: 100%),
   caption: "Diagramme de Gantt : Évolution de PBattleship (avril-mai 2026)"
 )
 
@@ -362,7 +362,7 @@ L'application est organisée en quatre couches à responsabilités distinctes.
 - `TurnRepository` : insertion des tours + `BotShot` en une transaction, mise à jour Likert, requêtes d'analyse.
 - `PersonaRepository` : gestion des personnages de bot (CRUD admin).
 
-#figure(image("diagrams/images/classes.png"), caption: "Diagramme de classes : PBattleship")
+#figure(image("diagrams/images/diag_classes.png",width: 95%), caption: "Diagramme de classes : PBattleship")
 
 #pagebreak()
 == Cas d'utilisation
@@ -449,8 +449,10 @@ GET    /admin/logout                   → déconnexion
 - *En-têtes HTTP* : `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Content-Security-Policy`, `Strict-Transport-Security` (HSTS)
 - *Rate limiting* par IP via flask-limiter (stockage mémoire)
 - *Admin* : HTTP Basic Auth ; échec loggué avec l'IP source
-
-#figure(image("diagrams/images/backend.png"), caption: "Diagramme des routes Flask : PBattleship")
+// #pagebreak()
+\
+\
+#figure(image("diagrams/images/backend.png"), caption: "Diagramme de la backend Flask : PBattleship")
 #pagebreak()
 == Implémentation du CheatBot
 
@@ -579,7 +581,7 @@ La plateforme calcule nativement les corrélations nécessaires à la recherche 
 \
 
 #figure(
-   table(columns: 3)[#image("diagrams/accueil.png",width: 100%)][#image("diagrams/accueil2.png")][#image("diagrams/config.png")][#image("diagrams/partie.png")][#image("diagrams/partie2.png")][#image("diagrams/partie3.png")][#image("diagrams/partie4.png")][#image("diagrams/admin.png")][#image("diagrams/admin1.png")],
+   table(columns: 3)[#image("diagrams/accueil.png",width: 100%)][#image("diagrams/accueil2.png",width: 100%)][#image("diagrams/config.png",width: 100%)][#image("diagrams/partie.png",width: 100%)][#image("diagrams/partie2.png",width: 100%)][#image("diagrams/partie3.png",width: 100%)][#image("diagrams/partie4.png",width: 100%)][#image("diagrams/admin.png",width: 100%)][#image("diagrams/admin1.png",width: 100%)],
    caption: "Captures d'écran de l'interface web : PBattleship"
 )
 
@@ -588,7 +590,7 @@ La plateforme calcule nativement les corrélations nécessaires à la recherche 
 
 === Séquence d'une partie
 
-#figure(image("diagrams/images/SequencePartie.png"), caption: "Diagramme de séquence : déroulement d'une partie")
+#figure(image("diagrams/images/SequencePartie.png",width: 90%), caption: "Diagramme de séquence : déroulement d'une partie")
 
 #pagebreak()
 
