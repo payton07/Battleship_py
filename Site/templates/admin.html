@@ -1130,9 +1130,6 @@ async function openDetail(gameId) {
                .reduce((s, t) => s + t.trust_score, 0)
        / d.turns.filter(t => t.trust_score !== null).length || 0).toFixed(1)
     : '—';
-  const maxTurn = d.turns.length
-    ? Math.max(...d.turns.map(t => (t.turn_number ?? 0)))
-    : 0;
 
   const winnerBadge = g.winner === 'Pepper Bot'
     ? `<span class="badge badge-bot">🤖 Pepper Bot</span>`
@@ -1147,9 +1144,7 @@ async function openDetail(gameId) {
       : `<span class="badge badge-none">—</span>`;
 
   const turnsHtml = d.turns.map((t, idx) => {
-    const displayTurn = (t.turn_number !== null && t.turn_number !== undefined)
-      ? t.turn_number
-      : idx + 1;
+    const displayTurn = idx + 1;
     const shots = (t.shots || []).map(s => {
       const coord = `${COLS[s.pos_x] || '?'}${s.pos_y}`;
       const cls = s.result === 'Coulé' ? 'shot-sunk' : s.result === 'Touché' ? 'shot-hit' : 'shot-miss';
@@ -1193,7 +1188,7 @@ async function openDetail(gameId) {
       </div>
       <div class="meta-item">
         <span class="meta-label">Nb de tours</span>
-        <span class="meta-value" style="color:var(--accent);">${maxTurn || d.turns.length}</span>
+        <span class="meta-value" style="color:var(--accent);">${d.turns.length}</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">Suspicion moy. / tour</span>
