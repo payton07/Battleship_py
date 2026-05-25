@@ -102,9 +102,6 @@ Plusieurs facteurs expliquaient cette difficulté :
 
 - *Latence dans les réponses* : Le temps de traitement de l'information et de réponse de Pepper était plus long que prévu, car ils etait effectué à la main par une personne via une connexion entre un PC et le systeme de Pepper, et non integré directement à ce dernier, ce qui allongeait considérablement la durée des parties
 
-#text(red)[*Voir si on peut faire un truc avec les videos prise lors des experiences*]
-
-- #text(red)[*Ajouter autre chose*]
 
 En conséquence, l'équipe a décidé de *repenser le design expérimental autour d'une approche purement digitale*, tout en conservant l'infrastructure Python déjà développée pour Pepper.
 
