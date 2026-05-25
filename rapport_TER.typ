@@ -33,6 +33,7 @@
 
 #outline(title: "Table des matières", depth: 3, indent: 1.5em)
 
+#set text(lang: "fr")
 #pagebreak()
 
 = Remerciements
@@ -53,7 +54,7 @@ Enfin, nous exprimons notre gratitude envers nos familles et amis pour leur sout
 
 
 
-== Contexte et enjeux sociétaux
+= Contexte et enjeux sociétaux
 
 L'essor de l'intelligence artificielle et des systèmes autonomes transforme profondément les interactions humaines quotidiennes. Des assistants vocaux aux robots collaboratifs, en passant par les systèmes de recommandation et les agents conversationnels, l'IA est devenue omniprésente dans nos environnements de travail et de loisir.
 
@@ -64,47 +65,59 @@ Cette asymétrie perceptuelle a des implications conséquentes :
 - *En éthique* : Faut-il tenir compte des biais de confiance lors de la conception d'agents autonomes destinés à interagir avec des utilisateurs ?
 - *En sciences cognitives* : Quels mécanismes psychologiques expliquent cette différenciation ?
 
-== Problématique et questions de recherche
+#pagebreak()
+= Problématique et questions de recherche
 
 Ce travail s'inscrit dans une perspective pluridisciplinaire combinant psychologie sociale, ergonomie cognitive et informatique expérimentale. Il s'appuie sur l'observation suivante : les participants accordent-ils leur confiance différemment à un adversaire humain par rapport à une intelligence artificielle, notamment lorsque ces deux adversaires adoptent des comportements strictement identiques mais perçus comme déloyaux ou biaisés ?
 
 *Question de recherche principale :*
 
-> Dans quelle mesure les utilisateurs modulent-ils leurs jugements de confiance en fonction de la nature déclarée de l'adversaire (humain vs machine) indépendamment de son comportement observable ?
+#h(1em) Dans quelle mesure les utilisateurs modulent-ils leurs jugements de confiance en fonction de la nature déclarée de l'adversaire (humain vs machine) indépendamment de son comportement observable ?
 
 
 == Genèse et évolution du projet : du robot Pepper à une plateforme web
 
 === Contexte initial et objectif ambitieux
 
-Le projet Pepper Battleship s'inscrivait initialement dans une perspective beaucoup plus ambitieuse. L'objectif premier était de disposer d'une plateforme complète d'expérimentation utilisant le robot social Pepper (développé par SoftBank Robotics), qui représente une entité humanoïde — à mi-chemin entre une machine abstraite et une silhouette humaine.
+Le projet Pepper Battleship s'inscrivait initialement dans une perspective beaucoup plus ambitieuse. L'objectif premier était de disposer d'une plateforme complète d'expérimentation utilisant le robot social Pepper (développé par SoftBank Robotics), qui représente une entité humanoïde, à mi-chemin entre une machine abstraite et une silhouette humaine.
+
 
 L'hypothèse initiale était de créer une échelle de comparaison à trois niveaux :
-1. *Adversaire humain réel* : Un joueur humain physiquement présent
-2. *Adversaire humanoïde* : Le robot Pepper, incarnant une forme physique humaine mais clairement artificiel
-3. *Adversaire digital abstrait* : Une interface purement numérique sans représentation physique
+- *Adversaire humain réel* : Un joueur humain physiquement présent
+- *Adversaire humanoïde* : Le robot Pepper, incarnant une forme physique humaine mais clairement artificiel
+- *Adversaire digital abstrait* : Une interface purement numérique sans représentation physique
 
 Cette approche tri-modale aurait permis d'étudier l'influence de l'*embodiment* (incarnation physique) sur la perception de confiance et la détection de déloyauté.
 
 === Pivot technique et justification
 
-Cependant, après avoir implémenté une première version du système intégrant Pepper et développé les protocoles d'interaction robot-humain, un problème majeur s'est imposé : *les parties contre Pepper s'avéraient être extrêmement longues pour les participants*.
+Cependant, après l'implémentation d'une première version du projet, dont l'objectif était de développer une application intégrée au système du robot Pepper, plusieurs contraintes techniques majeures ont été rencontrées, rendant cette approche difficilement exploitable. Ces contraintes concernaient notamment l'incompatibilité entre les environnements de développement et le système embarqué de Pepper, ainsi que les limitations fonctionnelles de la tablette destinée à servir de support à l'application. #text(red)[Mettre photo de l'appli voir Mallo] // voir @photoAppli\ 
+
+
+\ En conséquence, une seconde approche a été envisagée afin de permettre une interaction différente avec Pepper, à travers le développement d'un système reposant sur des protocoles d'interaction homme-robot. Ce systeme a ete developpé en Python + Tkinter (partie graphique), langage natif de Pepper, et basé sur une connexion ssh, a permis de maintenir une certaine continuité dans le développement de la logique de jeu. \
+Néanmoins, cette solution a également mis en évidence une difficulté importante : *les parties jouées contre Pepper se révélaient particulièrement longues pour les participants.*
 
 Plusieurs facteurs expliquaient cette difficulté :
 - *Problèmes de communication* : La voix de Pepper était parfois difficile à comprendre et ajoutait une latence dans les échanges
-- *Ajouter autre chose*
+
+- *Latence dans les réponses* : Le temps de traitement de l'information et de réponse de Pepper était plus long que prévu, car ils etait effectué à la main par une personne via une connexion entre un PC et le systeme de Pepper, et non integré directement à ce dernier, ce qui allongeait considérablement la durée des parties
+
+#text(red)[*Voir si on peut faire un truc avec les videos prise lors des experiences*]
+
+- #text(red)[*Ajouter autre chose*]
 
 En conséquence, l'équipe a décidé de *repenser le design expérimental autour d'une approche purement digitale*, tout en conservant l'infrastructure Python déjà développée pour Pepper.
 
+
 === Pivot vers une plateforme digitale
 
-Plutôt que d'abandonner le travail réalisé, le projet a pivoté vers :
+Plutôt que d'abandonner le travail réalisé, le projet a pivoté vers une plateforme web moderne, permettant de simuler les interactions avec Pepper de manière plus fluide et accessible. Cette transition a été motivée par plusieurs considérations clés :
 
-1. *Conservation de la stack Python* : Pepper tournant nativement sous Python, toute la logique de jeu avait été développée dans ce langage. Il aurait été contre-productif de réécrire en une autre langue.
++ *Conservation de la stack Python* : Pepper tournant nativement sous Python, toute la logique de jeu avait été développée dans ce langage. Il aurait été contre-productif de réécrire en une autre langue.
 
-2. *Ajout d'une couche web* : Pour pallier les limitations de Pepper, une interface web moderne (Flask + JavaScript) a été développée pour permettre une collecte de données en ligne et une meilleure expérience utilisateur.
++ *Ajout d'une couche web* : Pour pallier les limitations de Pepper, une interface web moderne (Flask + JavaScript) a été développée pour permettre une collecte de données en ligne et une meilleure expérience utilisateur.
 
-3. *Redéfinition de la manipulation expérimentale* : Plutôt qu'une échelle physique (humain → humanoïde → digital), on utilise une manipulation *de présentation* : le même adversaire digital est présenté alternativement comme "humain" ou comme "CheatBot", permettant de tester l'influence de l'*étiquetage* (labeling) indépendamment de la représentation physique.
++ *Redéfinition de la manipulation expérimentale* : Plutôt qu'une échelle physique (humain → humanoïde → digital), on utilise une manipulation *de présentation* : le même adversaire digital est présenté alternativement comme "humain" ou comme "CheatBot", permettant de tester l'influence de l'*étiquetage* (labeling) indépendamment de la représentation physique.
 
 Cette adaptation offrait en fait plusieurs avantages :
 - *Contrôle rigoureux* : Certitude absolue que le comportement adversaire est identique dans les deux conditions
@@ -122,45 +135,68 @@ Le choix de maintenir Python comme langage principal pour la logique de jeu (plu
 
 L'intégration d'une couche Flask a donc servi d'*adaptateur* : la web permet une UX moderne et une collecte de données centralisée, tandis que Python gère la complexité algorithmique du jeu et de l'intelligence artificielle du CheatBot.
 
+
 == État de l'art et positionnement théorique
 
 === Théorie de l'attribution et formation des jugements
 
-La théorie de l'attribution (Heider, 1958 ; Weiner, 1985) stipule que les individus construisent des explications causales pour les événements observés. Lorsqu'une personne rencontre un comportement ou un résultat, elle tend à l'attribuer soit à des facteurs internes (disposition, intention) soit à des facteurs externes (contexte, chance).
+Heider @heider1958 puis Weiner @weiner1985 ont posé les bases de la théorie de l'attribution, selon laquelle les individus construisent des explications causales pour les événements qu'ils observent. Face à un comportement ou à un résultat, une personne tend à l'attribuer soit à des facteurs _internes_ (disposition, intention), soit à des facteurs _externes_ (contexte, hasard). Cette grille de lecture causale s'applique aussi bien aux actions humaines qu'à celles des agents artificiels, mais pas nécessairement de la même manière.
 
-Or, les chercheurs en psychologie cognitive ont démontré que cette attribution est systématiquement biaisée lorsque la cible est une entité artificielle. Par exemple, un tir réussi attribué à un humain sera expliqué par son habileté, tandis que le même tir attribué à un robot sera attribué au hasard ou à un "bug" (Madhavan et Wiegmann, 2007).
+Les recherches en interaction humain-automatisation montrent que les individus n'évaluent pas les performances des systèmes artificiels comme celles des agents humains. Madhavan et Wiegmann @madhavan2007 relèvent que les erreurs d'un système automatisé réduisent la confiance plus fortement que des erreurs humaines équivalentes, du fait d'une attente implicite de perfection à l'égard des machines : leur fiabilité étant supposée a priori, la moindre défaillance est perçue comme une rupture. À titre d'illustration, une réussite sera attribuée à l'habileté chez un humain, mais au hasard ou à un dysfonctionnement chez une machine.
 
 === Tromperie et manipulation en contexte humain-robot
 
-Une étude particulièrement pertinente pour notre recherche est celle de Ullman, Spelke et Tenenbaum (2014) de l'Université Yale. Ces chercheurs ont investigué comment les humains développent la confiance envers les robots et, plus important, comment ils réagissent lorsqu'un robot les trompe délibérément.
+Une étude particulièrement pertinente est celle d'Ullman et al. @ullman2014, menée à
+l'Université Yale. Ces chercheurs ont manipulé le _type d'agent_ (humain ou robot)
+et le _type de comportement_ (honnête ou malhonnête) dans un jeu compétitif,
+dissociant ainsi ce que fait l'agent de la manière dont on le catégorise. Résultat
+notable : à comportement identique, les robots qui trichaient étaient tenus pour
+_moins responsables_ que les humains, ce qui suggère que l'étiquette attachée à un
+agent modifie l'interprétation morale d'un même acte de tromperie.
 
-Dans l'expérience d'Ullman et al., des participants humains interagissaient avec un robot dans une situation coopérative (un jeu de coquille) où le robot était supposé donner des conseils utiles. L'expérience comportait plusieurs phases :
+D'autres travaux confirment que la confiance envers un agent artificiel n'est ni
+purement rationnelle ni stable. Robinette et al. @robinette2016 observent un
+phénomène de _surconfiance_ : lors d'une évacuation d'urgence simulée, tous les
+participants ont suivi un robot guide, y compris après l'avoir vu échouer.
+Inversement, Esterwood et Robert @esterwood2023 montrent qu'après des violations
+répétées, aucune stratégie de réparation ne restaure pleinement la fiabilité perçue, signe d'un _ancrage_ durable de la méfiance acquise.
 
-1. *Phase de construction de confiance* : Le robot fournissait des conseils corrects et cohérents
-2. *Phase de tromperie* : Le robot commençait délibérément à donner des informations fausses ou trompeuses
-3. *Phase de récupération* : Le robot revenait à des conseils corrects
+#pagebreak()
+Surtout, ces effets dépendent aussi de la façon dont la source est _étiquetée_.
+Jakesch et al. @jakesch2019 montrent qu'un même contenu est jugé moins fiable
+lorsqu'il est présenté comme rédigé par une IA, mais seulement en environnement
+_mixte_ (sources humaines et artificielles mêlées), l'« effet Replicant ». Les
+utilisateurs n'appliquent donc pas un seuil de détection unique, mais l'ajustent
+selon la nature perçue de l'interlocuteur.
 
-Les résultats révélaient plusieurs phénomènes intéressants :
-- Les participants continuaient à faire confiance au robot *même après l'avoir détecté en train de tricher*, particulièrement si la confiance initiale était établie
-- Une fois la confiance brisée, les participants restaient méfiants *même après le retour du robot à un comportement honnête*
-- La persistance de la confiance initial (ou de la méfiance acquise) suggérait un *ancrage psychologique* difficile à modifier
-
-Ces résultats sont directement pertinents à notre question de recherche : ils suggèrent que les utilisateurs peuvent avoir des seuils de détection différents pour la tromperie selon la nature perçue de l'adversaire, et que cette détection est loin d'être objective. Notre étude prolonge cette investigation en étudiant précisément comment l'*étiquetage* (humain vs machine) influence cette perception, en contrôlant rigoureusement le comportement observable.
+Notre étude prolonge ces travaux en isolant la variable d'étiquetage (humain vs
+machine) à comportement rigoureusement contrôlé, afin de mesurer dans quelle mesure
+la seule attribution de la source modifie la perception de la tromperie.
 
 === Anthropomorphisme et perception morale
 
-L'anthropomorphisme — la tendance à attribuer des caractéristiques humaines à des entités non-humaines — joue un rôle central dans la confiance homme-machine. Cependant, les études récentes révèlent un phénomène paradoxal : lorsqu'une machine se comporte de manière déloyale ou contraire à l'éthique, les utilisateurs lui en attribuent davantage la responsabilité intentionnelle que si la même action provenait d'un humain (Castelli et al., 2021).
+L'anthropomorphisme, la tendance à attribuer des caractéristiques humaines à des entités non humaines, joue un rôle central dans la confiance homme-machine, mais ses effets sur le jugement moral sont ambivalents. Placani @placani2024 souligne ainsi que l'anthropomorphisme distord les jugements portés sur une IA, notamment ceux relatifs à sa responsabilité et à la confiance qu'on lui accorde. La direction de cette distorsion fait toutefois débat. Plusieurs travaux suggèrent qu'attribuer une apparence ou une intentionnalité humaine à une machine tend à la _dédouaner_, en déplaçant la responsabilité vers ses concepteurs. À l'inverse, d'autres études mettent en évidence une sévérité accrue : Lin et al. @lin2024 observent un « double standard » par lequel une Ià se comporte de manière immorale est jugée plus durement, en tant que catégorie, qu'un humain commettant la même faute.
 
-Ce phénomène, appelé *anthropomorphisme inversé*, suggère que les utilisateurs appliqueraient des standards moraux différents selon qu'ils interagissent avec un humain ou une machine. Les machines déloyales seraient jugées plus sévèrement car elles sont supposées être "neutres" et "sans intérêt personnel".
+Cet effet n'est cependant pas systématique. Dans les mêmes travaux, l'agent artificiel pris _individuellement_ est tantôt jugé plus sévèrement, tantôt plus indulgemment que son équivalent humain, selon le cadrage expérimental. Cette contradiction apparente suggère que les utilisateurs n'appliquent pas un standard moral fixe, mais ajustent leur évaluation selon que l'agent est perçu comme humain ou comme machine, ce qui motive directement une approche expérimentale où le comportement observable est tenu constant et seule l'étiquette de l'agent varie.
 
 === Contexte des interactions compétitives
 
-Les jeux compétitifs offrent un contexte privilégié pour étudier ces phénomènes car :
-- Ils simulent des situations où la triche ou la déloyauté peuvent être détectées (score anormalement élevé, patterns improbables)
-- Ils permettent un contrôle expérimental strict du comportement observé
-- Ils favorisent l'émergence de jugements intuitifs non censurés
+Les jeux compétitifs constituent un cadre privilégié pour étudier ces phénomènes,
+et ce pour plusieurs raisons :
 
-Peu d'études existantes combinent ce contexte avec la mesure répétée de confiance au fil du temps, particulièrement en utilisant un protocole quasi-expérimental où le comportement est rigoureusement identique.
+- ils reproduisent des situations où la triche ou la déloyauté peuvent être
+  détectées par l'utilisateur (score anormalement élevé, comportements improbables) ;
+- ils autorisent un contrôle expérimental strict du comportement observé, à l'image
+  du système de jeu compétitif développé par Sebo et al. @sebo2019 pour maîtriser les
+  actions du robot liées à la confiance ;
+- ils favorisent l'émergence de jugements intuitifs, formulés dans le feu de
+  l'interaction plutôt que de manière réfléchie.
+
+Ce type de paradigme a déjà été mobilisé pour comparer la confiance accordée à un
+humain et à un robot @kahn2016. Peu de travaux, cependant, associent ce contexte à
+une mesure répétée de la confiance au fil du temps, dans le cadre d'un protocole
+quasi-expérimental où le comportement de l'agent demeure rigoureusement identique
+d'une condition à l'autre.
 
 == Objectifs et contribution attendue
 
@@ -224,377 +260,385 @@ L'élément crucial du design est que *le comportement du joueur adverse reste s
 
 = Développement
 
-Le projet Pepper Battleship repose sur deux composants interdépendants : une application de jeu Python multimode (desktop/GUI) et une plateforme web moderne pour la collecte expérimentale. Cette architecture hybride permet une expérience flexible adaptée à divers contextes (laboratoire, en ligne, intégration robotique).
+PBattleship est une plateforme de collecte de données expérimentales construite autour d'un jeu de bataille navale modifié. Elle met en scène un `CheatBot` à comportement contrôlé face à des participants humains et enregistre leurs perceptions de triche tour par tour. L'ensemble est déployé en production sur Oracle Cloud.
 
-== Architecture générale
+== Architecture & technologies
 
 === Stack technologique
 
-*Backend Python :*
-- *Langage* : Python 2.7+ (compatibilité descendante)
-- *Moteur de jeu* : Architecture modulaire propriétaire
-- *Base de données* : SQLite pour stockage local
-- *Interfaces* : Console texte + Tkinter GUI
-- *Intégration robotique* : Communication socket (Pepper)
+*Backend :*
+- *Langage* : Python 3.x
+- *Serveur web* : Flask 2.3+
+- *Base de données* : PostgreSQL (driver Psycopg2)
+- *Accès données* : Pattern Repository (`GameRepository`, `TurnRepository`, `PersonaRepository`)
+- *Sécurité* : flask-limiter, CSP, HSTS, Basic Auth admin, sessions Flask
 
-*Frontend Web :*
-- *Serveur* : Flask 2.3+ (framework web minimaliste)
-- *Requêtes* : API REST JSON
-- *Frontend* : HTML5 + CSS3 + JavaScript vanilla
-- *Sécurité* : flask-limiter pour rate-limiting
-- *Déploiement* : Gunicorn + PostgreSQL optionnel
+*Frontend :*
+- HTML5 + CSS3 + JavaScript vanilla (sans framework)
+- API REST JSON pour toutes les interactions client-serveur
 
-*Communication :*
-- API REST pour synchronisation client-serveur
-- Socket TCP/IP pour robot Pepper
-- Session management pour suivi des parties
+*Déploiement :*
+- Oracle Cloud Free Tier : Ubuntu Server
+- Gunicorn : `--workers 1 --threads 8` (1 worker pour éviter les conflits de session, 8 threads pour gérer la charge)
+- Nginx reverse proxy
+- Let's Encrypt : HTTPS via `https://141.253.121.69.nip.io`
 
-== Plateforme web (Site/)
+*Communication robotique :*
+- Socket TCP vers robot Pepper, protocole `P<col><row>` / T / C / R
+- Désactivé automatiquement en mode web multi-utilisateurs
 
-=== Architecture Flask
-
-Le serveur Flask (`Site/app.py`) orchestre l'expérience web avec deux points d'entrée principaux.
-
-*Routes principales :*
-- `GET /` : Landing page avec présentation du projet
-- `GET /game` : Interface de jeu interactive
-- `GET /admin` : Tableau de bord administrateur
-- `POST /api/game/new` : Création d'une partie
-- `POST /api/game/{gid}/shoot` : Enregistrement d'un tir joueur
-- `POST /api/game/{gid}/bot-turn` : Exécution du tour du bot
-- `POST /api/game/{gid}/turn-trust` : Enregistrement score de confiance
-- `GET /api/stats` : Récupération des statistiques globales
-- `GET /api/personas` : Récupération des personas expérimentaux
-
-La conception du serveur Flask favorise :
-- La stateless API (chaque requête est indépendante)
-- La limitation de requêtes (protection contre les abus)
-- L'enregistrement détaillé en base de données
-- La confidentialité des données (anonymisation)
-
-=== Landing page (Templates/index.html)
-
-La page d'accueil constitue l'élément critique de recrutement et de contextualisation expérimentale.
-
-*Sections principales :*
-
-1. *Navigation* : Logo Pepper Battleship, liens d'ancrage vers les sections, CTA "Jouer"
-
-2. *Héros* :
-   - Message accrocheur : "POUVEZ-VOUS DÉTECTER LA TRICHE ?"
-   - Sous-titre contextuel mentionnant Pepper robot
-   - Statistiques dynamiques (parties jouées, tirs/tour, configurations, bateaux)
-   - CTA principal vers `/game`
-
-3. *Fonctionnalités* (6 cartes) :
-   - Affrontez Pepper Bot (présentation du robot)
-   - Évaluation par tour (système de confiance 0-5)
-   - 10 configurations prédéfinies
-   - 4 tirs par tour (règles modifiées)
-   - Données anonymes (RGPD)
-   - Confiance en son instinct (justification)
-
-4. *Règles du Jeu* (4 étapes) :
-   - Étape 1 : Sélection de la flotte parmi 10 configurations
-   - Étape 2 : Combat alternée à 4 tirs/tour
-   - Étape 3 : Observation du bot pour détecter la triche
-   - Étape 4 : Notation du suspicion sur 0-5
-
-5. *Section Recherche* :
-   - Contexte académique (TER M1 Génie Logiciel)
-   - Objectif : comprendre perception de tromperie artificielle
-   - Garantie anonymat et usage recherche
-
-*Animations JavaScript :*
-- Système de particules interactives (connexions entre points)
-- Compteur animé pour les statistiques globales
-- Fetch `/api/stats` pour mise à jour temps réel
-
-=== Écran de jeu (Templates/game.html)
-
-L'interface de jeu web implémente une expérience UX complète.
-
-*États de l'expérience (State machine) :*
-
-1. *Setup* : Entrée du nom du joueur
-2. *Persona* : Sélection du contexte (humain vs robot — manipulation expérimentale)
-3. *Grid* : Validation de la configuration de flotte
-4. *Playing* : Combat et collection de scores de confiance
-5. *GameOver* : Résultats et débriefing
-
-*Grilles 10×10 :*
-- Grille du joueur (ma flotte + tirs ennemis)
-- Grille de suivi (tirs du joueur + résultats)
-- Affichage symbolique (~ eau, X touché, C coulé, \* raté)
-
-*Flow de jeu :*
-- Phase de tir : Le joueur clique sur jusqu'à 4 cases de la grille adverse
-- Affichage résultats : Chaque tir retourne immédiatement son résultat
-- Phase bot : Le bot effectue ses 4 tirs
-- Questionnaire : Après le tour du bot, le joueur note sa suspicion (0-5)
-- Répétition : Prochains tours jusqu'à victoire/défaite
-
-*Système de notation de confiance :*
-```javascript
-// Après chaque tour du bot, affichage :
-"Dans quelle mesure pensez-vous que le bot a triché ?"
-0 = Pas du tout triché
-1-2 = Peu probable
-3 = Incertain
-4-5 = Très suspect / Certainement triché
-```
-
-=== API REST et flux de données
-
-*Endpoints clés :*
+=== Structure du projet
 
 ```
-GET /api/stats
-└─ Réponse: { total_games: N, avg_trust_score: X }
-
-POST /api/game/new
-├─ Payload: { player_name, persona_id }
-└─ Réponse: { game_id, grids: [...], opponent: "Pepper Bot" }
-
-POST /api/game/{gid}/select-grid
-├─ Payload: { index: 0-9 }
-└─ Réponse: { success: true, grid: [...] }
-
-POST /api/game/{gid}/shoot
-├─ Payload: { x, y }
-└─ Réponse: { result: "hit|miss|sunk", player_shots: [...] }
-
-POST /api/game/{gid}/bot-turn
-├─ Payload: {}
-└─ Réponse: { bot_shots: [...], results: [...], turn_complete: true }
-
-POST /api/game/{gid}/turn-trust
-├─ Payload: { score: 0-5 }
-└─ Réponse: { recorded: true }
-
-GET /api/game/{gid}/preview/{index}
-├─ Paramètre: index grille à visualiser
-└─ Réponse: { grid: [...], ships: [...] }
+PBattleship/
+├── Site/
+│   ├── app.py              # Serveur Flask + WebGame + routes API REST
+│   ├── templates/          # Pages HTML (index, game, admin)
+│   └── static/             # CSS, JS, assets statiques
+├── classes/                # Modèles de jeu (Grid, Ship, Position, Variable…)
+├── players/                # CheatBot, SmartBot, Bot, Player, PhysicalPlayer
+├── game_logic/             # Game (arbitre), GameMaster (mode console)
+├── database/               # Connexion PostgreSQL + DAO
+│   ├── connection.py       # Database (context manager Psycopg2)
+│   ├── db_manager.py       # Façade (compatibilité mode console)
+│   └── repositories/       # GameRepository, TurnRepository, PersonaRepository
+└── client/                 # Socket TCP Pepper
 ```
 
-*Sérialisation et persistance :*
-- Chaque partie crée une session serveur avec état de jeu
-- Tous les tirs (joueur + bot) sont enregistrés instantanément en base
-- Les scores de confiance sont horodatés (timestamp = fin du tour)
-- Les données brutes permettent reconstitution complète de chaque partie
+#figure(image("diagrams/images/architecture_globale.png"), caption: "Architecture générale de PBattleship")
 
-== Application Python (Logique de jeu)
+#pagebreak()
+== Chronologie & processus
 
-=== Architecture modulaire du projet
+Le développement de PBattleship s'est déroulé en cinq phases entre avril et mai 2026, totalisant 41 commits (33 payton07, 8 Mallo) sur la branche `pat_dev`.
 
-L'application Python est organisée en 6 modules principaux :
+1. *Fondation du jeu (1-3 avril 2026)* : Traduction en Python des classes issues du prototype Android (`Grid`, `Ship`, `Position`, `Variable`, `Orientation`, `Player`, `Game`, `GameMaster`). Ajout du `CheatBot` avec quota de succès contrôlé. Interface Tkinter et socket Pepper intégrés par Mallo.
+
+2. *Base de données & réseau (9-21 avril 2026)* : Client socket TCP pour le robot Pepper, persistance SQLite, stabilisation de la version console. Milestone : version console finale le 21 avril.
+
+3. *Interface web (14 mai 2026)* : Création du site Flask, migration de SQLite vers PostgreSQL, frontend JavaScript avec feedback visuel des cellules et notation Likert par tour.
+
+4. *Sécurité & administration (18-19 mai 2026)* : Authentification admin, tableau de bord joueurs, CRUD personnages, redesign de la flotte (6 navires), cache-busting par hash git, rate limiting admin.
+
+5. *Robustesse & production (21-22 mai 2026)* : Restauration de l'état de partie après rechargement (sessionStorage), correctif du freeze multi-joueurs (connexion socket Pepper bloquante), correctif d'affichage des dates PostgreSQL, ajustement du rate limit sur `/shoot` et `/bot-turn`.
+
+#figure(
+  image("diagrams/images/gantt_dev.png"),
+  caption: "Diagramme de Gantt : Évolution de PBattleship (avril-mai 2026)"
+)
+
+#pagebreak()
+== Structure des classes
+
+L'application est organisée en quatre couches à responsabilités distinctes.
+
+=== Couche métier : `classes/`
+
+#table(
+  columns: (auto, 1fr),
+  [*Classe*], [*Rôle*],
+  [`Grid`], [Plateau 10x10 : placement des navires, traitement des tirs (`shoot(x,y)`), détection de fin de partie (`all_ships_sunk`)],
+  [`Ship`], [Navire : taille, position de départ, orientation, comptage des touches, détection de coulage (`is_sunk`)],
+  [`Position`], [Coordonnée (x, y), implémente `__eq__` pour les comparaisons et l'historique des tirs],
+  [`Orientation`], [Énumération HORIZONTAL / VERTICAL],
+  [`Variable`], [Constantes globales : taille grille (10), tirs/tour (4), symboles d'affichage, `QUOTA_SEQUENCE`],
+  [`Response`], [Retour d'un tir : code numérique + message (Touché / Coulé / Raté / Déjà joué / Hors grille)],
+  [`PredefinedGrids`], [10 configurations de flotte prédéfinies parmi lesquelles le joueur choisit],
+)
+
+=== Couche joueurs : `players/`
+
+#table(
+  columns: (auto, auto, 1fr),
+  [*Classe*], [*Hérite de*], [*Rôle*],
+  [`Player`], [—], [Classe de base : deux grilles (flotte + suivi), historique des tirs, réception des coups],
+  [`Bot`], [`Player`], [Bot aléatoire pur : tir sur une case non déjà jouée],
+  [`SmartBot`], [`Player`], [Bot heuristique : chasse les cases adjacentes après une touche],
+  [`CheatBot`], [`Player`], [Bot tricheur : accède directement à `target_grid` + `QUOTA_SEQUENCE`],
+  [`PhysicalPlayer`], [`Player`], [Interface pour le robot Pepper physique (mode hybride)],
+)
+
+=== Couche logique : `game_logic/`
+
+- `Game` : arbitre d'une partie. Gère les joueurs, le tour actif (`self.turn`), les appels à `play()` (un tir), `next_turn()` et `is_game_over()`.
+- `GameMaster` : orchestrateur du mode console. Configure les joueurs, sélectionne les grilles, pilote la boucle de jeu et appelle la BDD.
+
+=== Couche persistance : `database/`
+
+- `Database` : context manager Psycopg2 : connexion → commit / rollback → fermeture automatique.
+- `GameRepository` : CRUD sur `Game` (création, mise à jour vainqueur, score de confiance, statistiques).
+- `TurnRepository` : insertion des tours + `BotShot` en une transaction, mise à jour Likert, requêtes d'analyse.
+- `PersonaRepository` : gestion des personnages de bot (CRUD admin).
+
+#figure(image("diagrams/images/classes.png"), caption: "Diagramme de classes : PBattleship")
+
+#pagebreak()
+== Cas d'utilisation
+
+La plateforme est utilisée par deux acteurs distincts.
+
+*Joueur (participant) :*
+- Démarrer une nouvelle partie
+- Choisir un personnage de bot (manipulation expérimentale)
+- Sélectionner une configuration de flotte parmi 10 prédéfinies
+- Effectuer 4 tirs par tour sur la grille adverse
+- Évaluer la suspicion de triche (Likert 0-5) après chaque tour du bot
+- Donner un verdict final (Oui / Non) en fin de partie
+
+*Administrateur :*
+- Consulter la liste des parties et les scores de confiance
+- Supprimer des parties ou des joueurs
+- Gérer les personnages de bot (CRUD)
+- Consulter les statistiques globales (taux de détection par quota, distribution des scores Likert)
+- Se déconnecter
+
+#figure(image("diagrams/images/usecase.png"), caption: "Diagramme des cas d'utilisation")
+
+#pagebreak()
+== Backend Flask
+
+=== Classe `WebGame` : session de jeu en mémoire
+
+`WebGame` est l'objet central du backend web. Une instance est créée par partie et stockée dans le dictionnaire `games` (TTL 2 heures, nettoyage automatique à chaque nouvelle partie).
+
+*Attributs principaux :*
+- `player`, `bot` : instances de `Player` et `CheatBot`
+- `game` : instance de `Game` (arbitre)
+- `phase` : état courant (`'setup'` → `'playing'` → `'game_over'`)
+- `current_turn` : `'player'` ou `'bot'`
+- `player_shots_left` : tirs restants ce tour (initialisé à `Variable.SHOTS_PER_TURN = 4`)
+- `quota_sequence`, `quota_index` : parcours cyclique de `QUOTA_SEQUENCE`
+- `game_id` : identifiant PostgreSQL de la partie en cours
+- `created_at` : horodatage pour le TTL de session
+
+*Méthodes principales :*
+- `select_grid(index)` : place la flotte du joueur (prédéfinie) et la flotte du bot (aléatoire), transmet `target_grid` au CheatBot
+- `player_shoot(x, y)` : valide et exécute un tir joueur, décrémente `player_shots_left`, détecte la fin de partie
+- `execute_bot_turn()` : récupère le quota du tour depuis `QUOTA_SEQUENCE`, exécute 4 tirs, sauvegarde le tour en BDD
+- `submit_turn_trust(score)` : met à jour `Turn.trust_score` pour le dernier tour
+- `submit_final_trust(detected)` : met à jour `Game.trust_final` (1 si triche détectée, 0 sinon)
+
+=== Routes publiques
 
 ```
-Battleship_py/
-├── game_logic/           # Moteur de jeu
-│   ├── game_master.py   # Orchestrateur principal
-│   └── game.py          # Logique de tour
-├── classes/              # Modèles de données
-│   ├── grid.py          # Plateau de jeu
-│   ├── ship.py          # Navires
-│   ├── position.py      # Coordonnées
-│   └── variable.py      # Configuration globale
-├── players/              # Implémentations de joueurs
-│   ├── player.py        # Classe de base
-│   ├── cheat_bot.py     # Bot tricheur
-│   └── smart_bot.py     # Bot intelligent
-├── interface/            # UX
-│   └── interface_tk.py   # GUI Tkinter
-├── database/             # Persistance
-│   └── db_manager.py     # Gestion SQLite
-└── client/               # Communication réseau
-    └── client.py         # Socket TCP
+GET  /                              → landing page
+GET  /game                          → interface de jeu
+GET  /api/personas                  → personnages actifs          (60 req/min)
+POST /api/game/new                  → crée une WebGame            (50 req/heure)
+GET  /api/game/<gid>/preview/<idx>  → aperçu d'une configuration  (60 req/min)
+POST /api/game/<gid>/select-grid    → valide la configuration choisie
+GET  /api/game/<gid>/state          → état courant (phase, grilles, tirs restants)
+POST /api/game/<gid>/shoot          → tir joueur                  (30 req/min)
+POST /api/game/<gid>/bot-turn       → tour du bot                 (30 req/min)
+POST /api/game/<gid>/turn-trust     → score Likert du tour
+POST /api/game/<gid>/final-trust    → verdict final Oui/Non
+GET  /api/stats                     → statistiques globales
 ```
 
-=== GameMaster (orchestrateur)
+#figure(image("diagrams/images/Front/APIS.png"), caption: "Diagramme des routes publiques : PBattleship")
+#pagebreak()
+=== Routes administrateur (Basic Auth)
 
-`GameMaster` est le contrôleur central de toute expérience.
+```
+GET    /admin                          → tableau de bord
+GET    /api/admin/overview             → statistiques d'ensemble
+GET    /api/admin/games                → liste des parties
+GET    /api/admin/players              → liste des joueurs
+GET    /api/admin/personas             → liste des personnages
+POST   /api/admin/personas             → créer un personnage
+PATCH  /api/admin/personas/<id>        → activer / désactiver
+DELETE /api/admin/personas/<id>        → supprimer
+GET    /admin/logout                   → déconnexion
+```
 
-*Responsabilités :*
+=== Sécurité
 
-1. *Initialisation* :
-   - Configuration des joueurs (humain vs CheatBot)
-   - Mode Digital (ordinateur seul) vs Hybride (intégration Pepper)
-   - Création de la partie en base de données
+- *Variables d'environnement* : `SECRET_KEY`, `ADMIN_PASSWORD`, `DATABASE_URL` : obligatoires au démarrage
+- *En-têtes HTTP* : `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Content-Security-Policy`, `Strict-Transport-Security` (HSTS)
+- *Rate limiting* par IP via flask-limiter (stockage mémoire)
+- *Admin* : HTTP Basic Auth ; échec loggué avec l'IP source
 
-2. *Gestion des tours* :
-   - Détermination du joueur actif
-   - Exécution des coups
-   - Transition vers le joueur suivant
+#figure(image("diagrams/images/backend.png"), caption: "Diagramme des routes Flask : PBattleship")
+#pagebreak()
+== Implémentation du CheatBot
 
-3. *Gestion de l'expérience* :
-   - Sélection des grilles prédéfinies
-   - Attribution des quotas de triche à chaque tour
-   - Enregistrement des scores de confiance
+Le `CheatBot` est le composant expérimental central : il garantit un niveau de triche contrôlé et reproductible, indépendamment du déroulement réel de la partie.
 
-4. *Persistance* :
-   - Appels à DatabaseManager pour création/mise à jour parties
-   - Enregistrement des tours avec quota et score de confiance
+=== Accès privilégié à la grille ennemie
 
-*Exemple de flux :*
+Contrairement aux autres joueurs, le `CheatBot` reçoit une référence directe à la grille du joueur lors de la sélection de la configuration :
+
 ```python
-gm = GameMaster()
-gm.setup_players(hybrid=False)
-gm.db.create_game(player_name, player_type)
-# ... validation des grilles ...
-while not game.is_finished():
-    result = game.play(current_player)
-    gm.db.record_turn(turn_data)
-    gm.db.record_trust_score(trust_score)
-    game.next_turn()
+# Site/app.py : WebGame.select_grid()
+if isinstance(self.bot, CheatBot):
+    self.bot.set_target_grid(self.player.get_my_grid())
 ```
 
-=== CheatBot (élément critique)
+Cet accès lui permet de cibler précisément les cases occupées par des navires non encore coulés.
 
-`CheatBot` implémente la logique de triche contrôlée qui garantit l'équivalence expérimentale.
+=== Séquence de quotas
 
-*Architecture de triche :*
+Le nombre de succès garantis par tour est défini par une séquence statique stockée dans `Variable.QUOTA_SEQUENCE` :
 
-1. *Accès à la grille ennemie* :
 ```python
-self.target_grid = None  # Set par GameMaster
+# classes/variable.py
+# Distribution cible : 0→6%, 1→25%, 2→38%, 3→25%, 4→6% (cloche centrée sur 2)
+QUOTA_SEQUENCE = [1, 2, 0, 3, 3, 2, 1, 4, 2, 1, 3]
 ```
 
-2. *Planification stratégique* (par tour) :
-```python
-def execute_turn(self, grid, enemy_ships):
-    # 1. Identifier les cases de bateaux non touchées
-    # 2. Identifier les cases vides
-    # 3. Sélectionner exactement N cases (succès)
-    # 4. Sélectionner (4-N) cases vides (échecs)
-    # 5. Mélanger pour éviter pattern
-    # 6. Retourner les 4 positions
-```
+En mode web, la séquence est parcourue cycliquement (`quota_index % len(QUOTA_SEQUENCE)`). À chaque tour, le `CheatBot` effectue exactement 4 tirs dont `QUOTA_SEQUENCE[quota_index]` sont des succès garantis.
 
-3. *Application du quota* :
-   - `self.success_quota` défini par tour (ex: [2, 1, 3, 2, 1])
-   - Garantit exactement N succès par tour
-   - Adaptation automatique si plus de bateaux disponibles
+=== Algorithme de sélection des tirs
 
-4. *Comportement en mode Physique* :
-   - Fallback aléatoire si pas de grille cible disponible
-   - Permet mode hybride sans grille digitale
+Pour chaque tour, le `CheatBot` :
 
-*Communication réseau :*
-```python
-self.client_socket = Client("10.161.177.181", port=5000)
-# Format: "P{colonne}{ligne}" (ex: "PA4")
-# Utilisé pour feedback au robot Pepper
-```
+1. Identifie les cases de navires non encore touchées dans `target_grid`
+2. Priorise les navires partiellement touchés (s'il en existe)
+3. Sélectionne exactement `quota` cases parmi les cases de navires (succès garantis)
+4. Complète avec `4 - quota` cases d'eau (tirs volontairement manqués)
+5. Adapte automatiquement si moins de `quota` cases de navires sont disponibles
+
+Si `target_grid` est absent, le `CheatBot` bascule sur un comportement aléatoire standard.
 
 === Hiérarchie des joueurs
 
 ```
-Player (classe de base)
-├── CheatBot              # Triche discrète
-├── SmartBot              # Stratégie heuristique
-└── PhysicalPlayer        # Interface robot Pepper
+Player
+├── Bot
+├── SmartBot       ← heuristique, sans accès à la grille ennemie
+└── CheatBot       ← accès direct target_grid + QUOTA_SEQUENCE
 ```
 
-*Player* implémente :
-- Gestion de deux grilles (ma flotte, grille de suivi)
-- Historique des coups joués
-- Interface d'entrée utilisateur (console ou GUI)
+#pagebreak()
+== Base de données
 
-=== Modèles de données
+=== Schéma relationnel
 
-*Grid* (10×10 cases) :
-- Stockage des navires placés
-- Traitement des tirs via `shoot(x, y)`
-- Retour de Response (touché/coulé/raté)
-- État de chaque case
+La base PostgreSQL contient quatre tables :
 
-*Ship* :
-- Position (start) + Orientation (H/V)
-- Taille (5, 4, 3, 3, 2)
-- Détection de coulage
-
-*Position* :
-- Coordonnées (x, y)
-- Validation des limites
-
-*Response* :
-- Message (touché/coulé/raté)
-- État après tir
-
-=== Système de persistance (DatabaseManager)
-
-Base SQLite `battleship_stats.db` avec schéma relationnel :
-
-*Table Game* :
+*Table `Game`* : une ligne par partie :
 ```sql
 CREATE TABLE Game (
-    id INTEGER PRIMARY KEY,
+    id          SERIAL PRIMARY KEY,
     player_name TEXT,
-    player_type TEXT,
-    date_played DATETIME,
-    winner TEXT,
-    trust_score_avg REAL
+    player_type TEXT,              -- 'Digital-Web'
+    date_played TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    winner      TEXT,              -- nom du vainqueur
+    trust_score INTEGER,           -- score global (agrégat, usage futur)
+    trust_final INTEGER            -- 1 = triche détectée, 0 = non détectée, NULL = non répondu
 )
 ```
 
-*Table Turn* :
+*Table `Turn`* : un enregistrement par tour de bot :
 ```sql
 CREATE TABLE Turn (
-    id INTEGER PRIMARY KEY,
-    game_id INTEGER,
+    id          SERIAL PRIMARY KEY,
+    game_id     INTEGER REFERENCES Game(id),
     turn_number INTEGER,
-    bot_quota INTEGER,
-    trust_score INTEGER,
-    FOREIGN KEY(game_id) REFERENCES Game(id)
+    bot_quota   INTEGER,           -- succès prévus par QUOTA_SEQUENCE
+    trust_score INTEGER            -- score Likert 0-5 saisi par le joueur
 )
 ```
 
-*Table BotShot* :
+*Table `BotShot`* : un enregistrement par tir du bot :
 ```sql
 CREATE TABLE BotShot (
-    id INTEGER PRIMARY KEY,
-    turn_id INTEGER,
-    shot_number INTEGER,
-    pos_x, pos_y INTEGER,
-    result TEXT
+    id          SERIAL PRIMARY KEY,
+    turn_id     INTEGER REFERENCES Turn(id),
+    shot_number INTEGER,           -- 1 à 4
+    pos_x       INTEGER,
+    pos_y       INTEGER,
+    result      TEXT               -- 'Touché', 'Coulé', 'Raté'
 )
 ```
 
-Cette structure permet :
-- Reconstitution complète de chaque partie
-- Analyse des quotas appliqués vs perceptions
-- Corrélation confiance / succès du bot
+*Table `BotPersona`* : personnages de bot configurables :
+```sql
+CREATE TABLE BotPersona (
+    id          SERIAL PRIMARY KEY,
+    name        TEXT NOT NULL UNIQUE,
+    emoji       TEXT DEFAULT '🤖',
+    description TEXT,
+    active      BOOLEAN DEFAULT TRUE
+)
+```
 
-=== Interfaces utilisateur
+#figure(image("diagrams/images/bdd.png"), caption: "Modèle logique de données : PBattleship")
 
-*Mode Console* :
-- Affichage textuel des grilles
-- Interaction CLI
-- Approprié pour tests serveur
+=== Couche d'accès (DAO/Repository)
 
-*Mode Graphique (Tkinter)* :
-- Canvases pour visualisation grilles 10×10
-- Widgets pour interactions
-- Affichage des tirs antérieurs
-- Intégration du questionnaire de confiance post-tour
-- Support complet des configurations prédéfinies
+Le pattern Repository isole toute la logique SQL de la couche métier. Chaque repository reçoit une instance de `Database` par injection de dépendance.
 
-== Synchronisation Web ↔ Python
+- `GameRepository.create()` → insère une partie, retourne son `id`
+- `GameRepository.update_winner()` → enregistre le vainqueur en fin de partie
+- `GameRepository.update_trust_final()` → enregistre le verdict final (1/0)
+- `TurnRepository.save()` → insère un `Turn` + les 4 `BotShot` associés en une seule transaction
+- `TurnRepository.update_trust()` → met à jour `trust_score` après saisie joueur
+- `PersonaRepository.find_all_active()` → liste les personnages actifs pour le frontend
 
-L'application web Flask en tant que *clients* qui invoquent la logique Python :
+=== Requêtes d'analyse
 
-1. *Création de partie* : Flask appelle GameMaster.setup_players()
-2. *Tirs joueur* : API `/shoot` valide et enregistre
-3. *Tour du bot* : API `/bot-turn` appelle CheatBot.get_case_played()
-4. *Enregistrement confiance* : API `/turn-trust` persiste score en base
-5. *Synchronisation d'état* : État de jeu partagé via base SQLite ou session
+La plateforme calcule nativement les corrélations nécessaires à la recherche :
 
-Cette intégration bidirectionnelle permet :
-- Interface web moderne pour recrutement en ligne
-- Logique Python robuste et testée pour jeu
-- Collecte centralisée des données
-- Flexibilité multi-plateformes (web + desktop)
+- *Distribution Likert par quota* : pour chaque valeur de `bot_quota` (0-4), score de confiance moyen et nombre de tours, mesure si les participants perçoivent davantage la triche quand le quota est élevé.
+- *Taux de détection finale par quota* : proportion de parties où `trust_final = 1` selon le quota dominant, mesure si un quota élevé augmente la détection globale.
+- *Distribution des scores Likert* : répartition 0-5 sur l'ensemble des tours, profil général de suspicion.
+
+\
+
+#figure(
+   table(columns: 3)[#image("diagrams/accueil.png",width: 100%)][#image("diagrams/accueil2.png")][#image("diagrams/config.png")][#image("diagrams/partie.png")][#image("diagrams/partie2.png")][#image("diagrams/partie3.png")][#image("diagrams/partie4.png")][#image("diagrams/admin.png")][#image("diagrams/admin1.png")],
+   caption: "Captures d'écran de l'interface web : PBattleship"
+)
+
+#pagebreak()
+== Interface web & collecte de données
+
+=== Séquence d'une partie
+
+#figure(image("diagrams/images/sequencePartie.png"), caption: "Diagramme de séquence : déroulement d'une partie")
+
+#pagebreak()
+
+Le déroulement complet d'une session suit les étapes suivantes :
+
+1. *Création* : le joueur saisit son nom et choisit un persona → `POST /api/game/new` → crée une `WebGame` en mémoire et une ligne `Game` en BDD
+2. *Sélection de flotte* : navigation parmi 10 configurations (`GET .../preview/<idx>`) puis validation → `POST .../select-grid` → place la flotte, donne `target_grid` au bot
+3. *Tour joueur* : 4 tirs successifs → `POST .../shoot` x 4 (chaque réponse met à jour l'affichage)
+4. *Tour bot* : `POST .../bot-turn` → le CheatBot tire 4 fois selon le quota, résultats retournés
+5. *Évaluation* : le joueur note sa suspicion 0-5 → `POST .../turn-trust`
+6. Retour à l'étape 3 jusqu'à victoire ou défaite
+7. *Verdict final* : le joueur répond Oui / Non → `POST .../final-trust` → `Game.trust_final` mis à jour
+
+=== Pages et vues
+
+*Landing page (`/`)* :
+- Présentation de l'étude et recrutement des participants
+- Statistiques dynamiques de la plateforme (récupérées via `GET /api/stats`)
+- Section RGPD et garantie d'anonymat
+
+*Interface de jeu (`/game`)* :
+- Deux grilles 10x10 : flotte du joueur (avec tirs reçus) et grille de suivi (tirs envoyés)
+- Symboles : `~` eau, `O` navire (côté joueur), `X` touché, `C` coulé, `*` raté
+- Journal d'actions (10 dernières lignes)
+- Questionnaire Likert 0-5 affiché automatiquement après chaque tour du bot
+- Formulaire de verdict final en fin de partie
+- Restauration de l'état après rechargement via `sessionStorage`
+
+*Dashboard admin (`/admin`)* :
+- Tableau des parties : joueur, date, tours joués, score Likert moyen, verdict de détection
+- Tableau des joueurs : parties jouées, score moyen, taux de détection, victoires
+- Graphiques : distribution Likert, corrélation quota / score, taux de détection par quota
+- CRUD personnages (ajouter, activer/désactiver, supprimer)
+
+=== Collecte des données de confiance
+
+Deux mesures sont enregistrées en base pour chaque partie :
+
+- *Score de confiance par tour* (`Turn.trust_score`) : échelle de Likert 0-5, saisie après chaque tour du bot : « Dans quelle mesure pensez-vous que le bot a triché ce tour ? »
+- *Verdict final* (`Game.trust_final`) : binaire 0 / 1 en fin de partie : « Pensez-vous que le bot a triché durant la partie ? »
+
+Aucune donnée personnelle n'est collectée ; l'anonymat est garanti et affiché sur la landing page conformément au RGPD.
 
 #pagebreak()
 
@@ -715,3 +759,6 @@ Ces résultats contribuent à la compréhension des mécanismes de confiance int
 Cette étude offre une contribution empirique à la question fondamentale des biais de confiance dans les interactions compétitives homme-machine. En isolant le rôle du label d'adversaire (humain vs machine) tout en maintenant un comportement de jeu identique, elle permet une évaluation rigoureuse de la manière dont les utilisateurs réagissent différemment selon la nature perçue de leur adversaire.
 
 Les implications de cette recherche dépassent le contexte ludique pour toucher à des enjeux plus larges d'acceptabilité, de confiance, et de coopération dans les environnements intégrant l'intelligence artificielle.
+
+#pagebreak()
+#bibliography("references.bib", style: "ieee")
