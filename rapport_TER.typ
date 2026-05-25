@@ -97,6 +97,8 @@ Cependant, après l'implémentation d'une première version du projet, dont l'ob
 \ En conséquence, une seconde approche a été envisagée afin de permettre une interaction différente avec Pepper, à travers le développement d'un système reposant sur des protocoles d'interaction homme-robot. Ce systeme a ete developpé en Python + Tkinter (partie graphique), langage natif de Pepper, et basé sur une connexion ssh, a permis de maintenir une certaine continuité dans le développement de la logique de jeu. \
 Néanmoins, cette solution a également mis en évidence une difficulté importante : *les parties jouées contre Pepper se révélaient particulièrement longues pour les participants.*
 
+Voir annexes (@annexes) pour les code qr des vidéos reccueillies lors des tests avec Pepper. 
+
 Plusieurs facteurs expliquaient cette difficulté :
 - *Problèmes de communication* : La voix de Pepper était parfois difficile à comprendre et ajoutait une latence dans les échanges
 
@@ -745,3 +747,31 @@ Les implications de cette recherche dépassent le contexte ludique pour toucher 
 
 #pagebreak()
 #bibliography("references.bib", style: "ieee")
+
+= Annexes <annexes>
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 20pt,
+    [
+      #figure(
+        image("diagrams/qr_video1.png", width: 3.5cm),
+        caption: "Vidéo 1 : Premiere partie contre pepper"
+      )
+      #align(center)[
+        #link("https://youtu.be/ktykt9hJhyE")[
+          #text(size: 8pt)[youtu.be/ktykt9hJhyE]
+        ]
+      ]
+    ],
+    [
+      #figure(
+        image("diagrams/qr_video2.png", width: 3.5cm),
+        caption: "Vidéo 2 : Derniere partie contre pepper"
+      )
+      #align(center)[
+        #link("https://youtu.be/i_QCbBmhEOI")[
+          #text(size: 8pt)[youtu.be/i_QCbBmhEOI]
+        ]
+      ]
+    ]
+  )
