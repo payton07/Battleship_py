@@ -1143,7 +1143,8 @@ async function openDetail(gameId) {
       ? `<span class="badge badge-clean">✅ Non, normal</span>`
       : `<span class="badge badge-none">—</span>`;
 
-  const turnsHtml = d.turns.map(t => {
+  const turnsHtml = d.turns.map((t, idx) => {
+    const displayTurn = idx + 1;
     const shots = (t.shots || []).map(s => {
       const coord = `${COLS[s.pos_x] || '?'}${s.pos_y}`;
       const cls = s.result === 'Coulé' ? 'shot-sunk' : s.result === 'Touché' ? 'shot-hit' : 'shot-miss';
@@ -1160,7 +1161,7 @@ async function openDetail(gameId) {
 
     return `
       <div class="turn-row">
-        <div class="turn-num">Tour ${t.turn_number}</div>
+        <div class="turn-num">Tour ${displayTurn}</div>
         <div class="turn-quota">
           Quota <strong>${quota}</strong>/4
           <span class="quota-bar" style="width:${quotaBarW}px;"></span>

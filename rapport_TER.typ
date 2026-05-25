@@ -555,7 +555,7 @@ CREATE TABLE BotPersona (
 )
 ```
 
-#figure(image("diagrams/images/bdd.png"), caption: "Modèle logique de données : PBattleship")
+#figure(image("diagrams/images/Bdd.png"), caption: "Modèle logique de données : PBattleship")
 
 === Couche d'accès (DAO/Repository)
 
@@ -588,7 +588,7 @@ La plateforme calcule nativement les corrélations nécessaires à la recherche 
 
 === Séquence d'une partie
 
-#figure(image("diagrams/images/sequencePartie.png"), caption: "Diagramme de séquence : déroulement d'une partie")
+#figure(image("diagrams/images/SequencePartie.png"), caption: "Diagramme de séquence : déroulement d'une partie")
 
 #pagebreak()
 
@@ -638,46 +638,39 @@ Aucune donnée personnelle n'est collectée ; l'anonymat est garanti et affiché
 
 == Population et recrutement
 
-[À compléter selon le contexte : nombre de participants, critères d'inclusion/exclusion, mode de recrutement, caractéristiques démographiques]
+La majorité de la population cible est constituée de nos amis et de membres de notre famille. La moyenne d'age est d'environ 25 ans avec une grande majorité de jeunes (autour de 23 ans). La majorité des participants sont des hommes (environ 80%).
 
 == Protocole d'expérience
 
 === Phase de préparation
 
-Chaque participant est accueilli et informé de la nature générale de l'étude (comparaison de deux types d'adversaires dans un jeu compétitif) sans révéler l'hypothèse centrale. Un formulaire de consentement est signé, et des informations démographiques de base sont collectées.
-
-=== Entraînement
-
-Une courte phase d'entraînement permet au participant de se familiariser avec les règles modifiées du jeu, en particulier le système de 4 tirs par tour. Cette étape dure environ 5 minutes.
+Chaque participant est accueilli et informé de la nature générale de l'étude (détection de triche) sans révéler l'hypothèse centrale. Il leur est expliqué que les deux adversaire auront la capacité de tricher, mais sans préciser que le comportement est identique.
 
 === Déroulement des parties
 
-*Première partie* : Le participant joue une partie contre un adversaire présenté comme [HUMAIN / MACHINE - à préciser selon la condition expérimentale].
-
-*Pause inter-conditions* : Une courte pause de 5 minutes est imposée entre les deux parties pour permettre au participant de se reposer.
+*Première partie* : Le participant joue une partie contre un adversaire présenté comme HUMAIN ou IA.
 
 *Deuxième partie* : Le participant joue une deuxième partie contre un adversaire présenté comme le type opposé. Les conditions de jeu restent identiques.
 
 === Mesure de confiance
 
-À la fin de chaque tour, le participant doit répondre à la question suivante sur une échelle de 1 à 5 :
+À la fin de chaque tour, le participant doit répondre à la question suivante sur une échelle de 0 à 5 :
 
 _"Dans quelle mesure pensez-vous que votre adversaire a triché lors de ce tour ?"_
 
 Les réponses sont enregistrées immédiatement dans la base de données.
 
-- *1* : Pas du tout triché
+- *0* : Pas du tout triché
+- *1* : Très peu probable qu'il/elle ait triché
 - *2* : Peu probable qu'il/elle ait triché
-- *3* : Neutre / incertain
+- *3* : Neutre
 - *4* : Probable qu'il/elle ait triché
 - *5* : Certainement triché
 
 === Questionnaire post-expérience
 
-À l'issue des deux parties, un questionnaire exploratoire demande au participant :
-- Ses perceptions globales de chaque adversaire
-- S'il a identifié des patterns dans le comportement de l'adversaire
-- Son hypothèse sur les objectifs de l'étude
+À l'issue de chaques parties, une question supplémentaire est posée au participant afin de connaître son ressenti général sur la partie : 
+_"Pensez-vous que votre adversaire a triché durant la partie ?"_
 
 == Conditions de contrôle
 

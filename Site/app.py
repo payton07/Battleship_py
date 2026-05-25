@@ -262,7 +262,17 @@ class WebGame:
         if isinstance(self.bot, CheatBot):
             self.bot.set_success_quota(quota)
 
+        turn_number = self.turn_number
         shots = []
+        def persist_turn():
+            if self.game_id:
+                try:
+                    self.last_turn_id = turn_repo.save(
+                        self.game_id, turn_number, quota, None, self.bot_shots_this_turn
+                    )
+                except Exception as e:
+                    logger.error("save_turn error: %s", e)
+
         for _ in range(Variable.SHOTS_PER_TURN):
             result = self.game.play(self.bot)
             pos    = self.bot.last_played_pos
@@ -278,21 +288,15 @@ class WebGame:
             over, winner, msg = self._is_over()
             if over:
                 self._save_winner(winner)
+                persist_turn()
                 return {**self._grids(reveal_bot=True),
                         'shots': shots, 'game_over': True, 'winner': winner, 'message': msg}
 
+        persist_turn()
         self.game.next_turn()
         self.current_turn      = 'player'
         self.player_shots_left = Variable.SHOTS_PER_TURN
         self.turn_number      += 1
-
-        if self.game_id:
-            try:
-                self.last_turn_id = turn_repo.save(
-                    self.game_id, self.turn_number, quota, None, self.bot_shots_this_turn
-                )
-            except Exception as e:
-                logger.error("save_turn error: %s", e)
 
         return {
             **self._grids(),
