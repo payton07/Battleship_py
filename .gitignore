@@ -21,6 +21,8 @@ venv/
 .venv/
 env/
 
+Presentation/Nouveau_*
+
 # IDE
 .vscode/
 .idea/

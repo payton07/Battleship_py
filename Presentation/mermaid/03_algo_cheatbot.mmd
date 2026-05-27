@@ -1,0 +1,20 @@
+flowchart TD
+    START(["Début du tour — 4 tirs"])
+    START --> Q["Lire quota N\ndepuis QUOTA_SEQUENCE"]
+    Q --> ID["Identifier les cases\nde navires non touchées"]
+    ID --> PRIO{"Navire déjà\npartiellement touché ?"}
+    PRIO -->|Oui| CONT["Prioriser ce navire"]
+    PRIO -->|Non| RND["Choisir un navire\naléatoirement"]
+    CONT --> SEL["Sélectionner N cases\nde navires\n(succès garantis)"]
+    RND --> SEL
+    SEL --> FILL["Compléter avec\n4 - N cases d'eau\n(tirs manqués volontaires)"]
+    FILL --> MIX["Mélanger les 4 tirs\naléatoirement"]
+    MIX --> EXEC["Exécuter et enregistrer\nles tirs en BDD"]
+    EXEC --> END(["Fin du tour"])
+
+    style START fill:#1a3a5c,color:#fff
+    style END fill:#1a3a5c,color:#fff
+    style SEL fill:#c0392b,color:#fff
+    style FILL fill:#2a5f9e,color:#fff
+    style MIX fill:#6b7280,color:#fff
+    style PRIO fill:#f39c12,color:#fff

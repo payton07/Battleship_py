@@ -1,0 +1,20 @@
+flowchart LR
+    S1["Saisie\ndu nom"] --> S2["Choix\ndu persona"]
+    S2 --> S3["Sélection\nde flotte"]
+    S3 --> S4["4 tirs\nJoueur"]
+    S4 --> S5["4 tirs\nBot"]
+    S5 --> S6["Évaluation\nLikert 0-5"]
+    S6 --> FIN{"Fin de\npartie ?"}
+    FIN -->|Non| S4
+    FIN -->|Oui| S7["Verdict\nfinal\nOui / Non"]
+    S7 --> S8["Résultats\naffichés"]
+
+    style S1 fill:#2a5f9e,color:#fff
+    style S2 fill:#2a5f9e,color:#fff
+    style S3 fill:#2a5f9e,color:#fff
+    style S4 fill:#27ae60,color:#fff
+    style S5 fill:#c0392b,color:#fff
+    style S6 fill:#f39c12,color:#fff,font-weight:bold
+    style FIN fill:#6b7280,color:#fff
+    style S7 fill:#f39c12,color:#fff,font-weight:bold
+    style S8 fill:#1a3a5c,color:#fff

@@ -1,0 +1,20 @@
+flowchart LR
+    P["Participants"] --> GA["Groupe A"]
+    P --> GB["Groupe B"]
+
+    GA --> A1["Partie 1\nAdversaire HUMAIN"]
+    GA --> A2["Partie 2\nAdversaire IA"]
+
+    GB --> B1["Partie 1\nAdversaire IA"]
+    GB --> B2["Partie 2\nAdversaire HUMAIN"]
+
+    A1 & A2 & B1 & B2 --> SAME["Comportement identique\nMêmes quotas\nMême CheatBot"]
+
+    style P fill:#1a3a5c,color:#fff,font-weight:bold
+    style GA fill:#2a5f9e,color:#fff
+    style GB fill:#2a5f9e,color:#fff
+    style A1 fill:#27ae60,color:#fff
+    style A2 fill:#c0392b,color:#fff
+    style B1 fill:#c0392b,color:#fff
+    style B2 fill:#27ae60,color:#fff
+    style SAME fill:#6b7280,color:#fff,font-weight:bold
