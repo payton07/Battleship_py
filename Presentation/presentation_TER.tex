@@ -288,7 +288,7 @@
 \textbf{Algorithme de triche :}
 \begin{itemize}
     \item Accès à la grille ennemie
-    \item Quota prédéfini par tour : [1, 2, 0, 3, 3, 2, 1, 4, 2, 1, 3]
+    \item Quota prédéfini par tour : [1, 2, ..., 3]
 \end{itemize}
 
 \vspace{0.5cm}
@@ -305,62 +305,17 @@
 
 \begin{frame} % Page 20
 \frametitle{Base de données PostgreSQL}
-\textbf{Schéma relationnel :}
-
-\begin{columns}[T]
-\column{0.33\textwidth}
-\textbf{Table Game}
-\begin{itemize}
-    \item game\_id (PK)
-    \item player\_name
-    \item player\_type
-    \item date\_played
-    \item winner
-\end{itemize}
-
-\column{0.33\textwidth}
-\textbf{Table Turn}
-\begin{itemize}
-    \item turn\_id (PK)
-    \item game\_id (FK)
-    \item turn\_number
-    \item bot\_quota
-    \item trust\_score
-\end{itemize}
-
-\column{0.33\textwidth}
-\textbf{Table BotShot}
-\begin{itemize}
-    \item shot\_id (PK)
-    \item turn\_id (FK)
-    \item shot\_number
-    \item pos\_x, pos\_y
-    \item result
-\end{itemize}
-\end{columns}
-
-\vspace{0.5cm}
+\textbf{Schéma de la base :}
 \begin{center}
-\includegraphics[width=0.78\textwidth]{../rapport/diagrams/images/Bdd.png}
+\includegraphics[width=0.5\textwidth]{../rapport/diagrams/images/Bdd.png}
 \end{center}
 \end{frame}
 
 \begin{frame} % Page 21
 \frametitle{Synchronisation Web $\leftrightarrow$ Python}
 \textbf{Flux de données complet :}
-
-\begin{enumerate}
-    \item Utilisateur accède à \texttt{/game} (Flask)
-    \item Flask initialise GameMaster en Python
-    \item Tirs joueur → API \texttt{/shoot} → logique Python
-    \item Tour du bot → appel CheatBot.get\_case\_played()
-    \item Résultats → enregistrement PostgreSQL
-    \item Scores de confiance → base de données
-\end{enumerate}
-
-\vspace{0.5cm}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{../rapport/diagrams/images/synchro.png}
+\includegraphics[width=0.5\textwidth]{../rapport/diagrams/images/synchro.png}
 \end{center}
 \end{frame}
 
@@ -404,10 +359,9 @@ Condition B & IA & Humain \\
 \textbf{Phases d'une partie :}
 \begin{enumerate}
     \item Sélection du nom du joueur
+    \item Choix de l'adversaire
     \item Sélection de la configuration de la flotte
     \item Combat
-    \item Évaluation de confiance après chaque tour du bot
-    \item Fin : Victoire ou défaite
     \item Évaluation de perception de triche globale
 \end{enumerate}
 \end{frame}
@@ -444,7 +398,7 @@ Condition B & IA & Humain \\
 
 \begin{itemize}
     \item \textbf{Même adversaire} : Algorithme identique
-    \item \textbf{Même quota} : Séquence [1, 2, ..., 3] répétée
+    \item \textbf{Même quota} : Séquence [1, 2, 0, 3, 3, 2, 1, 4, 2, 1, 3] répétée
 \end{itemize}
 
 \vspace{0.5cm}
@@ -516,7 +470,7 @@ Condition B & IA & Humain \\
     \item Biais systématique dans la perception de tromperie artificielle
 \end{itemize}
 \vspace{0.5cm}
-\textbf{Implications pour le design éthique d'IA}
+\textbf{Implications pour le design d'IA}
 \end{frame}
 
 \begin{frame} % Page 33
