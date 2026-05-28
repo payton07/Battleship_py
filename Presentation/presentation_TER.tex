@@ -121,7 +121,7 @@
     
     \vspace{0.5cm}
     
-    \item[\textbf{H\textsubscript{2a}}] L'ordre de présentation \textbf{influence} impact les perceptions de triche
+    \item[\textbf{H\textsubscript{2a}}] L'ordre de présentation de l'adversaire \textbf{influence} les perceptions de triche
     
     \vspace{0.5cm}
     
@@ -228,24 +228,13 @@
 \end{frame}
 
 \begin{frame} % Page 14
-\frametitle{Interface de Jeu Web}
-\textbf{Machine à états (5 phases) :}
-\begin{enumerate}
-    \item \textbf{Setup} : Entrée du nom du joueur
-    \item \textbf{Persona} : Sélection du contexte (humain vs robot)
-    \item \textbf{Grid} : Validation configuration de flotte
-    \item \textbf{Playing} : Jeu et collecte de scores de confiance
-    \item \textbf{GameOver} : Résultats et débriefing
-\end{enumerate}
-
-\vspace{0.5cm}
 \begin{center}
 \includegraphics[width=0.50\textwidth]{../rapport/diagrams/images/Front/MachineEtat_Ecran.png}
 \end{center}
 \end{frame}
 
 \begin{frame} % Page 15
-\frametitle{Grilles de jeu (10×10)}
+\frametitle{Grilles de jeu}
 \begin{columns}[T]
 \column{0.5\textwidth}
 \textbf{Grille du joueur :}
@@ -264,15 +253,13 @@
 \end{itemize}
 \end{columns}
 
-\vspace{1cm}
 \begin{center}
-\includegraphics[width=0.85\textwidth]{../rapport/diagrams/interfaces_site/partie2.png}
+\includegraphics[width=0.80\textwidth]{../rapport/diagrams/interfaces_site/partie2.png}
 \end{center}
 \end{frame}
 
 
-%Experience
-\begin{frame} % Page 16
+\begin{frame} % Page 17
 \frametitle{Système de notation de confiance}
 \textbf{Après chaque tour du bot :}
 
@@ -280,98 +267,48 @@
 \Large \textit{``Le comportement de votre adversaire vous a-t-il semblé suspect ce tour? ''}
 \end{center}
 
-\vspace{0.5cm}
-
-\begin{tabular}{c|l}
-\textbf{Score} & \textbf{Interprétation} \\
-\hline
-0 & Pas du tout triché \\
-1-2 & Peu probable \\
-3 & Incertain \\
-4-5 & Très suspect / Certainement triché \\
-\end{tabular}
-
-\vspace{0.5cm}
 \begin{center}
-\includegraphics[width=0.70\textwidth]{../rapport/diagrams/interfaces_site/partie3.png}
+\includegraphics[width=0.80\textwidth]{../rapport/diagrams/interfaces_site/partie3.png}
+\end{center}
+\end{frame}
+
+\begin{frame} % Page 17
+\frametitle{Appréciation globale}
+\textbf{A la fin de la partie :}
+
+\begin{center}
+\Large \textit{``Au regard de toute la partie, pensez-vous que votre adversaire a triché ?''}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.80\textwidth]{../rapport/diagrams/interfaces_site/partie4.png}
 \end{center}
 \end{frame}
 
 \subsection{Application Python}
 
-\begin{frame} % Page 17
-\frametitle{CheatBot : Architecture de triche}
-\textbf{Le cœur du protocole expérimental}
+\begin{frame} % Page 18
+\frametitle{CheatBot}
+\textbf{Algorithme de triche :}
+\begin{itemize}
+    \item Accès à la grille ennemie
+    \item Quota prédéfini par tour : [1, 2, 0, 3, 3, 2, 1, 4, 2, 1, 3]
+\end{itemize}
 
 \vspace{0.5cm}
 
-\textbf{Processus par tour :}
+\textbf{Chaque tour :}
 \begin{enumerate}
-    \item Accès à la grille ennemie
     \item Identification d'un bateau ayant reçu au moins un tir
-    \item Sélection de $B_1 = \max(N, case du bateaux restantes)$ cases bateaux (succès)
+    \item Sélection de cases à touché sur ce bateau (succès)
     \item Sélection des cases vides (échecs)
     \item Sélection d'un autre bateau pour compléter les tirs si besoin
     \item Exécution des 4 tirs
 \end{enumerate}
 \end{frame}
 
-
-%Experience
-\begin{frame} % Page 18
-\frametitle{Conditions expérimentales}
-\textbf{Garantie de contrôle expérimental :}
-
-\begin{itemize}
-    \item Quota prédéfini par tour (ex: [1, 2, 0, 3, 3, 2, 1, 4, 2, 1, 3])
-    \item \textbf{Même séquence} utilisée dans les deux conditions
-\end{itemize}
-
-\vspace{0.5cm}
-
-\textbf{Variation entre expériences :}
-
-\begin{itemize}
-    \item Chance du joueur à toucher le bot
-    \item \textbf Connaissance du jeu pour le joueur
-\end{itemize}
-\end{frame}
-
-\begin{frame} % Page 19
-\frametitle{Modèles de données}
-\begin{columns}[T]
-\column{0.5\textwidth}
-\textbf{Grid (10×10)}
-\begin{itemize}
-    \item Navires placés
-    \item État de chaque case
-    \item Méthode \texttt{shoot(x,y)}
-\end{itemize}
-
-\textbf{Ship}
-\begin{itemize}
-    \item Position, orientation
-    \item Taille (5, 4, 3, 3, 2)
-    \item Détection coulage
-\end{itemize}
-
-\column{0.5\textwidth}
-\textbf{Position}
-\begin{itemize}
-    \item Coordonnées (x, y)
-    \item Validation limites
-\end{itemize}
-
-\textbf{Response}
-\begin{itemize}
-    \item Message (touché/coulé/raté)
-    \item État après tir
-\end{itemize}
-\end{columns}
-\end{frame}
-
 \begin{frame} % Page 20
-\frametitle{Base de données SQLite}
+\frametitle{Base de données PostgreSQL}
 \textbf{Schéma relationnel :}
 
 \begin{columns}[T]
@@ -423,7 +360,7 @@
     \item Flask initialise GameMaster en Python
     \item Tirs joueur → API \texttt{/shoot} → logique Python
     \item Tour du bot → appel CheatBot.get\_case\_played()
-    \item Résultats → enregistrement SQLite
+    \item Résultats → enregistrement PostgreSQL
     \item Scores de confiance → base de données
 \end{enumerate}
 
@@ -433,16 +370,7 @@
 \end{center}
 \end{frame}
 
-\begin{frame} % Page 22
-\frametitle{Avantages de cette architecture}
-\begin{itemize}
-    \item \textbf{Interface moderne} : Web pour UX optimale et recrutement en ligne
-    \item \textbf{Contrôle rigoureux} : Comportement identique dans les deux conditions
-    \item \textbf{Reproductibilité} : Code centralisé et versionné
-    \item \textbf{Scalabilité} : Collecte de données auprès de nombreux participants
-    \item \textbf{Flexibilité future} : Intégration possible avec Pepper (socket TCP/IP)
-\end{itemize}
-\end{frame}
+% {Interface moderne} : Web pour UX optimale et recrutement en ligne
 
 % ═════════════════════════════════════════════════════════════════════════
 % SECTION 4 : PROTOCOLE EXPÉRIMENTAL
@@ -459,11 +387,9 @@
 
 \begin{frame} % Page 24
 \frametitle{Design quasi-expérimental}
-\textbf{Plan intra-groupe (within-subjects) :}
 
 \begin{center}
 Chaque participant joue \textbf{2 parties} avec comportement adversaire \textbf{identique}
-\end{center}
 
 \vspace{0.5cm}
 
@@ -471,18 +397,12 @@ Chaque participant joue \textbf{2 parties} avec comportement adversaire \textbf{
 \hline
 & \textbf{Partie 1} & \textbf{Partie 2} \\
 \hline
-Condition A & Adversaire X (Label 1) & Adversaire Y (Label 2) \\
+Condition A & Humain & IA \\
 \hline
-Condition B & Adversaire Y (Label 2) & Adversaire X (Label 1) \\
+Condition B & IA & Humain \\
 \hline
 \end{tabular}
-
-\vspace{0.5cm}
-
-Label 1 = Humain (adversaire présenté comme joueur humain)
-
-Label 2 = IA (adversaire présenté comme CheatBot)
-
+\end{center}
 \end{frame}
 
 \begin{frame} % Page 25
@@ -490,9 +410,9 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 \textbf{Phases d'une partie :}
 \begin{enumerate}
     \item Sélection du nom du joueur
-    \item Sélection de la configuration de flotte (10 grilles prédéfinies)
-    \item Combat (alternance joueur $\leftrightarrow$ bot, 4 tirs/tour)
-    \item Évaluation de confiance après chaque tour du bot (0-5)
+    \item Sélection de la configuration de la flotte
+    \item Combat
+    \item Évaluation de confiance après chaque tour du bot
     \item Fin : Victoire ou défaite
     \item Évaluation de perception de triche globale
 \end{enumerate}
@@ -540,6 +460,16 @@ Label 2 = IA (adversaire présenté comme CheatBot)
     \item Label de l'adversaire %(Humain vs CheatBot)
     \item Ordre de présentation %(Condition A vs B)
 \end{itemize}
+
+\vspace{0.5cm}
+
+\textbf{Variation entre joueurs :}
+
+\begin{itemize}
+    \item Chance du joueur à toucher le bot
+    \item \textbf{Connaissance du jeu} pour le joueur
+\end{itemize}
+
 \end{frame}
 
 % ═════════════════════════════════════════════════════════════════════════
@@ -559,7 +489,7 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 \frametitle{Population étudiée}
 \textbf{Population :}
 \begin{itemize}
-    \item Taille de l'échantillon : 30 participants pour 40 parties
+    \item Taille de l'échantillon : 28 participants pour 40 parties
     \item Amis, collègues de l'université et famille
     \item Diversité d'âge, de genre et de familiarité avec les jeux vidéo
     \item Majorité masculine (environ 80\%)
@@ -567,13 +497,14 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 \end{frame}
 
 \begin{frame} % Page 30
-\frametitle{Analyse prévue}
-\textbf{Hypothèses à tester :}
+\frametitle{Hypothèses}
+\begin{center}
 \begin{itemize}
     \item H\textsubscript{1} : Différence significative entre les deux labels
     \item H\textsubscript{2a} : Effet d'ordre de présentation
     \item H\textsubscript{2b} : Diminution de la confiance au fil des tours
 \end{itemize}
+\end{center}
 \end{frame}
 
 \begin{frame} % Page 31
@@ -589,8 +520,9 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 \begin{itemize}
     \item Les utilisateurs appliquent des standards différents selon le label
     \item Biais systématique dans la perception de tromperie artificielle
-    \item Implications pour le design éthique d'IA
 \end{itemize}
+\vspace{0.5cm}
+\textbf{Implications pour le design éthique d'IA}
 \end{frame}
 
 \begin{frame} % Page 33
@@ -667,7 +599,7 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 \begin{frame} % Page 39
 \frametitle{Merci}
 \begin{center}
-{\Large Pepper Battleship}
+{\Large Bataille navale}
 
 \vspace{1cm}
 
