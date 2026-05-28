@@ -2,10 +2,6 @@
 \beamer@sectionintoc {1}{Introduction}{3}{0}{1}
 \beamer@sectionintoc {2}{Contexte du Projet}{7}{0}{2}
 \beamer@sectionintoc {3}{Développement}{9}{0}{3}
-\beamer@subsectionintoc {3}{1}{Architecture générale}{10}{0}{3}
-\beamer@subsectionintoc {3}{2}{Plateforme Web}{13}{0}{3}
-\beamer@subsectionintoc {3}{3}{Application Python}{18}{0}{3}
-\beamer@subsectionintoc {3}{4}{Intégration Web $\leftrightarrow $ Python}{20}{0}{3}
 \beamer@sectionintoc {4}{Protocole Expérimental}{21}{0}{4}
 \beamer@sectionintoc {5}{Résultats Obtenus}{26}{0}{5}
 \beamer@sectionintoc {6}{Conclusion}{34}{0}{6}
