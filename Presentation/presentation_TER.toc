@@ -7,5 +7,5 @@
 \beamer@subsectionintoc {3}{3}{Application Python}{17}{0}{3}
 \beamer@subsectionintoc {3}{4}{Intégration Web $\leftrightarrow $ Python}{21}{0}{3}
 \beamer@sectionintoc {4}{Protocole Expérimental}{23}{0}{4}
-\beamer@sectionintoc {5}{Résultats Attendus}{28}{0}{5}
+\beamer@sectionintoc {5}{Résultats Obtenus}{28}{0}{5}
 \beamer@sectionintoc {6}{Conclusion}{36}{0}{6}

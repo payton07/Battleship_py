@@ -13,37 +13,38 @@
 
 % Couleurs personnalisées
 \definecolor{darkblue}{rgb}{0.1, 0.3, 0.5}
+\definecolor{bblue}{rgb}{0.15, 0.35, 0.6}
 \definecolor{lightblue}{rgb}{0.2, 0.4, 0.7}
-\definecolor{accentred}{rgb}{1, 0.3, 0.2}
 
 \setbeamercolor{palette primary}{bg=darkblue, fg=white}
-\setbeamercolor{palette secondary}{bg=lightblue, fg=white}
-\setbeamercolor{palette tertiary}{bg=accentred, fg=white}
-\setbeamercolor{title}{fg=darkblue}
-\setbeamercolor{subtitle}{fg=lightblue}
+\setbeamercolor{palette secondary}{bg=bblue, fg=white}
+\setbeamercolor{palette tertiary}{bg=lightblue, fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{subtitle}{fg=lightgray}
 
 % ─── En-têtes et pieds de page ────────────────────────────────────────
 \setbeamerfont{page number in head/foot}{size=\small}
-\setbeamertemplate{footline}[frame number]
-
-% ─── Commandes personnalisées ─────────────────────────────────────────
-\newcommand{\todo}[1]{{\color{red}\textbf{[À MODIFIER: #1]}}}
-\newcommand{\placeholder}[2]{
-  \begin{center}
-  \fbox{\begin{minipage}{#1}
-    \centering
-    \textit{\small Image / Schéma : #2}
-    \vspace{#1}
-  \end{minipage}}
-  \end{center}
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.33\paperwidth,ht=2.5ex,dp=1.2ex,left]{author in head/foot}%
+      \hspace*{1em}Mallory B.\ Patrice K.
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.5ex,dp=1.2ex,center]{title in head/foot}%
+      Bataille navale
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.33\paperwidth,ht=2.5ex,dp=1.2ex,right]{date in head/foot}%
+      \insertframenumber/\inserttotalframenumber\hspace*{1em}
+    \end{beamercolorbox}%
+  }%
 }
 
 % ─── Titres et auteur ─────────────────────────────────────────────────
-\title{Pepper Battleship}
+\title{Bataille navale}
 \subtitle{Étude de la confiance accordée à un humain vs une IA}
-\author{\todo{Prénom NOM}, \todo{Prénom NOM}}
+\author{Mallory BARATAY - Patrice KEGLO \\ Groupe CTRL-Z}
 \date{\today}
-\institute{Master 1 Génie Logiciel \\ Faculté des Sciences -- Département Informatique}
+\institute{Master 1 Génie Logiciel \\ Faculté des Sciences de Montpellier \\ Département Informatique}
 
 % ═════════════════════════════════════════════════════════════════════════
 % DÉBUT DU DOCUMENT
@@ -68,7 +69,7 @@
 
 \section{Introduction}
 
-\begin{frame}[plain] % Page 3
+\begin{frame} % Page 3
 \centering
 \vfill
 {\Huge Introduction}
@@ -134,7 +135,7 @@
 
 \section{Contexte du Projet}
 
-\begin{frame}[plain] % Page 7
+\begin{frame} % Page 7
 \centering
 \vfill
 {\Huge Contexte du Projet}
@@ -178,7 +179,7 @@
 
 \section{Développement}
 
-\begin{frame}[plain] % Page 9
+\begin{frame} % Page 9
 \centering
 \vfill
 {\Huge Développement}
@@ -449,7 +450,7 @@
 
 \section{Protocole Expérimental}
 
-\begin{frame}[plain] % Page 23
+\begin{frame} % Page 23
 \centering
 \vfill
 {\Huge Protocole Expérimental}
@@ -547,7 +548,7 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 
 \section{Résultats Obtenus}
 
-\begin{frame}[plain] % Page 28
+\begin{frame} % Page 28
 \centering
 \vfill
 {\Huge Résultats Obtenus}
@@ -625,7 +626,7 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 
 \section{Conclusion}
 
-\begin{frame}[plain] % Page 36
+\begin{frame} % Page 36
 \centering
 \vfill
 {\Huge Conclusion}
@@ -674,7 +675,7 @@ Label 2 = IA (adversaire présenté comme CheatBot)
 
 \vspace{2cm}
 
-\todo{Université - Master 1 Génie Logiciel}
+Faculté des Sciences de Montpellier - Master 1 Génie Logiciel
 
 \vspace{1cm}
 
