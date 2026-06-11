@@ -18,5 +18,4 @@ jobs:
           script: |
             cd /opt/pbattleship
             git pull origin main
-            pip install -r Site/requirements.txt --break-system-packages
             sudo systemctl restart pbattleship
