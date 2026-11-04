@@ -29,9 +29,9 @@ class GameMaster:
         for player in self.players:
             self.game.add_player(player)
 
-        # Liaison des grilles pour l'adversité
-        self.human_player.set_enemy_grid(self.bot_player.get_my_grid())
-        self.bot_player.set_enemy_grid(self.human_player.get_my_grid())
+        # Le CheatBot a besoin de la grille ennemie pour "tricher" lors de sa planification
+        if isinstance(self.bot_player, CheatBot):
+            self.bot_player.set_cheating_target_grid(self.human_player.get_my_grid())
 
     def apply_grid_choice(self, player, index):
         """Applique une grille prédéfinie à un joueur."""

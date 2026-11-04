@@ -18,8 +18,9 @@ class Game:
 
     def play(self, player):
         """
-        Effectue UN TIR pour le joueur donné, s'il a le droit de jouer.
-        Ne passe pas au tour suivant automatiquement.
+        Effectue UN TIR pour le joueur donné.
+        Le moteur récupère les coordonnées de tir du joueur, 
+        les transmet à l'adversaire et renvoie le résultat au tireur.
         """
         if not self.players:
             return Variable.MESSAGE_PAS_DE_JOUEUR
@@ -30,23 +31,28 @@ class Game:
             return Variable.MESSAGE_JOUEUR_NON_TROUVE
 
         if player_index == self.turn:
-            # Le joueur tire
-            message = player.shoot().get_message()
+            # 1. Obtenir la cible
+            target_pos = player.get_case_played()
+            x, y = target_pos.get_x(), target_pos.get_y()
+
+            # 2. Identifier l'adversaire
+            opponent_index = (player_index + 1) % len(self.players)
+            opponent = self.players[opponent_index]
+
+            # 3. Transmettre le tir et récupérer le résultat
+            response = opponent.receive_shot(x, y)
+
+            # 4. Informer le tireur pour qu'il mette à jour son suivi local
+            player.handle_response(x, y, response)
             
-            # On retourne le message du tir
-            return message
+            # 5. Retourner le message du tir
+            return response.get_message()
 
         return Variable.MESSAGE_TOUR_ERR.format(player_name=player.get_name())
 
     def next_turn(self):
-        """Passe manuellement au joueur suivant."""
         if self.players:
             self.turn = (self.turn + 1) % len(self.players)
-
-    def place_ships(self, player, ships_to_place):
-        grid = player.get_my_grid()
-        for ship in ships_to_place:
-            grid.place_ship(ship)
 
     def place_predefined_ships(self, player, configuration):
         grid = player.get_my_grid()
@@ -64,7 +70,6 @@ class Game:
                 y = random.randint(0, Variable.get_size_grid() - 1)
                 pos = Position(x, y)
                 orientation = Orientation.HORIZONTAL if random.random() < 0.5 else Orientation.VERTICAL
-
                 ship = Ship(size, pos, orientation)
                 placed = grid.place_ship(ship)
 
