@@ -14,7 +14,7 @@ class Grid:
         return Variable.is_inside(x, y)
 
     def can_place_ship(self, ship):
-        """Vérifie si un bateau peut être placé (CONDITIONS 2 et 3)."""
+        """Vérifie si un bateau peut être placé sans collision et sans toucher un autre bateau."""
         for pos in ship.get_positions():
             x, y = pos.get_x(), pos.get_y()
             # 1. Ne sort pas de la grille
@@ -23,6 +23,12 @@ class Grid:
             # 2. Ne touche pas un autre bateau (Collision / Superposition)
             if self.cases[x][y] != Variable.CASE_DEFAULT:
                 return False
+            # 3. Ne touche pas un voisin (Pas de bateaux collés)
+            for neighbor in pos.get_neighbors():
+                nx, ny = neighbor.get_x(), neighbor.get_y()
+                if self.is_inside(nx, ny):
+                    if self.cases[nx][ny] == Variable.CASE_BATEAU:
+                        return False
         return True
 
     def place_ship(self, ship):

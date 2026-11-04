@@ -17,7 +17,7 @@ class GridGenerator:
         for size in sizes:
             placed = False
             attempts = 0
-            while not placed and attempts < 200: # Plus d'essais si la grille est serrée
+            while not placed and attempts < 1000: # Plus d'essais pour respecter les contraintes strictes
                 x = random.randint(0, size_grid - 1)
                 y = random.randint(0, size_grid - 1)
                 orient = random.choice([Orientation.HORIZONTAL, Orientation.VERTICAL])
@@ -25,7 +25,7 @@ class GridGenerator:
                 ship = Ship(size, Position(x, y), orient)
                 # On utilise la validation de Grid qui vérifie les collisions et les bords
                 if grid.place_ship(ship):
-                    ship_configs.append((size, x, y, orient.value))
+                    ship_configs.append((size, x, y, orient))
                     placed = True
                 attempts += 1
         

@@ -47,14 +47,14 @@ class BattleshipGUI(object):
         self.label_status = Label(self.top_frame, text="Choisissez votre configuration", font=("Arial", 14, "bold"))
         self.label_status.pack()
 
+        self.label_quota = Label(self.top_frame, text="Quota : -", font=("Arial", 12), fg="#7f8c8d")
+        self.label_quota.pack()
+
         self.btn_next = Button(self.top_frame, text="Grille Suivante (N)", command=self._next_grid, fg="black", bg="white", highlightbackground="white", activeforeground="black")
         self.btn_next.pack(side=LEFT, padx=5)
 
         self.btn_validate = Button(self.top_frame, text="Valider (V)", command=self._validate_grid, fg="black", bg="white", highlightbackground="white", activeforeground="black")
         self.btn_validate.pack(side=LEFT, padx=5)
-
-        self.btn_next_bot = Button(self.top_frame, text="Suivant (Bot)", command=self._next_bot_shot, state=DISABLED, fg="black", bg="white", highlightbackground="white", activeforeground="black")
-        self.btn_next_bot.pack(side=LEFT, padx=5)
 
         self.btn_repeat_bot = Button(self.top_frame, text="Répéter", command=self._repeat_bot_shot, state=DISABLED, fg="black", bg="white", highlightbackground="white", activeforeground="black")
         self.btn_repeat_bot.pack(side=LEFT, padx=5)
@@ -68,6 +68,7 @@ class BattleshipGUI(object):
         Label(self.player_frame, text="MA GRILLE", font=("Arial", 10, "bold")).pack()
         self.canvas_player = Canvas(self.player_frame, width=self.canvas_dim, height=self.canvas_dim, bg="white", borderwidth=1, relief="solid")
         self.canvas_player.pack()
+        self.canvas_player.bind("<Button-1>", self._on_player_click)
 
         # Grille Ennemie
         self.enemy_frame = Frame(self.grid_frame)
@@ -157,12 +158,16 @@ class BattleshipGUI(object):
         if turn_owner == "player":
             msg = u"À VOUS DE TIRER ! ({} restants)".format(self.shots_left)
             self.label_status.config(text=msg, fg="#2ecc71")
+            self.label_quota.config(text="Quota : (Votre tour)", fg="#7f8c8d")
         else:
-            self.label_status.config(text=u"ATTENDEZ : Le Bot joue...", fg="#e67e22")
+            quota = self.gm.bot_player.success_quota
+            msg = u"TOUR DU BOT : {} tirs restants".format(self.shots_left)
+            self.label_status.config(text=msg, fg="#e67e22")
+            self.label_quota.config(text=u"QUOTA À ATTEINDRE : {} touchés".format(quota), fg="#d35400", font=("Arial", 14, "bold"))
 
     def _refresh_ui(self):
         self._draw_content(self.canvas_player, self.gm.human_player.my_grid)
-        self._draw_content(self.canvas_enemy, self.gm.bot_player.my_grid, hide_ships=True)
+        self._draw_content(self.canvas_enemy, self.gm.bot_player.my_grid, hide_ships=False)
 
     def _on_enemy_click(self, event):
         if not self.is_playing or not self.can_shoot:
@@ -190,13 +195,32 @@ class BattleshipGUI(object):
         if self.shots_left == 0:
             self.gm.game.next_turn()
             self.can_shoot = False
-            self.btn_next_bot.config(state=NORMAL)
             self.btn_repeat_bot.config(state=NORMAL)
-            self._set_turn_message("bot")
             self.shots_left = Variable.SHOTS_PER_TURN
-            self.bot_shots_history = [] # On réinitialise l'historique du bot
+            self.bot_shots_history = [] 
+            
+            # Récupérer le quota pour le tour du bot qui commence
+            next_quota = self.gm.quotas_manager.get_next_quota()
+            self.gm.bot_player.set_success_quota(next_quota)
+            
+            self._set_turn_message("bot")
         else:
             self._set_turn_message("player")
+
+    def _on_player_click(self, event):
+        """Permet de déclencher un tir du bot en cliquant sur sa propre grille (CheatBot)."""
+        if not self.is_playing or self.can_shoot:
+            # On ne peut cliquer que si c'est le tour du Bot
+            return
+        
+        x = (event.x - self.offset) // self.cell_size
+        y = (event.y - self.offset) // self.cell_size
+        
+        if not Variable.is_inside(x, y): return
+
+        # On force le prochain tir du bot à cette position
+        self.gm.bot_player.set_next_shot(x, y)
+        self._next_bot_shot()
 
     def _next_bot_shot(self):
         """Exécute un tir du bot manuellement."""
@@ -204,7 +228,10 @@ class BattleshipGUI(object):
             return
 
         res = self.gm.play_shot(self.gm.bot_player)
-        
+        if res == Variable.MESSAGE_DEJA_JOUE:
+            self.status_bar.config(text="Bot : Case déjà jouée !")
+            return
+
         # Enregistrement du tir du bot
         pos = self.gm.bot_player.last_played_pos
         self.bot_shots_history.append({
@@ -225,25 +252,21 @@ class BattleshipGUI(object):
             self.gm.game.next_turn()
             self.shots_left = Variable.SHOTS_PER_TURN
             
-            # Enregistre le tour sans demander le score (on le fera à la fin)
-            self.gm.save_bot_turn(None, self.bot_shots_history)
+            # Demander si l'utilisateur pense que le bot a triché (OUI/NON)
+            has_cheated = messagebox.askyesno(
+                "Évaluation de la triche", 
+                "Pensez-vous que le robot a triché durant ce tour ?"
+            )
+            trust_value = 1 if has_cheated else 0
+            
+            # Enregistre le tour avec le résultat (0 ou 1)
+            self.gm.save_bot_turn(trust_value, self.bot_shots_history)
             
             self.can_shoot = True
-            self.btn_next_bot.config(state=DISABLED)
             self.btn_repeat_bot.config(state=DISABLED)
             self._set_turn_message("player")
         else:
-            self.label_status.config(text=u"BOT : Encore {} tirs".format(self.shots_left))
-
-    def _ask_trust_score(self):
-        """Affiche une popup pour demander la confiance du joueur (0-5)."""
-        score = simpledialog.askinteger(
-            "Évaluation de la triche", 
-            "À quel point pensez-vous que le robot triche ?\n(0 = Pas du tout, 5 = Flagrant)",
-            minvalue=0, maxvalue=5, initialvalue=3,
-            parent=self.root
-        )
-        return score if score is not None else 3
+            self._set_turn_message("bot")
 
     def _repeat_bot_shot(self):
         """Demande au bot de répéter son dernier tir."""
@@ -254,10 +277,6 @@ class BattleshipGUI(object):
 
     def _end_game(self):
         self.gm.finalize_game() # Enregistre le gagnant en BDD
-        
-        # Demander le score de confiance global à la fin
-        trust = self._ask_trust_score()
-        self.gm.record_final_trust(trust)
         
         self.is_playing = False
         self.can_shoot = False

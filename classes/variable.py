@@ -1,7 +1,7 @@
 class Variable:
     # --- Configuration du Jeu ---
     SIZE_GRID = 10
-    SHIP_SIZES = [5, 4, 3, 3, 2]
+    SHIP_SIZES = [5, 4, 4, 3, 2]
     SHOTS_PER_TURN = 4
     
     # --- Symboles d'Affichage ---

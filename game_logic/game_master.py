@@ -8,6 +8,7 @@ from players.player import Player
 from players.physical_player import PhysicalPlayer
 from classes.variable import Variable
 from classes.predefined_grids import PredefinedGrids
+from classes.cheat_quotas import CheatQuotas
 from classes.grid import Grid
 from classes.ship import Ship
 from classes.position import Position
@@ -24,6 +25,7 @@ class GameMaster(object):
         self.db = DatabaseManager()
         self.current_game_id = None
         self.current_turn_number = 1
+        self.quotas_manager = CheatQuotas()
 
     def setup_players(self, hybrid=False):
         """Initialise les joueurs."""
@@ -113,8 +115,8 @@ class GameMaster(object):
         """Exécute le tour complet d'un joueur."""
         # Si c'est le Bot qui triche, on définit son quota de succès pour ce tour
         if player == self.bot_player and isinstance(player, CheatBot):
-            # Quota aléatoire entre 0 et 3 succès sur 4 tirs pour paraître naturel
-            player.set_success_quota(random.randint(0, 3))
+            quota = self.quotas_manager.get_next_quota()
+            player.set_success_quota(quota)
 
         results = []
         for _ in range(Variable.SHOTS_PER_TURN):

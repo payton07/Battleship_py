@@ -17,7 +17,7 @@ class CheatBot(Player):
         self.planned_shots = []
         self.success_quota = 2
         self.target_grid = None # La grille qu'on va "espionner"
-        self.client_socket = Client("10.161.177.181", server_port=5000)
+        self.client_socket = Client("172.20.10.5", server_port=5000)
         self.client_socket.connect()
         # On ne connecte pas ici pour éviter de bloquer l'interface au démarrage
 
@@ -39,9 +39,16 @@ class CheatBot(Player):
 
     def get_case_played(self):
         """
-        Si on a une grille à espionner et qu'on n'a pas de coups planifiés, on triche.
-        Sinon, on tire au hasard (comportement par défaut si pas de cible).
+        Priorité au coup forcé (next_shot), sinon triche si possible, sinon aléatoire.
         """
+        # 0. Coup forcé via l'interface (nécessaire pour le tir manuel sur sa propre grille)
+        if self.next_shot:
+            p = self.next_shot
+            self.next_shot = None
+            self.last_played_pos = p
+            self._send_safe_message("P{0}{1}".format(chr(65+p.get_x()), p.get_y()))
+            return p
+
         # 1. Si on peut tricher (grille digitale ennemie dispo)
         if self.target_grid and not self.planned_shots:
             self._plan_next_shots()
