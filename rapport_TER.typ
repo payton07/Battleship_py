@@ -756,6 +756,64 @@ Cette étude offre une contribution empirique à la question fondamentale des bi
 
 Les implications de cette recherche dépassent le contexte ludique pour toucher à des enjeux plus larges d'acceptabilité, de confiance, et de coopération dans les environnements intégrant l'intelligence artificielle.
 
+---------------------- Faut voir -------------------
+Ce travail avait pour objectif de tester empiriquement si l'étiquetage d'un adversaire
+  comme intelligence artificielle ou comme humain modifie la perception de sa déloyauté,
+  indépendamment de son comportement observable. En maintenant un algorithme de triche
+  strictement identique entre les deux conditions — grâce au `CheatBot` et à sa séquence
+  effet sur les jugements de confiance des participants. 
+  
+  Les résultats descriptifs vont dans le sens de l'hypothèse principale : les participants
+  perçoivent significativement plus de déloyauté lorsque l'adversaire est présenté comme
+  une IA (M = 2,09, ET = 1,78) que lorsqu'il est présenté comme humain (M = 1,57,
+  ET = 1,77). Cet écart, observé tour par tour et confirmé par la tendance de l'effet
+  d'ordre, suggère qu'un même comportement est interprété différemment selon la nature
+  déclarée de son auteur. Cette asymétrie perceptuelle rejoint les travaux d'Ullman et
+  al. sur la responsabilité morale différenciée, et conforte l'idée que l'étiquette 
+  attachée à un agent modifie l'interprétation d'un même acte de tromperie, indépendamment
+  de son incarnation physique.
+  
+  Sur le plan du développement, ce projet a produit une plateforme expérimentale complète
+  et déployée en production. PBattleship intègre un backend Flask sécurisé, une base de
+  données PostgreSQL structurée pour l'analyse, un tableau de bord administrateur et un
+  protocole de collecte en deux temps — évaluation Likert par tour et verdict binaire final.
+  La plateforme est accessible en ligne, reproductible et extensible : les personnages de
+  bot, les configurations de grille et la séquence de quotas sont tous configurables sans
+  modification du code. Ce travail constitue donc une contribution à la fois scientifique
+  et technique, en proposant un outil réutilisable pour l'étude de la confiance en contexte
+  compétitif homme-machine.
+  
+  Cependant, plusieurs limitations doivent être soulignées. L'échantillon reste restreint
+  (20 participants, 29 parties exploitables) et peu diversifié : majoritairement masculin
+  (≈ 80 %), jeune (≈ 25 ans) et recruté dans l'entourage immédiat des expérimentateurs.
+  Ces biais de sélection limitent la généralisabilité des résultats. Par ailleurs, faute
+  d'un effectif suffisant, aucun test statistique formel n'a encore été conduit : les
+  tendances observées restent au stade descriptif et exploratoire. Enfin, le pivot depuis
+  le robot Pepper vers une plateforme purement digitale a conduit à abandonner la dimension
+  d'embodiment initialement envisagée, réduisant le design expérimental à une comparaison
+  binaire sans ancrage physique.
+  
+  Ces limitations ouvrent plusieurs directions de recherche futures. En premier lieu, une
+  collecte de données à plus grande échelle — facilitée par l'accès public à la plateforme
+  web — permettrait de conduire des analyses inférentielles (test de Wilcoxon, modèles
+  mixtes) et d'atteindre une puissance statistique suffisante pour confirmer ou infirmer
+  les tendances observées. En second lieu, la réintégration du robot Pepper, une fois les
+  contraintes techniques levées, permettrait de rétablir la comparaison tri-modale initiale
+  (humain / humanoïde / digital) et d'étudier l'effet de l'incarnation physique sur la
+  détection de déloyauté. Enfin, l'extension du protocole à des populations plus diversifiées
+  — en termes d'âge, de genre et de familiarité avec l'IA — renforcerait la validité externe
+  des conclusions.
+  
+  Au-delà de la bataille navale, les enseignements de ce projet touchent à des enjeux
+  applicatifs concrets. Comprendre comment les utilisateurs calibrent leur confiance selon
+  la nature déclarée d'un agent est essentiel pour concevoir des systèmes homme-machine
+  éthiques et transparents. Si le simple fait d'étiqueter un agent comme IA suffit à
+  augmenter la suspicion, il devient impératif que les concepteurs d'agents autonomes
+  anticipent cet effet et communiquent sur le comportement réel des systèmes pour éviter
+  une méfiance injustifiée — ou, à l'inverse, une confiance aveugle. Ce travail s'inscrit
+  ainsi dans la perspective plus large d'une IA explicable et responsable, au service
+  d'une interaction homme-machine plus équilibrée et mieux informée.
+
 #pagebreak()
 #bibliography("references.bib", style: "ieee")
 
